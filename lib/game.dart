@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:skwer/tile.dart';
+import 'package:skwer/skwer_tile.dart';
 
 class Game extends StatefulWidget {
   const Game({Key? key}) : super(key: key);
@@ -49,7 +49,7 @@ class _GameState extends State<Game> {
                       // FIXME use skwer rules
                       tileState.value = tileState.value + 1;
                     },
-                    child: Tile(
+                    child: SkwerTile(
                       key: ValueKey<TileIndex>(tileIndex),
                       state: tileState,
                     ),

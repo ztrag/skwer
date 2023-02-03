@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
+import 'package:skwer/mosaic/mosaic_grid.dart';
 
-class Tile extends StatelessWidget {
+class SkwerTile extends StatelessWidget {
   final ValueNotifier<int> state;
-  final _TilePaint _paint;
+  final _SkwerTilePaint _paint;
 
-  Tile({
+  SkwerTile({
     required ValueKey<TileIndex> key,
     required this.state,
-  })  : _paint = _TilePaint(state),
+  })  : _paint = _SkwerTilePaint(state),
         super(key: key);
 
   @override
@@ -18,31 +19,22 @@ class Tile extends StatelessWidget {
   }
 }
 
-class _TilePaint extends CustomPainter {
+class _SkwerTilePaint extends CustomPainter {
+  final MosaicGrid grid = MosaicGrid();
   final ValueNotifier<int> state;
 
-  _TilePaint(this.state) : super(repaint: state);
+  _SkwerTilePaint(this.state) : super(repaint: state);
 
   // FIXME animate on state change
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.lineTo(0, 0);
-
-    final paint = Paint();
-    paint.color = skColors[state.value % 3];
-
-    canvas.drawPath(path, paint);
+    grid.paint(canvas, size, skColors[state.value % 3]);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is! _TilePaint) {
+    if (oldDelegate is! _SkwerTilePaint) {
       return true;
     }
 
@@ -58,7 +50,7 @@ class TileIndex {
   const TileIndex(this.x, this.y);
 
   @override
-  int get hashCode => x*1000 + y;
+  int get hashCode => x * 1000 + y;
 
   @override
   bool operator ==(Object other) {

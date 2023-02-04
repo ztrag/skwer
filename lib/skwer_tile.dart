@@ -1,16 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
+import 'package:skwer/mosaic/mosaic_animation.dart';
 import 'package:skwer/mosaic/mosaic_grid.dart';
 
-class SkwerTile extends StatelessWidget {
+class SkwerTile extends StatefulWidget {
   final SkwerTileProps props;
-  final _SkwerTilePaint _paint;
 
   SkwerTile({
     required this.props,
-  })  : _paint = _SkwerTilePaint(props.state),
-        super(key: props.key);
+  }) : super(key: props.key);
+
+  @override
+  State<SkwerTile> createState() => _SkwerTileState();
+}
+
+class _SkwerTileState extends State<SkwerTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  late final Animation<double> _animation;
+  late final _SkwerTilePaint _paint;
+  late SkwerTileState _previousState;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
+    _paint = _SkwerTilePaint(widget.props.state, _animation);
+    _previousState = widget.props.state.value;
+
+    widget.props.state.addListener(_onStateChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.props.state.removeListener(_onStateChanged);
+    super.dispose();
+  }
+
+  void _onStateChanged() {
+    final currentState = widget.props.state.value;
+    if (currentState.count != _previousState.count) {
+      _paint.animationStart = _previousState;
+      _paint.animationEnd = currentState;
+      _animationController.forward(from: 0);
+    }
+    _previousState = currentState;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +64,13 @@ class _SkwerTilePaint extends CustomPainter {
 
   final MosaicGrid grid = MosaicGrid();
   final ValueNotifier<SkwerTileState> state;
+  final Animation<double> animation;
 
-  // FIXME animate on state change
+  SkwerTileState animationStart = SkwerTileState();
+  SkwerTileState animationEnd = SkwerTileState();
 
-  _SkwerTilePaint(this.state) : super(repaint: state);
+  _SkwerTilePaint(this.state, this.animation)
+      : super(repaint: Listenable.merge([state, animation]));
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -38,7 +82,16 @@ class _SkwerTilePaint extends CustomPainter {
         _focusPaint,
       );
     }
-    grid.paint(canvas, size, skTileColors[state.value.count % 3]);
+
+    grid.paint(
+      canvas,
+      size,
+      MosaicAnimation(
+        skTileColors[animationStart.count % 3],
+        skTileColors[animationEnd.count % 3],
+        animation.value,
+      ),
+    );
   }
 
   @override
@@ -47,8 +100,7 @@ class _SkwerTilePaint extends CustomPainter {
       return true;
     }
 
-    // FIXME
-    return true;
+    return false;
   }
 
   static Paint _buildFocusPaint() {

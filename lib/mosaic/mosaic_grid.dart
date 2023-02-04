@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:skwer/mosaic/mosaic_animation.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
 class MosaicGrid {
@@ -11,10 +12,14 @@ class MosaicGrid {
 
   MosaicGrid();
 
-  void paint(Canvas canvas, Size size, Color color) {
+  void paint(Canvas canvas, Size size, MosaicAnimation animationState) {
     final tiles = _tiles ??= _buildTiles();
     for (MosaicTile tile in tiles) {
-      tile.paint(canvas, size, color);
+      tile.paint(
+        canvas,
+        size,
+        animationState,
+      );
     }
   }
 

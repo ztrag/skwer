@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:skwer/skwer_tile.dart';
 
 class Game extends StatefulWidget {
@@ -11,8 +12,8 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
-  final Map<TileIndex, ValueNotifier<int>> state =
-      <TileIndex, ValueNotifier<int>>{};
+  final Map<SkwerTileIndex, SkwerTileProps> skwerTiles =
+      <SkwerTileIndex, SkwerTileProps>{};
 
   @override
   Widget build(BuildContext context) {
@@ -35,23 +36,34 @@ class _GameState extends State<Game> {
           children: List.generate(
             numTilesX,
             (i) {
-              final tileIndex = TileIndex(i, j);
-              final tileState = state[tileIndex] ?? ValueNotifier<int>(0);
-              state[tileIndex] = tileState;
+              final tileIndex = SkwerTileIndex(i, j);
+              final tileProps =
+                  skwerTiles[tileIndex] ?? SkwerTileProps(tileIndex: tileIndex);
+              skwerTiles[tileIndex] = tileProps;
 
               return SizedBox(
                 width: tileSize,
                 height: tileSize,
                 child: Padding(
                   padding: padding,
-                  child: GestureDetector(
-                    onTap: () {
-                      // FIXME use skwer rules
-                      tileState.value = tileState.value + 1;
-                    },
-                    child: SkwerTile(
-                      key: ValueKey<TileIndex>(tileIndex),
-                      state: tileState,
+                  child: MouseRegion(
+                    onHover: (event) => tileProps.focusNode.requestFocus(),
+                    child: Focus(
+                      focusNode: tileProps.focusNode,
+                      onFocusChange: (hasFocus) =>
+                          _onFocusTile(tileIndex, hasFocus),
+                      onKeyEvent: (_, event) {
+                        if (event.logicalKey == LogicalKeyboardKey.space &&
+                            event is KeyDownEvent) {
+                          _onPressTile(tileIndex);
+                          return KeyEventResult.handled;
+                        }
+                        return KeyEventResult.ignored;
+                      },
+                      child: GestureDetector(
+                        onTap: () => _onPressTile(tileIndex),
+                        child: SkwerTile(props: tileProps),
+                      ),
                     ),
                   ),
                 ),
@@ -61,5 +73,17 @@ class _GameState extends State<Game> {
         ),
       ),
     );
+  }
+
+  void _onFocusTile(SkwerTileIndex index, bool hasFocus) {
+    // FIXME highlight skwer rules
+    final props = skwerTiles[index]!;
+    props.state.value = SkwerTileState.onFocus(props.state.value, hasFocus);
+  }
+
+  void _onPressTile(SkwerTileIndex index) {
+    // FIXME use skwer rules
+    final props = skwerTiles[index]!;
+    props.state.value = SkwerTileState.addCount(props.state.value, 1);
   }
 }

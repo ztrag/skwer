@@ -14,6 +14,8 @@ class Game extends StatefulWidget {
 class _GameState extends State<Game> {
   final Map<SkwerTileIndex, SkwerTileProps> skwerTiles =
       <SkwerTileIndex, SkwerTileProps>{};
+  int numTilesX = 0;
+  int numTilesY = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +26,8 @@ class _GameState extends State<Game> {
     );
     final padding = EdgeInsets.all(tileSize * 0.06);
 
-    final numTilesX = (size.width / tileSize).floor();
-    final numTilesY = (size.height / tileSize).floor();
+    numTilesX = (size.width / tileSize).floor();
+    numTilesY = (size.height / tileSize).floor();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -82,8 +84,55 @@ class _GameState extends State<Game> {
   }
 
   void _onPressTile(SkwerTileIndex index) {
-    // FIXME use skwer rules
     final props = skwerTiles[index]!;
-    props.state.value = SkwerTileState.addCount(props.state.value, 1);
+
+    final count = props.state.value.count;
+    if (count % 3 == 0) {
+      for (var x = index.x - 1; x <= index.x + 1; x++) {
+        for (var y = index.y - 1; y <= index.y + 1; y++) {
+          if (x == index.x && y == index.y) {
+            continue;
+          }
+          _maybeRotateTile(SkwerTileIndex(x, y));
+        }
+      }
+    } else if (count % 3 == 1) {
+      for (var x = 0; x < numTilesX; x++) {
+        if (x == index.x) {
+          continue;
+        }
+        _maybeRotateTile(SkwerTileIndex(x, index.y));
+      }
+      for (var y = 0; y < numTilesY; y++) {
+        if (y == index.y) {
+          continue;
+        }
+        _maybeRotateTile(SkwerTileIndex(index.x, y));
+      }
+    } else {
+      var i = 0;
+      var stillHas = true;
+      while (stillHas) {
+        i++;
+        final changes =
+            _maybeRotateTile(SkwerTileIndex(index.x - i, index.y - i)) +
+                _maybeRotateTile(SkwerTileIndex(index.x + i, index.y - i)) +
+                _maybeRotateTile(SkwerTileIndex(index.x - i, index.y + i)) +
+                _maybeRotateTile(SkwerTileIndex(index.x + i, index.y + i));
+        stillHas = changes > 0;
+      }
+    }
+  }
+
+  int _maybeRotateTile(SkwerTileIndex index) {
+    if (index.x < 0 ||
+        index.y < 0 ||
+        index.x >= numTilesX ||
+        index.y >= numTilesY) {
+      return 0;
+    }
+    final state = skwerTiles[index]!.state;
+    state.value = SkwerTileState.addCount(state.value, 1);
+    return 1;
   }
 }

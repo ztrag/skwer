@@ -46,10 +46,10 @@ class MosaicTile {
 
   List<Point> _getAnimatedPoints(double positionAnimation) {
     return <Point>[
-      (points[0] * positionAnimation + points[1] * (1-positionAnimation)),
-      (points[1] * positionAnimation + points[2] * (1-positionAnimation)),
-      (points[2] * positionAnimation + points[3] * (1-positionAnimation)),
-      (points[3] * positionAnimation + points[0] * (1-positionAnimation)),
+      (points[0] * positionAnimation + points[1] * (1 - positionAnimation)),
+      (points[1] * positionAnimation + points[2] * (1 - positionAnimation)),
+      (points[2] * positionAnimation + points[3] * (1 - positionAnimation)),
+      (points[3] * positionAnimation + points[0] * (1 - positionAnimation)),
     ];
   }
 

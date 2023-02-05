@@ -57,13 +57,21 @@ class _GameState extends State<Game> {
                       onKeyEvent: (_, event) {
                         if (event.logicalKey == LogicalKeyboardKey.space &&
                             event is KeyDownEvent) {
-                          _onPressTile(tileIndex);
+                          if (RawKeyboard.instance.keysPressed
+                                  .contains(LogicalKeyboardKey.shiftLeft) ||
+                              RawKeyboard.instance.keysPressed
+                                  .contains(LogicalKeyboardKey.shiftRight)) {
+                            _onResetFromTile(tileIndex);
+                          } else {
+                            _onPressTile(tileIndex);
+                          }
                           return KeyEventResult.handled;
                         }
                         return KeyEventResult.ignored;
                       },
                       child: GestureDetector(
                         onTap: () => _onPressTile(tileIndex),
+                        onLongPress: () => _onResetFromTile(tileIndex),
                         child: SkwerTile(props: tileProps),
                       ),
                     ),
@@ -120,6 +128,21 @@ class _GameState extends State<Game> {
                 _maybeRotateTile(SkwerTileIndex(index.x - i, index.y + i)) +
                 _maybeRotateTile(SkwerTileIndex(index.x + i, index.y + i));
         stillHas = changes > 0;
+      }
+    }
+  }
+
+  void _onResetFromTile(SkwerTileIndex index) {
+    final props = skwerTiles[index]!;
+
+    final count = props.state.value.count % 3;
+    for (var x = 0; x < numTilesX; x++) {
+      for (var y = 0; y < numTilesY; y++) {
+        final state = skwerTiles[SkwerTileIndex(x, y)]!.state;
+        state.value = SkwerTileState.addCount(
+          state.value,
+          count - state.value.count,
+        );
       }
     }
   }

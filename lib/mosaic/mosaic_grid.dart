@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -5,8 +6,9 @@ import 'package:skwer/mosaic/mosaic_animation.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
 class MosaicGrid {
-  static const int gridSize = 7;
   static final Random _random = Random();
+
+  final int gridSize = Platform.isAndroid || Platform.isIOS ? 5 : 7;
 
   List<MosaicTile>? _tiles;
 
@@ -80,7 +82,7 @@ class MosaicGrid {
 
   static double get _d1 {
     const d1 = 1.75;
-    return (1 - d1 / 2 + d1* _random.nextDouble());
+    return (1 - d1 / 2 + d1 * _random.nextDouble());
   }
 
   static double get _d2 {

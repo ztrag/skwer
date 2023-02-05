@@ -55,7 +55,7 @@ class _SkwerTileState extends State<SkwerTile>
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _paint);
+    return RepaintBoundary(child: CustomPaint(painter: _paint));
   }
 }
 

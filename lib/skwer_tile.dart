@@ -81,6 +81,7 @@ class _SkwerTilePaint extends CustomPainter {
     if (hasFocus) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth = size.width * 0.13;
+      _focusPaint.color = skTileColors[(animationStart.count + 1) % 3];
       canvas.drawRect(
         Rect.fromLTRB(x, x, size.width - x, size.height - x),
         _focusPaint,
@@ -118,7 +119,6 @@ class _SkwerTilePaint extends CustomPainter {
 
   static Paint _buildFocusPaint() {
     final paint = Paint();
-    paint.color = skFocusColor;
     paint.style = PaintingStyle.stroke;
     return paint;
   }

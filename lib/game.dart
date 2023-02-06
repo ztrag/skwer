@@ -67,19 +67,22 @@ class _GameState extends State<Game> {
                         if (event.logicalKey == LogicalKeyboardKey.space &&
                             event is KeyDownEvent) {
                           if (RawKeyboard.instance.keysPressed
-                                  .contains(LogicalKeyboardKey.shiftLeft) ||
-                              RawKeyboard.instance.keysPressed
-                                  .contains(LogicalKeyboardKey.shiftRight)) {
+                              .contains(LogicalKeyboardKey.shiftLeft)) {
                             _onResetFromTile(tileIndex);
                           } else {
-                            _onPressTile(tileIndex);
+                            _onPressTile(
+                                tileIndex,
+                                RawKeyboard.instance.keysPressed
+                                        .contains(LogicalKeyboardKey.shiftRight)
+                                    ? -1
+                                    : 1);
                           }
                           return KeyEventResult.handled;
                         }
                         return KeyEventResult.ignored;
                       },
                       child: GestureDetector(
-                        onTap: () => _onPressTile(tileIndex),
+                        onTap: () => _onPressTile(tileIndex, 1),
                         onLongPress: () => _onResetFromTile(tileIndex),
                         child: SkwerTile(props: tileProps),
                       ),
@@ -101,7 +104,7 @@ class _GameState extends State<Game> {
     }
   }
 
-  void _onPressTile(SkwerTileIndex index) {
+  void _onPressTile(SkwerTileIndex index, int dir) {
     final props = skwerTiles[index]!;
 
     final state = props.state;
@@ -110,39 +113,11 @@ class _GameState extends State<Game> {
 
     final count = props.state.value.count;
     if (count % 3 == 0) {
-      for (var x = index.x - 1; x <= index.x + 1; x++) {
-        for (var y = index.y - 1; y <= index.y + 1; y++) {
-          if (x == index.x && y == index.y) {
-            continue;
-          }
-          _maybeRotateTile(index, SkwerTileIndex(x, y));
-        }
-      }
+      _rotateRed(index, dir);
     } else if (count % 3 == 1) {
-      for (var x = 0; x < numTilesX; x++) {
-        if (x == index.x) {
-          continue;
-        }
-        _maybeRotateTile(index, SkwerTileIndex(x, index.y));
-      }
-      for (var y = 0; y < numTilesY; y++) {
-        if (y == index.y) {
-          continue;
-        }
-        _maybeRotateTile(index, SkwerTileIndex(index.x, y));
-      }
+      _rotateGreen(index, dir);
     } else {
-      var i = 0;
-      var stillHas = true;
-      while (stillHas) {
-        i++;
-        final changes = _maybeRotateTile(
-                index, SkwerTileIndex(index.x - i, index.y - i)) +
-            _maybeRotateTile(index, SkwerTileIndex(index.x + i, index.y - i)) +
-            _maybeRotateTile(index, SkwerTileIndex(index.x - i, index.y + i)) +
-            _maybeRotateTile(index, SkwerTileIndex(index.x + i, index.y + i));
-        stillHas = changes > 0;
-      }
+      _rotateBlue(index, dir);
     }
   }
 
@@ -162,7 +137,11 @@ class _GameState extends State<Game> {
     }
   }
 
-  int _maybeRotateTile(SkwerTileIndex trigger, SkwerTileIndex target) {
+  int _maybeRotateTile(
+    SkwerTileIndex trigger,
+    SkwerTileIndex target,
+    int delta,
+  ) {
     if (target.x < 0 ||
         target.y < 0 ||
         target.x >= numTilesX ||
@@ -170,7 +149,47 @@ class _GameState extends State<Game> {
       return 0;
     }
     final state = skwerTiles[target]!.state;
-    state.value = SkwerTileState.addCount(state.value, trigger, 1);
+    state.value = SkwerTileState.addCount(state.value, trigger, delta);
     return 1;
+  }
+
+  void _rotateRed(SkwerTileIndex trigger, int dir) {
+    for (var x = trigger.x - 1; x <= trigger.x + 1; x++) {
+      for (var y = trigger.y - 1; y <= trigger.y + 1; y++) {
+        if (x == trigger.x && y == trigger.y) {
+          continue;
+        }
+        _maybeRotateTile(trigger, SkwerTileIndex(x, y), dir);
+      }
+    }
+  }
+
+  void _rotateBlue(SkwerTileIndex trigger, int dir) {
+    var t = 0;
+    while (true) {
+      t++;
+      final x = _maybeRotateTile(trigger, trigger.translate(-t, -t), dir) +
+          _maybeRotateTile(trigger, trigger.translate(t, -t), dir) +
+          _maybeRotateTile(trigger, trigger.translate(-t, t), dir) +
+          _maybeRotateTile(trigger, trigger.translate(t, t), dir);
+      if (x == 0) {
+        return;
+      }
+    }
+  }
+
+  void _rotateGreen(SkwerTileIndex trigger, int dir) {
+    for (var x = 0; x < numTilesX; x++) {
+      if (x == trigger.x) {
+        continue;
+      }
+      _maybeRotateTile(trigger, SkwerTileIndex(x, trigger.y), dir);
+    }
+    for (var y = 0; y < numTilesY; y++) {
+      if (y == trigger.y) {
+        continue;
+      }
+      _maybeRotateTile(trigger, SkwerTileIndex(trigger.x, y), dir);
+    }
   }
 }

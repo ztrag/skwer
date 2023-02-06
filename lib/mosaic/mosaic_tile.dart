@@ -26,7 +26,12 @@ class MosaicTile {
     return points.reduce((a, b) => a + b) * (1 / points.length);
   }
 
-  void paint(Canvas canvas, Size size, MosaicAnimation animation) {
+  void paint(
+    Canvas canvas,
+    Size size,
+    double brightness,
+    MosaicAnimation animation,
+  ) {
     final positionAnimation = _getPositionAnimation(animation);
     _path.reset();
     final p = _getAnimatedPoints(positionAnimation);
@@ -37,20 +42,21 @@ class MosaicTile {
     _path.lineTo(p.first.x * size.width, p.first.y * size.height);
 
     final color = _getCurrentColor(animation, positionAnimation);
-    _paint.color = _colorD1 > 1
-        ? Color.lerp(color, skWhite, _colorD1 - 1)!
-        : Color.lerp(color, skBlack, 1 - _colorD1)!;
+    final colorD2 = _colorD1 * brightness;
+    _paint.color = colorD2 > 1
+        ? Color.lerp(color, skWhite, colorD2 - 1)!
+        : Color.lerp(color, skBlack, 1 - colorD2)!;
 
     canvas.drawPath(_path, _paint);
   }
 
-  List<Point> _getAnimatedPoints(double positionAnimation) {
-    return <Point>[
-      (points[0] * positionAnimation + points[1] * (1 - positionAnimation)),
-      (points[1] * positionAnimation + points[2] * (1 - positionAnimation)),
-      (points[2] * positionAnimation + points[3] * (1 - positionAnimation)),
-      (points[3] * positionAnimation + points[0] * (1 - positionAnimation)),
-    ];
+  List<Point<double>> _getAnimatedPoints(double animation) {
+    final p = <Point<double>>[];
+    var length = points.length;
+    for (var i = 0; i < length; i++) {
+      p.add(points[i] * animation + points[(i + 1) % length] * (1 - animation));
+    }
+    return p;
   }
 
   Color _getCurrentColor(MosaicAnimation animation, double positionAnimation) {
@@ -66,6 +72,6 @@ class MosaicTile {
 
   static double get _d1 {
     const d1 = 0.7;
-    return (1 - d1 / 2 + d1 * _random.nextDouble());
+    return (0.95 - d1 / 2 + d1 * _random.nextDouble());
   }
 }

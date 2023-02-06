@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:skwer/mosaic/mosaic_animation.dart';
+import 'package:skwer/mosaic/mosaic_group.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
-class MosaicGrid {
+class MosaicGrid extends MosaicGroup {
   static final Random _random = Random();
 
   final int gridSize = Platform.isAndroid || Platform.isIOS ? 5 : 7;
@@ -14,16 +13,8 @@ class MosaicGrid {
 
   MosaicGrid();
 
-  void paint(Canvas canvas, Size size, MosaicAnimation animationState) {
-    final tiles = _tiles ??= _buildTiles();
-    for (MosaicTile tile in tiles) {
-      tile.paint(
-        canvas,
-        size,
-        animationState,
-      );
-    }
-  }
+  @override
+  List<MosaicTile> get tiles => _tiles ??= _buildTiles();
 
   List<MosaicTile> _buildTiles() {
     final tiles = <MosaicTile>[];

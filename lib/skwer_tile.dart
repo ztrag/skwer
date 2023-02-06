@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/mosaic/mosaic_animation.dart';
 import 'package:skwer/mosaic/mosaic_grid.dart';
+import 'package:skwer/mosaic/mosaic_group.dart';
+import 'package:skwer/mosaic/mosaic_rosetta.dart';
 
 final Random _random = Random();
 
@@ -64,7 +66,8 @@ class _SkwerTileState extends State<SkwerTile>
 class _SkwerTilePaint extends CustomPainter {
   static final Paint _focusPaint = _buildFocusPaint();
 
-  final MosaicGrid grid = MosaicGrid();
+  final MosaicGroup grid = MosaicGrid();
+  final MosaicGroup rosetta = MosaicRosetta();
   final SkwerTileProps props;
   final Animation<double> animation;
 
@@ -88,9 +91,13 @@ class _SkwerTilePaint extends CustomPainter {
       );
     }
 
-    grid.paint(
+    final group = props.state.value.count < -2 ? rosetta : grid;
+    group.paint(
       canvas,
       size,
+      props.state.value.count > 10 // FIXME game count
+          ? (props.isActive ? 0.7 : 0.3)
+          : (props.isActive ? 1 : 0.9),
       MosaicAnimation(
         animationStart.count == animationEnd.count && !hasFocus
             ? (hadFocus
@@ -163,6 +170,9 @@ class SkwerTileIndex {
 
   @override
   String toString() => 'TileIndex[$x,$y]';
+
+  SkwerTileIndex translate(int x, int y) =>
+      SkwerTileIndex(this.x + x, this.y + y);
 }
 
 class SkwerTileProps {
@@ -173,6 +183,13 @@ class SkwerTileProps {
   SkwerTileProps({
     required SkwerTileIndex tileIndex,
   }) : key = ValueKey(tileIndex);
+
+  bool get isActive {
+    return true;
+    // FIXME based on game
+    // final index = key.value;
+    // return index.x > 3 && index.x <= 8 && index.y > 1 && index.y <= 5;
+  }
 }
 
 class SkwerTileState {

@@ -27,7 +27,7 @@ class MosaicTile {
   }
 
   void paint(Canvas canvas, Size size, MosaicAnimation animation) {
-    final positionAnimation = _getPositionAnimation(animation.value);
+    final positionAnimation = _getPositionAnimation(animation);
     _path.reset();
     final p = _getAnimatedPoints(positionAnimation);
     _path.moveTo(p.first.x * size.width, p.first.y * size.height);
@@ -57,11 +57,11 @@ class MosaicTile {
     return Color.lerp(animation.start, animation.end, positionAnimation)!;
   }
 
-  double _getPositionAnimation(double animation) {
-    final distFromCenter = (_position - const Point(0.5, 0.5)).magnitude;
-    const maxDistFromCenter = 0.70710678118; // sqrt(0.5^2 + 0.5^2);
+  double _getPositionAnimation(MosaicAnimation animation) {
+    final distFromCenter = (_position - animation.dir).magnitude;
+    const maxDistFromCenter = 1.4142;
     final relDistFromCenter = distFromCenter / maxDistFromCenter; // [0, 1];
-    return min(1, max(0, 2 * animation - relDistFromCenter));
+    return min(1, max(0, 2 * animation.value - relDistFromCenter));
   }
 
   static double get _d1 {

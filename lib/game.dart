@@ -18,6 +18,15 @@ class _GameState extends State<Game> {
   int numTilesY = 0;
 
   @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _onResetFromTile(SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2));
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final tileSize = min(
@@ -86,13 +95,18 @@ class _GameState extends State<Game> {
   }
 
   void _onFocusTile(SkwerTileIndex index, bool hasFocus) {
-    // FIXME highlight skwer rules
     final props = skwerTiles[index]!;
-    props.state.value = SkwerTileState.onFocus(props.state.value, hasFocus);
+    if (props.state.value.hasFocus != hasFocus) {
+      props.state.value = SkwerTileState.onFocus(props.state.value, hasFocus);
+    }
   }
 
   void _onPressTile(SkwerTileIndex index) {
     final props = skwerTiles[index]!;
+
+    final state = props.state;
+    state.value = SkwerTileState.onFocus(state.value, false);
+    state.value = SkwerTileState.addCount(state.value, props.key.value, 0);
 
     final count = props.state.value.count;
     if (count % 3 == 0) {
@@ -101,7 +115,7 @@ class _GameState extends State<Game> {
           if (x == index.x && y == index.y) {
             continue;
           }
-          _maybeRotateTile(SkwerTileIndex(x, y));
+          _maybeRotateTile(index, SkwerTileIndex(x, y));
         }
       }
     } else if (count % 3 == 1) {
@@ -109,24 +123,24 @@ class _GameState extends State<Game> {
         if (x == index.x) {
           continue;
         }
-        _maybeRotateTile(SkwerTileIndex(x, index.y));
+        _maybeRotateTile(index, SkwerTileIndex(x, index.y));
       }
       for (var y = 0; y < numTilesY; y++) {
         if (y == index.y) {
           continue;
         }
-        _maybeRotateTile(SkwerTileIndex(index.x, y));
+        _maybeRotateTile(index, SkwerTileIndex(index.x, y));
       }
     } else {
       var i = 0;
       var stillHas = true;
       while (stillHas) {
         i++;
-        final changes =
-            _maybeRotateTile(SkwerTileIndex(index.x - i, index.y - i)) +
-                _maybeRotateTile(SkwerTileIndex(index.x + i, index.y - i)) +
-                _maybeRotateTile(SkwerTileIndex(index.x - i, index.y + i)) +
-                _maybeRotateTile(SkwerTileIndex(index.x + i, index.y + i));
+        final changes = _maybeRotateTile(
+                index, SkwerTileIndex(index.x - i, index.y - i)) +
+            _maybeRotateTile(index, SkwerTileIndex(index.x + i, index.y - i)) +
+            _maybeRotateTile(index, SkwerTileIndex(index.x - i, index.y + i)) +
+            _maybeRotateTile(index, SkwerTileIndex(index.x + i, index.y + i));
         stillHas = changes > 0;
       }
     }
@@ -141,21 +155,22 @@ class _GameState extends State<Game> {
         final state = skwerTiles[SkwerTileIndex(x, y)]!.state;
         state.value = SkwerTileState.addCount(
           state.value,
+          index,
           count - state.value.count,
         );
       }
     }
   }
 
-  int _maybeRotateTile(SkwerTileIndex index) {
-    if (index.x < 0 ||
-        index.y < 0 ||
-        index.x >= numTilesX ||
-        index.y >= numTilesY) {
+  int _maybeRotateTile(SkwerTileIndex trigger, SkwerTileIndex target) {
+    if (target.x < 0 ||
+        target.y < 0 ||
+        target.x >= numTilesX ||
+        target.y >= numTilesY) {
       return 0;
     }
-    final state = skwerTiles[index]!.state;
-    state.value = SkwerTileState.addCount(state.value, 1);
+    final state = skwerTiles[target]!.state;
+    state.value = SkwerTileState.addCount(state.value, trigger, 1);
     return 1;
   }
 }

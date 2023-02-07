@@ -23,8 +23,8 @@ class GameWidget extends StatelessWidget {
       max(size.height, size.width) / (isSmall ? 7 : 9),
     );
 
-    int numTilesX = (size.width / tileSize).floor();
-    int numTilesY = (size.height / tileSize).floor();
+    final numTilesX = (size.width / tileSize).floor();
+    final numTilesY = (size.height / tileSize).floor();
     if (numTilesX != props.numTilesX || numTilesY != props.numTilesY) {
       game.resize(numTilesX, numTilesY);
     }

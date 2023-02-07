@@ -59,7 +59,7 @@ class MosaicRosetta extends Mosaic {
 
   MosaicTile _buildStone(
       double r1, double r2, double theta1, double theta2, int level) {
-    double thetaD2 = 0.04 * _random.nextDouble() / level;
+    final thetaD2 = 0.04 * _random.nextDouble() / level;
     return MosaicTile([
       _pointAt(r1, theta1),
       _pointAt(r2, theta1 + thetaD2),

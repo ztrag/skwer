@@ -18,8 +18,8 @@ class GridMosaic extends Mosaic {
     final tiles = <MosaicTile>[];
     final vertices = _calcVertices();
     const space = 0.01;
-    for (int i = 0; i < gridSize; i++) {
-      for (int j = 0; j < gridSize; j++) {
+    for (var i = 0; i < gridSize; i++) {
+      for (var j = 0; j < gridSize; j++) {
         tiles.add(MosaicTile([
           vertices[i][j] + Point(space * _d1, space * _d1),
           vertices[i + 1][j] + Point(-space * _d1, space * _d1),
@@ -33,9 +33,9 @@ class GridMosaic extends Mosaic {
 
   List<List<Point<double>>> _calcVertices() {
     final vertices = <List<Point<double>>>[];
-    for (int i = 0; i <= gridSize; i++) {
+    for (var i = 0; i <= gridSize; i++) {
       vertices.add(<Point<double>>[]);
-      for (int j = 0; j <= gridSize; j++) {
+      for (var j = 0; j <= gridSize; j++) {
         vertices[i].add(_getVertex(vertices, i, j));
       }
     }

@@ -108,8 +108,7 @@ class _GameState extends State<Game> {
     final props = skwerTiles[index]!;
 
     final state = props.state;
-    state.value = SkwerTileState.onFocus(state.value, false);
-    state.value = SkwerTileState.addCount(state.value, props.key.value, 0);
+    state.value = SkwerTileState.onPress(state.value);
 
     final count = props.state.value.count;
     if (count % 3 == 0) {
@@ -128,10 +127,10 @@ class _GameState extends State<Game> {
     for (var x = 0; x < numTilesX; x++) {
       for (var y = 0; y < numTilesY; y++) {
         final state = skwerTiles[SkwerTileIndex(x, y)]!.state;
-        state.value = SkwerTileState.addCount(
+        state.value = SkwerTileState.reset(
           state.value,
           index,
-          count - state.value.count,
+          count,
         );
       }
     }
@@ -149,7 +148,7 @@ class _GameState extends State<Game> {
       return 0;
     }
     final state = skwerTiles[target]!.state;
-    state.value = SkwerTileState.addCount(state.value, trigger, delta);
+    state.value = SkwerTileState.rotate(state.value, trigger, delta);
     return 1;
   }
 

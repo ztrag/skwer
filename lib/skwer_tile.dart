@@ -83,9 +83,7 @@ class _SkwerTilePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final hasFocus = animationEnd.hasFocus;
-    final hadFocus = animationStart.hasFocus;
-    if (hasFocus) {
+    if (animationEnd.hasFocus) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth = size.width * 0.13;
       _focusPaint.color = skTileColors[(animationStart.count + 1) % 3];
@@ -102,14 +100,14 @@ class _SkwerTilePaint extends CustomPainter {
           ? (props.isActive ? 0.7 : 0.3)
           : (props.isActive ? 1 : 0.9),
       MosaicAnimation(
-        animationStart.count == animationEnd.count && !hasFocus
-            ? (hadFocus
-                ? Color.lerp(
+        animationStart.count == animationEnd.count
+            ? (animationEnd.isLastPressed
+                ? skWhite
+                : Color.lerp(
                     skTileColors[(animationStart.count + 1) % 3],
                     skTileColors[(animationStart.count + 2) % 3],
                     0.25 + 0.5 * _random.nextDouble(),
-                  )!
-                : skWhite)
+                  )!)
             : skTileColors[animationStart.count % 3],
         skTileColors[animationEnd.count % 3],
         _getDirFromTrigger(),
@@ -128,10 +126,10 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   MosaicGroup get _currentGroup {
-    if (animationStart.count == -2 && animationEnd.count == -3) {
+    if (animationStart.count >= -2 && animationEnd.count <= -3) {
       transition.dir = 1;
       return transition;
-    } else if (animationStart.count == -3 && animationEnd.count == -2) {
+    } else if (animationStart.count <= -3 && animationEnd.count >= -2) {
       transition.dir = -1;
       return transition;
     }
@@ -210,20 +208,56 @@ class SkwerTileState {
   SkwerTileIndex? trigger;
   int count = 0;
   bool hasFocus = false;
+  bool isLastPressed = false;
 
   SkwerTileState();
 
-  SkwerTileState._(this.count, this.hasFocus, [this.trigger]);
+  SkwerTileState._({
+    required this.count,
+    this.hasFocus = false,
+    this.isLastPressed = false,
+    this.trigger,
+  });
 
-  factory SkwerTileState.addCount(
+  factory SkwerTileState.reset(
     SkwerTileState state,
     SkwerTileIndex trigger,
-    int value,
+    int count,
   ) {
-    return SkwerTileState._(state.count + value, false, trigger);
+    return SkwerTileState._(
+      count: count,
+      trigger: trigger,
+      hasFocus: state.hasFocus,
+    );
   }
 
-  factory SkwerTileState.onFocus(SkwerTileState state, bool hasFocus) {
-    return SkwerTileState._(state.count, hasFocus, state.trigger);
+  factory SkwerTileState.rotate(
+    SkwerTileState state,
+    SkwerTileIndex trigger,
+    int delta,
+  ) {
+    return SkwerTileState._(
+      count: state.count + delta,
+      trigger: trigger,
+    );
+  }
+
+  factory SkwerTileState.onFocus(
+    SkwerTileState state,
+    bool hasFocus,
+  ) {
+    return SkwerTileState._(
+      count: state.count,
+      hasFocus: hasFocus,
+      trigger: state.trigger,
+    );
+  }
+
+  factory SkwerTileState.onPress(SkwerTileState state) {
+    return SkwerTileState._(
+      count: state.count,
+      isLastPressed: true,
+      hasFocus: true,
+    );
   }
 }

@@ -8,6 +8,8 @@ import 'package:skwer/mosaic/grid_mosaic.dart';
 import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/rosetta_mosaic.dart';
 import 'package:skwer/mosaic/transition_mosaic.dart';
+import 'package:skwer/tile/skwer_tile_props.dart';
+import 'package:skwer/tile/skwer_tile_state.dart';
 
 final Random _random = Random();
 
@@ -16,7 +18,7 @@ class SkwerTile extends StatefulWidget {
 
   SkwerTile({
     required this.props,
-  }) : super(key: ValueKey(props.index));
+  }) : super(key: ValueKey(props));
 
   @override
   State<SkwerTile> createState() => _SkwerTileState();
@@ -159,100 +161,6 @@ class _SkwerTilePaint extends CustomPainter {
           : target.y < trigger.y
               ? 1
               : 0.5,
-    );
-  }
-}
-
-class SkwerTileIndex {
-  final int x;
-  final int y;
-
-  const SkwerTileIndex(this.x, this.y);
-
-  @override
-  int get hashCode => x * 1000 + y;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! SkwerTileIndex) {
-      return false;
-    }
-    return other.x == x && other.y == y;
-  }
-
-  SkwerTileIndex translate(int x, int y) =>
-      SkwerTileIndex(this.x + x, this.y + y);
-}
-
-class SkwerTileProps {
-  final FocusNode focusNode = FocusNode();
-  final ValueNotifier<SkwerTileState> state = ValueNotifier(SkwerTileState());
-  final SkwerTileIndex index;
-
-  SkwerTileProps({required this.index});
-
-  bool get isActive {
-    return true;
-    // FIXME based on game
-    // final index = key.value;
-    // return index.x > 3 && index.x <= 8 && index.y > 1 && index.y <= 5;
-  }
-}
-
-class SkwerTileState {
-  int skwer = 0;
-  bool hasFocus = false;
-  bool isLastPressed = false;
-  SkwerTileIndex? trigger;
-
-  SkwerTileState();
-
-  SkwerTileState._({
-    required this.skwer,
-    this.hasFocus = false,
-    this.isLastPressed = false,
-    this.trigger,
-  });
-
-  factory SkwerTileState.reset(
-    SkwerTileState state,
-    SkwerTileIndex trigger,
-    int skwer,
-  ) {
-    return SkwerTileState._(
-      skwer: skwer,
-      trigger: trigger,
-      hasFocus: state.hasFocus,
-    );
-  }
-
-  factory SkwerTileState.rotate(
-    SkwerTileState state,
-    SkwerTileIndex trigger,
-    int skwerDelta,
-  ) {
-    return SkwerTileState._(
-      skwer: state.skwer + skwerDelta,
-      trigger: trigger,
-    );
-  }
-
-  factory SkwerTileState.onFocus(
-    SkwerTileState state,
-    bool hasFocus,
-  ) {
-    return SkwerTileState._(
-      skwer: state.skwer,
-      hasFocus: hasFocus,
-      trigger: state.trigger,
-    );
-  }
-
-  factory SkwerTileState.onPress(SkwerTileState state) {
-    return SkwerTileState._(
-      skwer: state.skwer,
-      isLastPressed: true,
-      hasFocus: true,
     );
   }
 }

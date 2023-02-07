@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/game/game.dart';
 import 'package:skwer/game/game_props.dart';
+import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 
@@ -70,19 +71,19 @@ class GameWidget extends StatelessWidget {
                     .contains(LogicalKeyboardKey.shiftLeft)) {
                   game.reset(tileIndex);
                 } else {
-                  game.rotate(
-                      tileIndex,
-                      RawKeyboard.instance.keysPressed
-                              .contains(LogicalKeyboardKey.shiftRight)
-                          ? -1
-                          : 1);
+                  game.rotate(GameRotation(
+                    index: tileIndex,
+                    delta: _rotationDelta,
+                  ));
                 }
                 return KeyEventResult.handled;
               }
               return KeyEventResult.ignored;
             },
             child: GestureDetector(
-              onTap: () => game.rotate(tileIndex, 1),
+              onTap: () => game.rotate(
+                GameRotation(index: tileIndex, delta: _rotationDelta),
+              ),
               onLongPress: () => game.reset(tileIndex),
               child: SkwerTile(props: tileProps),
             ),
@@ -91,4 +92,9 @@ class GameWidget extends StatelessWidget {
       ),
     );
   }
+
+  int get _rotationDelta =>
+      RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftRight)
+          ? -1
+          : 1;
 }

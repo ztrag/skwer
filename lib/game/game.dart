@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:skwer/game/game_props.dart';
+import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_state.dart';
 
 class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
+  final List<GameRotation> rotations = [];
 
   GameProps get props => gameProps.value;
 
@@ -16,7 +18,7 @@ class Game {
     );
     Future.microtask(() {
       final trigger = SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2);
-      reset(trigger);
+      reset(trigger, true);
       props.skwerTiles[trigger]!.focusNode.requestFocus();
     });
   }
@@ -29,7 +31,7 @@ class Game {
     }
   }
 
-  void reset(SkwerTileIndex trigger) {
+  void reset(SkwerTileIndex trigger, [bool recreate = false]) {
     final tileProps = props.skwerTiles[trigger]!;
 
     final skwer = tileProps.state.value.skwer % 3;
@@ -44,67 +46,88 @@ class Game {
         );
       }
     }
+    if (recreate) {
+      for (final rotation in rotations) {
+        rotate(rotation, false);
+      }
+    } else {
+      rotations.clear();
+    }
   }
 
-  void rotate(SkwerTileIndex index, int dir) {
-    final tileProps = props.skwerTiles[index]!;
+  void rotate(GameRotation rotation, [bool addRotation = true]) {
+    final tileProps = props.skwerTiles[rotation.index];
+    if (tileProps == null) {
+      // Maybe caused by resize, skipping this rotation.
+      return;
+    }
+
+    if (addRotation) {
+      rotations.add(rotation);
+    }
+
     final tileState = tileProps.state;
     tileState.value = SkwerTileState.onPress(tileState.value);
 
     final skwer = tileProps.state.value.skwer;
     if (skwer % 3 == 0) {
-      _rotateRed(index, dir);
+      _rotateRed(rotation);
     } else if (skwer % 3 == 1) {
-      _rotateGreen(index, dir);
+      _rotateGreen(rotation);
     } else {
-      _rotateBlue(index, dir);
+      _rotateBlue(rotation);
     }
   }
 
-  void _rotateRed(SkwerTileIndex trigger, int dir) {
+  void _rotateRed(GameRotation rotation) {
+    final trigger = rotation.index;
+
     for (var x = trigger.x - 1; x <= trigger.x + 1; x++) {
       for (var y = trigger.y - 1; y <= trigger.y + 1; y++) {
         if (x == trigger.x && y == trigger.y) {
           continue;
         }
-        _maybeRotateTile(trigger, SkwerTileIndex(x, y), dir);
+        _maybeRotateTile(rotation, SkwerTileIndex(x, y));
       }
     }
   }
 
-  void _rotateBlue(SkwerTileIndex trigger, int dir) {
+  void _rotateBlue(GameRotation rotation) {
+    final trigger = rotation.index;
+
     var t = 0;
     while (true) {
       t++;
-      final x = _maybeRotateTile(trigger, trigger.translate(-t, -t), dir) +
-          _maybeRotateTile(trigger, trigger.translate(t, -t), dir) +
-          _maybeRotateTile(trigger, trigger.translate(-t, t), dir) +
-          _maybeRotateTile(trigger, trigger.translate(t, t), dir);
+      final x = _maybeRotateTile(rotation, trigger.translate(-t, -t)) +
+          _maybeRotateTile(rotation, trigger.translate(t, -t)) +
+          _maybeRotateTile(rotation, trigger.translate(-t, t)) +
+          _maybeRotateTile(rotation, trigger.translate(t, t));
       if (x == 0) {
         return;
       }
     }
   }
 
-  void _rotateGreen(SkwerTileIndex trigger, int dir) {
+  void _rotateGreen(GameRotation rotation) {
+    final trigger = rotation.index;
+
     for (var x = 0; x < props.numTilesX; x++) {
       if (x == trigger.x) {
         continue;
       }
-      _maybeRotateTile(trigger, SkwerTileIndex(x, trigger.y), dir);
+      _maybeRotateTile(rotation, SkwerTileIndex(x, trigger.y));
     }
     for (var y = 0; y < props.numTilesY; y++) {
       if (y == trigger.y) {
         continue;
       }
-      _maybeRotateTile(trigger, SkwerTileIndex(trigger.x, y), dir);
+      _maybeRotateTile(rotation, SkwerTileIndex(trigger.x, y));
     }
   }
 
   int _maybeRotateTile(
-    SkwerTileIndex trigger,
+    GameRotation rotation,
     SkwerTileIndex target,
-    int delta,
   ) {
     if (target.x < 0 ||
         target.y < 0 ||
@@ -112,8 +135,10 @@ class Game {
         target.y >= props.numTilesY) {
       return 0;
     }
+
     final state = props.skwerTiles[target]!.state;
-    state.value = SkwerTileState.rotate(state.value, trigger, delta);
+    state.value =
+        SkwerTileState.rotate(state.value, rotation.index, rotation.delta);
     return 1;
   }
 }

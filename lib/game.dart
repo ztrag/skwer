@@ -18,25 +18,26 @@ class _GameState extends State<Game> {
   int numTilesY = 0;
 
   @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _onResetFromTile(SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2));
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isSmall = size.width < 500 || size.height < 500;
     final tileSize = min(
-      min(size.height, size.width) / 8.0,
-      max(size.height, size.width) / 9.0,
+      min(size.height, size.width) / (isSmall ? 6 : 8),
+      max(size.height, size.width) / (isSmall ? 7 : 9),
     );
     final padding = EdgeInsets.all(tileSize * 0.06);
 
-    numTilesX = (size.width / tileSize).floor();
-    numTilesY = (size.height / tileSize).floor();
+    int nX = (size.width / tileSize).floor();
+    int nY = (size.height / tileSize).floor();
+    if (nX != numTilesX || nY != numTilesY) {
+      numTilesX = nX;
+      numTilesY = nY;
+      Future.microtask( () {
+        final trigger = SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2);
+        _onResetFromTile(trigger);
+        skwerTiles[trigger]!.focusNode.requestFocus();
+      });
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -120,16 +121,17 @@ class _GameState extends State<Game> {
     }
   }
 
-  void _onResetFromTile(SkwerTileIndex index) {
-    final props = skwerTiles[index]!;
+  void _onResetFromTile(SkwerTileIndex trigger) {
+    final props = skwerTiles[trigger]!;
 
     final count = props.state.value.count % 3;
     for (var x = 0; x < numTilesX; x++) {
       for (var y = 0; y < numTilesY; y++) {
-        final state = skwerTiles[SkwerTileIndex(x, y)]!.state;
+        final index = SkwerTileIndex(x, y);
+        final state = skwerTiles[index]!.state;
         state.value = SkwerTileState.reset(
           state.value,
-          index,
+          trigger,
           count,
         );
       }

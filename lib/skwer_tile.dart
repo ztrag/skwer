@@ -47,6 +47,7 @@ class _SkwerTileState extends State<SkwerTile>
   @override
   void dispose() {
     widget.props.state.removeListener(_onStateChanged);
+    _animationController.dispose();
     super.dispose();
   }
 

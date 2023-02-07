@@ -34,7 +34,7 @@ class _SkwerTileState extends State<SkwerTile>
     super.initState();
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 350),
       vsync: this,
     );
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);

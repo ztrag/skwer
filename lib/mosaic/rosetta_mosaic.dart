@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:skwer/mosaic/mosaic_group.dart';
+import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
-class MosaicRosetta extends MosaicGroup {
+class MosaicRosetta extends Mosaic {
   static final Random _random = Random();
 
   List<MosaicTile>? _tiles;

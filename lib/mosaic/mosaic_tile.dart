@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/mosaic/mosaic_animation.dart';
+import 'package:skwer/mosaic/color_wave.dart';
 
 class MosaicTile {
-  static final Paint _paint = _buildPaint();
+  static final Paint _paint = Paint();
   static final Path _path = Path();
   static final Random _random = Random();
 
@@ -18,10 +18,6 @@ class MosaicTile {
       : colorD1 = _d1,
         position = _calcPosition(points);
 
-  static Paint _buildPaint() {
-    return Paint();
-  }
-
   static Point<double> _calcPosition(List<Point<double>> points) {
     return points.reduce((a, b) => a + b) * (1 / points.length);
   }
@@ -30,19 +26,19 @@ class MosaicTile {
     Canvas canvas,
     Size size,
     double brightness,
-    MosaicAnimation animation,
+    ColorWave wave,
   ) {
-    final positionAnimation = _getPositionAnimation(animation);
+    final waveAnimation = _getPositionAnimation(wave);
     _path.reset();
-    final p = getAnimatedPoints(positionAnimation);
+    final p = getAnimatedPoints(waveAnimation);
     _path.moveTo(p.first.x * size.width, p.first.y * size.height);
     for (int i = 1; i < p.length; i++) {
       _path.lineTo(p[i].x * size.width, p[i].y * size.height);
     }
     _path.lineTo(p.first.x * size.width, p.first.y * size.height);
 
-    final color = _getCurrentColor(animation, positionAnimation);
-    final colorD2 = getAnimatedColorD1(animation.value) * brightness;
+    final color = _getCurrentColor(wave, waveAnimation);
+    final colorD2 = getAnimatedColorD1(wave.animationValue) * brightness;
     _paint.color = colorD2 > 1
         ? Color.lerp(color, skWhite, colorD2 - 1)!
         : Color.lerp(color, skBlack, 1 - colorD2)!;
@@ -59,19 +55,16 @@ class MosaicTile {
     return p;
   }
 
-  double getAnimatedColorD1(double animation) {
-    return colorD1;
-  }
+  double getAnimatedColorD1(double animation) => colorD1;
 
-  Color _getCurrentColor(MosaicAnimation animation, double positionAnimation) {
-    return Color.lerp(animation.start, animation.end, positionAnimation)!;
-  }
+  Color _getCurrentColor(ColorWave animation, double positionAnimation) =>
+      Color.lerp(animation.start, animation.end, positionAnimation)!;
 
-  double _getPositionAnimation(MosaicAnimation animation) {
-    final distFromCenter = (position - animation.dir).magnitude;
+  double _getPositionAnimation(ColorWave animation) {
+    final distFromCenter = (position - animation.direction).magnitude;
     const maxDistFromCenter = 1.4142;
     final relDistFromCenter = distFromCenter / maxDistFromCenter; // [0, 1];
-    return min(1, max(0, 2 * animation.value - relDistFromCenter));
+    return min(1, max(0, 2 * animation.animationValue - relDistFromCenter));
   }
 
   static double get _d1 {

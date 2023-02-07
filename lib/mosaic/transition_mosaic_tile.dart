@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'mosaic_tile.dart';
 
-class MosaicTransitionTile extends MosaicTile {
+class TransitionMosaicTile extends MosaicTile {
   final MosaicTile tileA;
   final MosaicTile tileB;
 
   int dir = 1;
 
-  MosaicTransitionTile(this.tileA, this.tileB)
+  TransitionMosaicTile(this.tileA, this.tileB)
       : super([
           ...tileA.points,
           ...tileB.points,

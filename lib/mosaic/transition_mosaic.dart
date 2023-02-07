@@ -1,34 +1,34 @@
-import 'package:skwer/mosaic/mosaic_group.dart';
+import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
-import 'package:skwer/mosaic/mosaic_transition_tile.dart';
+import 'package:skwer/mosaic/transition_mosaic_tile.dart';
 
-class MosaicGroupTransition extends MosaicGroup {
-  final MosaicGroup groupA;
-  final MosaicGroup groupB;
+class TransitionMosaic extends Mosaic {
+  final Mosaic mosaicA;
+  final Mosaic mosaicB;
 
   List<MosaicTile>? _tiles;
   int dir = 1;
 
-  MosaicGroupTransition(this.groupA, this.groupB);
+  TransitionMosaic(this.mosaicA, this.mosaicB);
 
   @override
   List<MosaicTile> get tiles {
     _tiles ??= _buildTiles();
     for (final tile in _tiles!) {
-      (tile as MosaicTransitionTile).dir = dir;
+      (tile as TransitionMosaicTile).dir = dir;
     }
     return _tiles!;
   }
 
   List<MosaicTile> _buildTiles() {
     final tiles = <MosaicTile>[];
-    final remaining = [...groupB.tiles];
-    for (final tile in groupA.tiles) {
+    final remaining = [...mosaicB.tiles];
+    for (final tile in mosaicA.tiles) {
       final match = _popClosest(tile, remaining);
-      tiles.add(MosaicTransitionTile(tile, match));
+      tiles.add(TransitionMosaicTile(tile, match));
     }
     for (final tile in remaining) {
-      tiles.add(MosaicTransitionTile(MosaicTile([tile.position]), tile));
+      tiles.add(TransitionMosaicTile(MosaicTile([tile.position]), tile));
     }
     return tiles;
   }

@@ -1,17 +1,15 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:skwer/mosaic/mosaic_group.dart';
+import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
-class MosaicGrid extends MosaicGroup {
+class GridMosaic extends Mosaic {
   static final Random _random = Random();
 
   final int gridSize = Platform.isAndroid || Platform.isIOS ? 5 : 7;
 
   List<MosaicTile>? _tiles;
-
-  MosaicGrid();
 
   @override
   List<MosaicTile> get tiles => _tiles ??= _buildTiles();

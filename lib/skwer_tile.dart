@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/mosaic/mosaic_animation.dart';
-import 'package:skwer/mosaic/mosaic_grid.dart';
-import 'package:skwer/mosaic/mosaic_group.dart';
-import 'package:skwer/mosaic/mosaic_rosetta.dart';
-import 'package:skwer/mosaic/mosaic_transition_group.dart';
+import 'package:skwer/mosaic/color_wave.dart';
+import 'package:skwer/mosaic/grid_mosaic.dart';
+import 'package:skwer/mosaic/mosaic.dart';
+import 'package:skwer/mosaic/rosetta_mosaic.dart';
+import 'package:skwer/mosaic/transition_mosaic.dart';
 
 final Random _random = Random();
 
@@ -16,7 +16,7 @@ class SkwerTile extends StatefulWidget {
 
   SkwerTile({
     required this.props,
-  }) : super(key: props.key);
+  }) : super(key: ValueKey(props.index));
 
   @override
   State<SkwerTile> createState() => _SkwerTileState();
@@ -68,13 +68,12 @@ class _SkwerTileState extends State<SkwerTile>
 class _SkwerTilePaint extends CustomPainter {
   static final Paint _focusPaint = _buildFocusPaint();
 
-  final MosaicGroup grid = MosaicGrid();
-  final MosaicGroup rosetta = MosaicRosetta();
+  final Mosaic grid = GridMosaic();
+  final Mosaic rosetta = MosaicRosetta();
+  late final TransitionMosaic transition = TransitionMosaic(grid, rosetta);
+
   final SkwerTileProps props;
   final Animation<double> animation;
-
-  late final MosaicGroupTransition transition =
-      MosaicGroupTransition(grid, rosetta);
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
@@ -87,7 +86,7 @@ class _SkwerTilePaint extends CustomPainter {
     if (animationEnd.hasFocus) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth = size.width * 0.13;
-      _focusPaint.color = skTileColors[(animationStart.count + 1) % 3];
+      _focusPaint.color = skTileColors[(animationStart.skwer + 1) % 3];
       canvas.drawRect(
         Rect.fromLTRB(x, x, size.width - x, size.height - x),
         _focusPaint,
@@ -97,22 +96,22 @@ class _SkwerTilePaint extends CustomPainter {
     _currentGroup.paint(
       canvas,
       size,
-      props.state.value.count > 10 // FIXME game count
+      props.state.value.skwer > 10 // FIXME game skwer
           ? (props.isActive ? 0.7 : 0.3)
           : (props.isActive ? 1 : 0.9),
-      MosaicAnimation(
-        animationStart.count == animationEnd.count
+      ColorWave(
+        start: animationStart.skwer == animationEnd.skwer
             ? (animationEnd.isLastPressed
                 ? skWhite
                 : Color.lerp(
-                    skTileColors[(animationStart.count + 1) % 3],
-                    skTileColors[(animationStart.count + 2) % 3],
+                    skTileColors[(animationStart.skwer + 1) % 3],
+                    skTileColors[(animationStart.skwer + 2) % 3],
                     0.25 + 0.5 * _random.nextDouble(),
                   )!)
-            : skTileColors[animationStart.count % 3],
-        skTileColors[animationEnd.count % 3],
-        _getDirFromTrigger(),
-        animation.value,
+            : skTileColors[animationStart.skwer % 3],
+        end: skTileColors[animationEnd.skwer % 3],
+        direction: _getWaveDirectionFromTrigger(),
+        animationValue: animation.value,
       ),
     );
   }
@@ -126,15 +125,15 @@ class _SkwerTilePaint extends CustomPainter {
     return false;
   }
 
-  MosaicGroup get _currentGroup {
-    if (animationStart.count >= -2 && animationEnd.count <= -3) {
+  Mosaic get _currentGroup {
+    if (animationStart.skwer >= -2 && animationEnd.skwer <= -3) {
       transition.dir = 1;
       return transition;
-    } else if (animationStart.count <= -3 && animationEnd.count >= -2) {
+    } else if (animationStart.skwer <= -3 && animationEnd.skwer >= -2) {
       transition.dir = -1;
       return transition;
     }
-    return props.state.value.count < -2 ? rosetta : grid;
+    return props.state.value.skwer < -2 ? rosetta : grid;
   }
 
   static Paint _buildFocusPaint() {
@@ -143,12 +142,12 @@ class _SkwerTilePaint extends CustomPainter {
     return paint;
   }
 
-  Point<double> _getDirFromTrigger() {
+  Point<double> _getWaveDirectionFromTrigger() {
     if (props.state.value.trigger == null) {
       return const Point(0.5, 0.5);
     }
     final trigger = props.state.value.trigger!;
-    final target = props.key.value;
+    final target = props.index;
     return Point(
       target.x > trigger.x
           ? 0
@@ -181,9 +180,6 @@ class SkwerTileIndex {
     return other.x == x && other.y == y;
   }
 
-  @override
-  String toString() => 'TileIndex[$x,$y]';
-
   SkwerTileIndex translate(int x, int y) =>
       SkwerTileIndex(this.x + x, this.y + y);
 }
@@ -191,11 +187,9 @@ class SkwerTileIndex {
 class SkwerTileProps {
   final FocusNode focusNode = FocusNode();
   final ValueNotifier<SkwerTileState> state = ValueNotifier(SkwerTileState());
-  final ValueKey<SkwerTileIndex> key;
+  final SkwerTileIndex index;
 
-  SkwerTileProps({
-    required SkwerTileIndex tileIndex,
-  }) : key = ValueKey(tileIndex);
+  SkwerTileProps({required this.index});
 
   bool get isActive {
     return true;
@@ -206,15 +200,15 @@ class SkwerTileProps {
 }
 
 class SkwerTileState {
-  SkwerTileIndex? trigger;
-  int count = 0;
+  int skwer = 0;
   bool hasFocus = false;
   bool isLastPressed = false;
+  SkwerTileIndex? trigger;
 
   SkwerTileState();
 
   SkwerTileState._({
-    required this.count,
+    required this.skwer,
     this.hasFocus = false,
     this.isLastPressed = false,
     this.trigger,
@@ -223,10 +217,10 @@ class SkwerTileState {
   factory SkwerTileState.reset(
     SkwerTileState state,
     SkwerTileIndex trigger,
-    int count,
+    int skwer,
   ) {
     return SkwerTileState._(
-      count: count,
+      skwer: skwer,
       trigger: trigger,
       hasFocus: state.hasFocus,
     );
@@ -235,10 +229,10 @@ class SkwerTileState {
   factory SkwerTileState.rotate(
     SkwerTileState state,
     SkwerTileIndex trigger,
-    int delta,
+    int skwerDelta,
   ) {
     return SkwerTileState._(
-      count: state.count + delta,
+      skwer: state.skwer + skwerDelta,
       trigger: trigger,
     );
   }
@@ -248,7 +242,7 @@ class SkwerTileState {
     bool hasFocus,
   ) {
     return SkwerTileState._(
-      count: state.count,
+      skwer: state.skwer,
       hasFocus: hasFocus,
       trigger: state.trigger,
     );
@@ -256,7 +250,7 @@ class SkwerTileState {
 
   factory SkwerTileState.onPress(SkwerTileState state) {
     return SkwerTileState._(
-      count: state.count,
+      skwer: state.skwer,
       isLastPressed: true,
       hasFocus: true,
     );

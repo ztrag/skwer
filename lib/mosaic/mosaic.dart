@@ -1,16 +1,16 @@
 import 'dart:ui';
 
-import 'package:skwer/mosaic/mosaic_animation.dart';
+import 'package:skwer/mosaic/color_wave.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
-abstract class MosaicGroup {
+abstract class Mosaic {
   List<MosaicTile> get tiles;
 
   void paint(
     Canvas canvas,
     Size size,
     double brightness,
-    MosaicAnimation animation,
+    ColorWave animation,
   ) {
     for (MosaicTile tile in tiles) {
       tile.paint(canvas, size, brightness, animation);

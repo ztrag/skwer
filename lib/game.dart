@@ -32,7 +32,7 @@ class _GameState extends State<Game> {
     if (nX != numTilesX || nY != numTilesY) {
       numTilesX = nX;
       numTilesY = nY;
-      Future.microtask( () {
+      Future.microtask(() {
         final trigger = SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2);
         _onResetFromTile(trigger);
         skwerTiles[trigger]!.focusNode.requestFocus();
@@ -50,7 +50,7 @@ class _GameState extends State<Game> {
             (i) {
               final tileIndex = SkwerTileIndex(i, j);
               final tileProps =
-                  skwerTiles[tileIndex] ?? SkwerTileProps(tileIndex: tileIndex);
+                  skwerTiles[tileIndex] ?? SkwerTileProps(index: tileIndex);
               skwerTiles[tileIndex] = tileProps;
 
               return SizedBox(
@@ -111,10 +111,10 @@ class _GameState extends State<Game> {
     final state = props.state;
     state.value = SkwerTileState.onPress(state.value);
 
-    final count = props.state.value.count;
-    if (count % 3 == 0) {
+    final skwer = props.state.value.skwer;
+    if (skwer % 3 == 0) {
       _rotateRed(index, dir);
-    } else if (count % 3 == 1) {
+    } else if (skwer % 3 == 1) {
       _rotateGreen(index, dir);
     } else {
       _rotateBlue(index, dir);
@@ -124,7 +124,7 @@ class _GameState extends State<Game> {
   void _onResetFromTile(SkwerTileIndex trigger) {
     final props = skwerTiles[trigger]!;
 
-    final count = props.state.value.count % 3;
+    final skwer = props.state.value.skwer % 3;
     for (var x = 0; x < numTilesX; x++) {
       for (var y = 0; y < numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
@@ -132,7 +132,7 @@ class _GameState extends State<Game> {
         state.value = SkwerTileState.reset(
           state.value,
           trigger,
-          count,
+          skwer,
         );
       }
     }

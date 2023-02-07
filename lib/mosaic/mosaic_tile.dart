@@ -11,12 +11,12 @@ class MosaicTile {
   static final Random _random = Random();
 
   final List<Point<double>> points;
-  final Point<double> _position;
-  final double _colorD1;
+  final Point<double> position;
+  final double colorD1;
 
   MosaicTile(this.points)
-      : _colorD1 = _d1,
-        _position = _calcPosition(points);
+      : colorD1 = _d1,
+        position = _calcPosition(points);
 
   static Paint _buildPaint() {
     return Paint();
@@ -34,7 +34,7 @@ class MosaicTile {
   ) {
     final positionAnimation = _getPositionAnimation(animation);
     _path.reset();
-    final p = _getAnimatedPoints(positionAnimation);
+    final p = getAnimatedPoints(positionAnimation);
     _path.moveTo(p.first.x * size.width, p.first.y * size.height);
     for (int i = 1; i < p.length; i++) {
       _path.lineTo(p[i].x * size.width, p[i].y * size.height);
@@ -42,7 +42,7 @@ class MosaicTile {
     _path.lineTo(p.first.x * size.width, p.first.y * size.height);
 
     final color = _getCurrentColor(animation, positionAnimation);
-    final colorD2 = _colorD1 * brightness;
+    final colorD2 = getAnimatedColorD1(animation.value) * brightness;
     _paint.color = colorD2 > 1
         ? Color.lerp(color, skWhite, colorD2 - 1)!
         : Color.lerp(color, skBlack, 1 - colorD2)!;
@@ -50,7 +50,7 @@ class MosaicTile {
     canvas.drawPath(_path, _paint);
   }
 
-  List<Point<double>> _getAnimatedPoints(double animation) {
+  List<Point<double>> getAnimatedPoints(double animation) {
     final p = <Point<double>>[];
     var length = points.length;
     for (var i = 0; i < length; i++) {
@@ -59,12 +59,16 @@ class MosaicTile {
     return p;
   }
 
+  double getAnimatedColorD1(double animation) {
+    return colorD1;
+  }
+
   Color _getCurrentColor(MosaicAnimation animation, double positionAnimation) {
     return Color.lerp(animation.start, animation.end, positionAnimation)!;
   }
 
   double _getPositionAnimation(MosaicAnimation animation) {
-    final distFromCenter = (_position - animation.dir).magnitude;
+    final distFromCenter = (position - animation.dir).magnitude;
     const maxDistFromCenter = 1.4142;
     final relDistFromCenter = distFromCenter / maxDistFromCenter; // [0, 1];
     return min(1, max(0, 2 * animation.value - relDistFromCenter));

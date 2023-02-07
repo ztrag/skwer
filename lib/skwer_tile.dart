@@ -7,6 +7,7 @@ import 'package:skwer/mosaic/mosaic_animation.dart';
 import 'package:skwer/mosaic/mosaic_grid.dart';
 import 'package:skwer/mosaic/mosaic_group.dart';
 import 'package:skwer/mosaic/mosaic_rosetta.dart';
+import 'package:skwer/mosaic/mosaic_transition_group.dart';
 
 final Random _random = Random();
 
@@ -71,6 +72,9 @@ class _SkwerTilePaint extends CustomPainter {
   final SkwerTileProps props;
   final Animation<double> animation;
 
+  late final MosaicGroupTransition transition =
+      MosaicGroupTransition(grid, rosetta);
+
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
 
@@ -91,8 +95,7 @@ class _SkwerTilePaint extends CustomPainter {
       );
     }
 
-    final group = props.state.value.count < -2 ? rosetta : grid;
-    group.paint(
+    _currentGroup.paint(
       canvas,
       size,
       props.state.value.count > 10 // FIXME game count
@@ -122,6 +125,17 @@ class _SkwerTilePaint extends CustomPainter {
     }
 
     return false;
+  }
+
+  MosaicGroup get _currentGroup {
+    if (animationStart.count == -2 && animationEnd.count == -3) {
+      transition.dir = 1;
+      return transition;
+    } else if (animationStart.count == -3 && animationEnd.count == -2) {
+      transition.dir = -1;
+      return transition;
+    }
+    return props.state.value.count < -2 ? rosetta : grid;
   }
 
   static Paint _buildFocusPaint() {

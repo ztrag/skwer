@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
+import 'package:skwer/game/game_zone.dart';
+import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_state.dart';
 
 class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
   final List<GameRotation> rotations = [];
+  final ValueNotifier<Puzzle?> puzzle = ValueNotifier(null);
 
   GameProps get props => gameProps.value;
 
@@ -17,32 +20,30 @@ class Game {
       numTilesY: numTilesY,
     );
     Future.microtask(() {
-      final trigger = SkwerTileIndex(numTilesX ~/ 2, numTilesY ~/ 2);
-      reset(trigger, true);
-      props.skwerTiles[trigger]!.focusNode.requestFocus();
+      reset(recreate: true);
     });
   }
 
-  void focus(SkwerTileIndex index, bool hasFocus) {
-    final tileProps = props.skwerTiles[index]!;
-    if (tileProps.state.value.hasFocus != hasFocus) {
-      tileProps.state.value =
-          SkwerTileState.onFocus(tileProps.state.value, hasFocus);
+  void reset({
+    SkwerTileIndex? trigger,
+    bool recreate = false,
+  }) {
+    if (trigger != null) {
+      gameProps.value = GameProps.reSkwer(
+        props: props,
+        skwer: props.skwerTiles[trigger]!.state.value.skwer,
+      );
     }
-  }
 
-  void reset(SkwerTileIndex trigger, [bool recreate = false]) {
-    final tileProps = props.skwerTiles[trigger]!;
-
-    final skwer = tileProps.state.value.skwer % 3;
+    final skwer = props.skwer % 3;
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
         final state = props.skwerTiles[index]!.state;
         state.value = SkwerTileState.reset(
           state.value,
-          trigger,
           skwer,
+          trigger: trigger,
         );
       }
     }
@@ -52,6 +53,26 @@ class Game {
       }
     } else {
       rotations.clear();
+    }
+  }
+
+  void startPuzzle(int size) {
+    puzzle.value = Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
+    resetPuzzle();
+  }
+
+  void resetPuzzle() {
+    reset();
+    for (final rotation in puzzle.value!.rotations) {
+      rotate(rotation);
+    }
+  }
+
+  void focus(SkwerTileIndex index, bool hasFocus) {
+    final tileProps = props.skwerTiles[index]!;
+    if (tileProps.state.value.hasFocus != hasFocus) {
+      tileProps.state.value =
+          SkwerTileState.onFocus(tileProps.state.value, hasFocus);
     }
   }
 

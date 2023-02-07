@@ -67,14 +67,10 @@ class GameWidget extends StatelessWidget {
             onKeyEvent: (_, event) {
               if (event.logicalKey == LogicalKeyboardKey.space &&
                   event is KeyDownEvent) {
-                if (RawKeyboard.instance.keysPressed
-                    .contains(LogicalKeyboardKey.shiftLeft)) {
-                  game.reset(tileIndex);
+                if (_isMenuAction()) {
+                  _onMenuAction(tileIndex);
                 } else {
-                  game.rotate(GameRotation(
-                    index: tileIndex,
-                    delta: _rotationDelta,
-                  ));
+                  game.rotate(GameRotation(index: tileIndex, delta: 1));
                 }
                 return KeyEventResult.handled;
               }
@@ -82,9 +78,9 @@ class GameWidget extends StatelessWidget {
             },
             child: GestureDetector(
               onTap: () => game.rotate(
-                GameRotation(index: tileIndex, delta: _rotationDelta),
+                GameRotation(index: tileIndex, delta: 1),
               ),
-              onLongPress: () => game.reset(tileIndex),
+              onLongPress: () => _onMenuAction(tileIndex),
               child: SkwerTile(props: tileProps),
             ),
           ),
@@ -93,8 +89,22 @@ class GameWidget extends StatelessWidget {
     );
   }
 
-  int get _rotationDelta =>
-      RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftRight)
-          ? -1
-          : 1;
+  void _onMenuAction(SkwerTileIndex trigger) {
+    if (trigger.y == game.props.numTilesY - 1) {
+      if (trigger.x == game.props.numTilesX - 1) {
+        game.resetPuzzle();
+      } else {
+        game.startPuzzle(trigger.x + 3);
+      }
+    } else {
+      game.reset(trigger: trigger);
+    }
+  }
+
+  bool _isMenuAction() {
+    return RawKeyboard.instance.keysPressed.intersection({
+      LogicalKeyboardKey.shiftLeft,
+      LogicalKeyboardKey.shiftRight
+    }).isNotEmpty;
+  }
 }

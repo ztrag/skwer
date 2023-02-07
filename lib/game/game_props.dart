@@ -13,11 +13,13 @@ class GameProps {
     this.skwer = 0,
     this.numTilesX = 0,
     this.numTilesY = 0,
+    GameProps? previous,
   }) {
     for (var x = 0; x < numTilesX; x++) {
       for (var y = 0; y < numTilesY; y++) {
         final tileIndex = SkwerTileIndex(x, y);
-        skwerTiles[tileIndex] = SkwerTileProps(index: tileIndex);
+        skwerTiles[tileIndex] =
+            previous?.skwerTiles[tileIndex] ?? SkwerTileProps(index: tileIndex);
       }
     }
   }
@@ -33,5 +35,14 @@ class GameProps {
         skwer: props.skwer,
         numTilesX: numTilesX,
         numTilesY: numTilesY,
+        previous: props,
+      );
+
+  factory GameProps.reSkwer({required GameProps props, required int skwer}) =>
+      GameProps._(
+        skwer: skwer,
+        numTilesX: props.numTilesX,
+        numTilesY: props.numTilesY,
+        previous: props,
       );
 }

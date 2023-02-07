@@ -17,9 +17,9 @@ class SkwerTileState {
 
   factory SkwerTileState.reset(
     SkwerTileState state,
-    SkwerTileIndex trigger,
-    int skwer,
-  ) {
+    int skwer, {
+    SkwerTileIndex? trigger,
+  }) {
     return SkwerTileState._(
       skwer: skwer,
       trigger: trigger,
@@ -35,6 +35,7 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: state.skwer + skwerDelta,
       trigger: trigger,
+      hasFocus: state.hasFocus,
     );
   }
 
@@ -53,7 +54,7 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: state.skwer,
       isLastPressed: true,
-      hasFocus: true,
+      hasFocus: state.hasFocus,
     );
   }
 }

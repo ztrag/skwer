@@ -5,8 +5,22 @@ import 'package:flutter/services.dart';
 import 'package:skwer/game/game.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
+import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
+
+const _kDigits = [
+  LogicalKeyboardKey.digit1,
+  LogicalKeyboardKey.digit2,
+  LogicalKeyboardKey.digit3,
+  LogicalKeyboardKey.digit4,
+  LogicalKeyboardKey.digit5,
+  LogicalKeyboardKey.digit6,
+  LogicalKeyboardKey.digit7,
+  LogicalKeyboardKey.digit8,
+  LogicalKeyboardKey.digit9,
+  LogicalKeyboardKey.digit0,
+];
 
 class GameWidget extends StatelessWidget {
   final Game game = Game();
@@ -61,32 +75,55 @@ class GameWidget extends StatelessWidget {
         padding: padding,
         child: MouseRegion(
           onHover: (event) => tileProps.focusNode.requestFocus(),
-          child: Focus(
-            focusNode: tileProps.focusNode,
-            onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
-            onKeyEvent: (_, event) {
-              if (event.logicalKey == LogicalKeyboardKey.space &&
-                  event is KeyDownEvent) {
-                if (_isMenuAction()) {
-                  _onMenuAction(tileIndex);
-                } else {
-                  game.rotate(GameRotation(index: tileIndex, delta: 1));
-                }
-                return KeyEventResult.handled;
-              }
-              return KeyEventResult.ignored;
-            },
-            child: GestureDetector(
-              onTap: () => game.rotate(
-                GameRotation(index: tileIndex, delta: 1),
+          child: ValueListenableBuilder<Puzzle?>(
+            valueListenable: props.puzzle,
+            builder: (_, __, ___) => ExcludeFocus(
+              excluding:
+                  !(props.puzzle.value?.zone.containsTile(tileIndex) ?? true),
+              child: Focus(
+                focusNode: tileProps.focusNode,
+                onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
+                onKeyEvent: (_, event) {
+                  if (event is! KeyDownEvent) {
+                    return KeyEventResult.ignored;
+                  }
+
+                  if (event.logicalKey == LogicalKeyboardKey.space) {
+                    if (_isMenuAction()) {
+                      _onMenuAction(tileIndex);
+                    } else {
+                      game.rotate(GameRotation(index: tileIndex, delta: 1));
+                    }
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
+                    game.resetPuzzle();
+                    return KeyEventResult.handled;
+                  } else if (_kDigits.contains(event.logicalKey)) {
+                    _handleDigit(event.logicalKey);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: GestureDetector(
+                  onTap: () => game.rotate(
+                    GameRotation(index: tileIndex, delta: 1),
+                  ),
+                  onLongPress: () => _onMenuAction(tileIndex),
+                  child: SkwerTile(props: tileProps, gameProps: game.gameProps),
+                ),
               ),
-              onLongPress: () => _onMenuAction(tileIndex),
-              child: SkwerTile(props: tileProps),
             ),
           ),
         ),
       ),
     );
+  }
+
+  bool _isMenuAction() {
+    return RawKeyboard.instance.keysPressed.intersection({
+      LogicalKeyboardKey.shiftLeft,
+      LogicalKeyboardKey.shiftRight
+    }).isNotEmpty;
   }
 
   void _onMenuAction(SkwerTileIndex trigger) {
@@ -97,14 +134,12 @@ class GameWidget extends StatelessWidget {
         game.startPuzzle(trigger.x + 3);
       }
     } else {
-      game.reset(trigger: trigger);
+      game.reset(trigger: trigger, reSkwer: true);
     }
   }
 
-  bool _isMenuAction() {
-    return RawKeyboard.instance.keysPressed.intersection({
-      LogicalKeyboardKey.shiftLeft,
-      LogicalKeyboardKey.shiftRight
-    }).isNotEmpty;
+  void _handleDigit(LogicalKeyboardKey key) {
+    final digit = _kDigits.indexOf(key) + 1;
+    game.startPuzzle(digit);
   }
 }

@@ -68,7 +68,7 @@ class MosaicTile {
   }
 
   static double get _d1 {
-    const d1 = 0.7;
+    const d1 = 0.6;
     return (0.95 - d1 / 2 + d1 * _random.nextDouble());
   }
 }

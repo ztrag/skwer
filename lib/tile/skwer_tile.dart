@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
+import 'package:skwer/game/game_props.dart';
 import 'package:skwer/mosaic/color_wave.dart';
 import 'package:skwer/mosaic/grid_mosaic.dart';
 import 'package:skwer/mosaic/mosaic.dart';
@@ -15,9 +16,11 @@ final Random _random = Random();
 
 class SkwerTile extends StatefulWidget {
   final SkwerTileProps props;
+  final ValueNotifier<GameProps> gameProps;
 
   SkwerTile({
     required this.props,
+    required this.gameProps,
   }) : super(key: ValueKey(props));
 
   @override
@@ -40,7 +43,7 @@ class _SkwerTileState extends State<SkwerTile>
       vsync: this,
     );
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
-    _paint = _SkwerTilePaint(widget.props, _animation);
+    _paint = _SkwerTilePaint(widget.props, widget.gameProps, _animation);
     _previousState = widget.props.state.value;
 
     widget.props.state.addListener(_onStateChanged);
@@ -55,7 +58,9 @@ class _SkwerTileState extends State<SkwerTile>
 
   void _onStateChanged() {
     final currentState = widget.props.state.value;
-    _paint.animationStart = _previousState;
+    if (_animationController.value == 1) {
+      _paint.animationStart = _previousState;
+    }
     _paint.animationEnd = currentState;
     _animationController.forward(from: 0);
     _previousState = currentState;
@@ -75,12 +80,14 @@ class _SkwerTilePaint extends CustomPainter {
   late final TransitionMosaic transition = TransitionMosaic(grid, rosetta);
 
   final SkwerTileProps props;
+  final ValueNotifier<GameProps> gameProps;
+
   final Animation<double> animation;
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
 
-  _SkwerTilePaint(this.props, this.animation)
+  _SkwerTilePaint(this.props, this.gameProps, this.animation)
       : super(repaint: Listenable.merge([props.state, animation]));
 
   @override
@@ -98,9 +105,7 @@ class _SkwerTilePaint extends CustomPainter {
     _currentGroup.paint(
       canvas,
       size,
-      props.state.value.skwer > 10 // FIXME game skwer
-          ? (props.isActive ? 0.7 : 0.3)
-          : (props.isActive ? 1 : 0.9),
+      _getBrightness(),
       ColorWave(
         start: animationStart.skwer == animationEnd.skwer
             ? (animationEnd.isLastPressed
@@ -118,6 +123,12 @@ class _SkwerTilePaint extends CustomPainter {
     );
   }
 
+  double _getBrightness() {
+    final start = animationStart.getBrightness(gameProps.value);
+    final end = animationEnd.getBrightness(gameProps.value);
+    return start * (1 - animation.value) + end * animation.value;
+  }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     if (oldDelegate is! _SkwerTilePaint) {
@@ -128,14 +139,16 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   Mosaic get _currentGroup {
-    if (animationStart.skwer >= -2 && animationEnd.skwer <= -3) {
+    final startDelta = animationStart.skwer - gameProps.value.skwer;
+    final endDelta = animationEnd.skwer - gameProps.value.skwer;
+    if (startDelta >= -2 && endDelta <= -3) {
       transition.dir = 1;
       return transition;
-    } else if (animationStart.skwer <= -3 && animationEnd.skwer >= -2) {
+    } else if (startDelta <= -3 && endDelta >= -2) {
       transition.dir = -1;
       return transition;
     }
-    return props.state.value.skwer < -2 ? rosetta : grid;
+    return endDelta < -2 ? rosetta : grid;
   }
 
   static Paint _buildFocusPaint() {

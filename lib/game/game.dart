@@ -9,7 +9,6 @@ import 'package:skwer/tile/skwer_tile_state.dart';
 class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
   final List<GameRotation> rotations = [];
-  final ValueNotifier<Puzzle?> puzzle = ValueNotifier(null);
 
   GameProps get props => gameProps.value;
 
@@ -27,12 +26,14 @@ class Game {
   void reset({
     SkwerTileIndex? trigger,
     bool recreate = false,
+    bool reSkwer = false,
   }) {
-    if (trigger != null) {
+    if (reSkwer) {
       gameProps.value = GameProps.reSkwer(
         props: props,
-        skwer: props.skwerTiles[trigger]!.state.value.skwer,
+        skwer: props.skwerTiles[trigger]!.state.value.skwer % 3,
       );
+      props.puzzle.value = null;
     }
 
     final skwer = props.skwer % 3;
@@ -44,6 +45,8 @@ class Game {
           state.value,
           skwer,
           trigger: trigger,
+          isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
+          hasPuzzle: props.puzzle.value != null,
         );
       }
     }
@@ -57,13 +60,14 @@ class Game {
   }
 
   void startPuzzle(int size) {
-    puzzle.value = Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
+    props.puzzle.value =
+        Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
     resetPuzzle();
   }
 
   void resetPuzzle() {
     reset();
-    for (final rotation in puzzle.value!.rotations) {
+    for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
     }
   }

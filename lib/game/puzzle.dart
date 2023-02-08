@@ -7,10 +7,10 @@ import 'package:skwer/tile/skwer_tile_index.dart';
 class Puzzle {
   static final Random _random = Random();
 
+  final GameZone zone;
   final List<GameRotation> rotations;
 
-  Puzzle(GameZone zone, int size)
-      : rotations = _calcRandomRotations(size, zone);
+  Puzzle(this.zone, int size) : rotations = _calcRandomRotations(size, zone);
 
   static List<GameRotation> _calcRandomRotations(int size, GameZone zone) =>
       List.generate(

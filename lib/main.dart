@@ -4,7 +4,11 @@ import 'package:skwer/game/game_widget.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: GameWidget(),
+    home: SizedBox(
+      width: kMaxSize.width,
+      height: kMaxSize.height,
+      child: GameWidget(),
+    ),
     debugShowCheckedModeBanner: false,
   ));
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);

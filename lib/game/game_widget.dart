@@ -22,6 +22,8 @@ const _kDigits = [
   LogicalKeyboardKey.digit0,
 ];
 
+const Size kMaxSize = Size(1200, 900);
+
 class GameWidget extends StatelessWidget {
   final Game game = Game();
 
@@ -36,7 +38,11 @@ class GameWidget extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
 
-    final size = MediaQuery.of(context).size;
+    var mediaSize = MediaQuery.of(context).size;
+    final size = Size(
+      min(kMaxSize.width, mediaSize.width),
+      min(kMaxSize.height, mediaSize.height),
+    );
     final isSmall = size.width < 500 || size.height < 500;
     final tileSize = min(
       min(size.height, size.width) / (isSmall ? 6 : 8),

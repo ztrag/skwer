@@ -112,8 +112,11 @@ class _SkwerTilePaint extends CustomPainter {
         direction: _getWaveDirectionFromTrigger(),
         animationValue: animation.value *
             (animationEnd.isFailed(gameProps.value) ? 0.75 : 1),
-        rotate: animationEnd.skwer > animationStart.skwer ||
-            _currentGroup == transition,
+        rotate: gameProps.value.puzzle.value == null ||
+            animationEnd.skwer > animationStart.skwer ||
+            _currentGroup == transition ||
+            animationEnd.hasFocus ||
+            animationStart.hasFocus,
       ),
     );
   }
@@ -122,8 +125,7 @@ class _SkwerTilePaint extends CustomPainter {
     if (gameProps.value.puzzle.value != null) {
       return false;
     }
-    return
-        animationStart.skwer == animationEnd.skwer &&
+    return animationStart.skwer == animationEnd.skwer &&
         !animationEnd.isLastPressed;
   }
 

@@ -9,12 +9,21 @@ class GameZone {
   GameZone._(this.start, this.size);
 
   factory GameZone(int numTilesX, int numTilesY) {
-    final paddingX = numTilesX <= 7 ? 1 : 2;
-    final paddingY = numTilesY <= 7 ? 1 : 2;
+    final paddingX = _paddingForTiles(numTilesX);
+    final paddingY = _paddingForTiles(numTilesY);
     return GameZone._(
       Point(paddingX, paddingY),
       Point(numTilesX - paddingX * 2, numTilesY - paddingY * 2),
     );
+  }
+
+  static int _paddingForTiles(int numTiles) {
+    if (numTiles > 10) {
+      return 3;
+    } else if (numTiles > 7) {
+      return 2;
+    }
+    return 1;
   }
 
   bool containsTile(SkwerTileIndex tile) {

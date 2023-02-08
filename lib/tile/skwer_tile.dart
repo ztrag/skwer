@@ -39,7 +39,7 @@ class _SkwerTileState extends State<SkwerTile>
     super.initState();
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
@@ -58,7 +58,7 @@ class _SkwerTileState extends State<SkwerTile>
 
   void _onStateChanged() {
     final currentState = widget.props.state.value;
-    if (_animationController.value == 1) {
+    if (_animationController.value > 0.5) {
       _paint.animationStart = _previousState;
     }
     _paint.animationEnd = currentState;
@@ -107,20 +107,41 @@ class _SkwerTilePaint extends CustomPainter {
       size,
       _getBrightness(),
       ColorWave(
-        start: animationStart.skwer == animationEnd.skwer
-            ? (animationEnd.isLastPressed
-                ? skWhite
-                : Color.lerp(
-                    skTileColors[(animationStart.skwer + 1) % 3],
-                    skTileColors[(animationStart.skwer + 2) % 3],
-                    0.25 + 0.5 * _random.nextDouble(),
-                  )!)
-            : skTileColors[animationStart.skwer % 3],
+        start: _getStartColor(),
         end: skTileColors[animationEnd.skwer % 3],
         direction: _getWaveDirectionFromTrigger(),
         animationValue: animation.value,
       ),
     );
+  }
+
+  bool get _shouldShowRainbow {
+    return animationStart.isActive == animationEnd.isActive &&
+        !animationEnd.isSolved &&
+        !animationStart.isSolved &&
+        animationStart.skwer == animationEnd.skwer &&
+        animationStart.hasPuzzle == animationEnd.hasPuzzle &&
+        !animationEnd.isLastPressed;
+  }
+
+  Color _getStartColor() {
+    if (_shouldShowRainbow) {
+      return _getRainbowColor();
+    }
+
+    if (animationEnd.isLastPressed) {
+      return skWhite;
+    }
+
+    return skTileColors[animationStart.skwer % 3];
+  }
+
+  Color _getRainbowColor() {
+    return Color.lerp(
+      skTileColors[(animationStart.skwer + 1) % 3],
+      skTileColors[(animationStart.skwer + 2) % 3],
+      0.25 + 0.5 * _random.nextDouble(),
+    )!;
   }
 
   double _getBrightness() {

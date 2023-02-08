@@ -66,7 +66,7 @@ class Game {
   }
 
   void resetPuzzle() {
-    reset();
+    reset(trigger: props.puzzle.value!.rotations.last.index);
     for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
     }
@@ -102,6 +102,8 @@ class Game {
     } else {
       _rotateBlue(rotation);
     }
+
+    _checkEndGame(rotation.index);
   }
 
   void _rotateRed(GameRotation rotation) {
@@ -165,5 +167,46 @@ class Game {
     state.value =
         SkwerTileState.rotate(state.value, rotation.index, rotation.delta);
     return 1;
+  }
+
+  void _checkEndGame(SkwerTileIndex trigger) {
+    if (props.puzzle.value == null || !_isClearState()) {
+      return;
+    }
+
+    final puzzleSize = props.puzzle.value!.rotations.length;
+    _showPuzzleWin(trigger);
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      startPuzzle(puzzleSize);
+    });
+  }
+
+  void _showPuzzleWin(SkwerTileIndex trigger) {
+    for (var x = 0; x < props.numTilesX; x++) {
+      for (var y = 0; y < props.numTilesY; y++) {
+        final index = SkwerTileIndex(x, y);
+        final state = props.skwerTiles[index]!.state;
+        state.value = SkwerTileState.reset(
+          state.value,
+          props.skwer,
+          trigger: trigger,
+          isSolved: true,
+          hasPuzzle: true,
+        );
+      }
+    }
+  }
+
+  bool _isClearState() {
+    for (var x = 0; x < props.numTilesX; x++) {
+      for (var y = 0; y < props.numTilesY; y++) {
+        final index = SkwerTileIndex(x, y);
+        final state = props.skwerTiles[index]!.state;
+        if (state.value.skwer % 3 != props.skwer) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }

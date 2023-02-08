@@ -7,6 +7,7 @@ class SkwerTileState {
   final bool isLastPressed;
   final bool isActive;
   final bool hasPuzzle;
+  final bool isSolved;
   final SkwerTileIndex? trigger;
 
   SkwerTileState._({
@@ -15,6 +16,7 @@ class SkwerTileState {
     this.isLastPressed = false,
     this.isActive = true,
     this.hasPuzzle = false,
+    this.isSolved = false,
     this.trigger,
   });
 
@@ -24,11 +26,13 @@ class SkwerTileState {
     SkwerTileState state,
     int skwer, {
     SkwerTileIndex? trigger,
-    bool isActive = true,
+    bool? isActive,
+    bool isSolved = false,
     bool hasPuzzle = false,
   }) {
     if (state.skwer == skwer &&
         state.isActive == isActive &&
+        state.isSolved == isSolved &&
         state.hasPuzzle == hasPuzzle) {
       return state;
     }
@@ -36,7 +40,8 @@ class SkwerTileState {
       skwer: skwer,
       trigger: trigger,
       hasFocus: state.hasFocus,
-      isActive: isActive,
+      isActive: isActive ?? state.isActive,
+      isSolved: isSolved,
       hasPuzzle: hasPuzzle,
     );
   }
@@ -82,6 +87,11 @@ class SkwerTileState {
     if (!hasPuzzle) {
       return 1;
     }
+
+    if (isSolved) {
+      return isActive ? 0.9 : 0.5;
+    }
+
     final skwerDelta = skwer - gameProps.skwer;
     final hasPuzzleHighlight = skwerDelta < 0;
     final isFailed = skwerDelta > 0 && skwerDelta % 3 != 0;

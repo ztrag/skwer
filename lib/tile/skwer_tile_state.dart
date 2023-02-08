@@ -97,6 +97,10 @@ class SkwerTileState {
       return 1;
     }
 
+    if (hasFocus) {
+      return 1.2;
+    }
+
     if (isSolved) {
       return isActive ? 0.9 : 0.5;
     }

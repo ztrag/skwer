@@ -177,7 +177,9 @@ class Game {
     final puzzleSize = props.puzzle.value!.rotations.length;
     _showPuzzleWin(trigger);
     Future.delayed(const Duration(milliseconds: 1200), () {
-      startPuzzle(puzzleSize);
+      if (_isClearState()) {
+        startPuzzle(puzzleSize);
+      }
     });
   }
 

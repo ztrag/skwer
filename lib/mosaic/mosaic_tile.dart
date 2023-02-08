@@ -30,7 +30,7 @@ class MosaicTile {
   ) {
     final waveAnimation = _getPositionAnimation(wave);
     _path.reset();
-    final p = getAnimatedPoints(waveAnimation);
+    final p = wave.rotate ? getAnimatedPoints(waveAnimation) : points;
     _path.moveTo(p.first.x * size.width, p.first.y * size.height);
     for (var i = 1; i < p.length; i++) {
       _path.lineTo(p[i].x * size.width, p[i].y * size.height);

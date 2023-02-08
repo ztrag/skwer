@@ -58,7 +58,7 @@ class _SkwerTileState extends State<SkwerTile>
 
   void _onStateChanged() {
     final currentState = widget.props.state.value;
-    if (_animationController.value > 0.5) {
+    if (_animationController.value > 0.1) {
       _paint.animationStart = _previousState;
     }
     _paint.animationEnd = currentState;
@@ -112,16 +112,18 @@ class _SkwerTilePaint extends CustomPainter {
         direction: _getWaveDirectionFromTrigger(),
         animationValue: animation.value *
             (animationEnd.isFailed(gameProps.value) ? 0.75 : 1),
+        rotate: animationEnd.skwer > animationStart.skwer ||
+            _currentGroup == transition,
       ),
     );
   }
 
   bool get _shouldShowRainbow {
-    return animationStart.isActive == animationEnd.isActive &&
-        !animationEnd.isSolved &&
-        !animationStart.isSolved &&
+    if (gameProps.value.puzzle.value != null) {
+      return false;
+    }
+    return
         animationStart.skwer == animationEnd.skwer &&
-        animationStart.hasPuzzle == animationEnd.hasPuzzle &&
         !animationEnd.isLastPressed;
   }
 

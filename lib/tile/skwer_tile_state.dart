@@ -83,6 +83,15 @@ class SkwerTileState {
     );
   }
 
+  bool isFailed(GameProps gameProps) {
+    if (!hasPuzzle) {
+      return false;
+    }
+
+    final skwerDelta = skwer - gameProps.skwer;
+    return skwerDelta > 0 && skwerDelta % 3 != 0;
+  }
+
   double getBrightness(GameProps gameProps) {
     if (!hasPuzzle) {
       return 1;
@@ -94,11 +103,11 @@ class SkwerTileState {
 
     final skwerDelta = skwer - gameProps.skwer;
     final hasPuzzleHighlight = skwerDelta < 0;
-    final isFailed = skwerDelta > 0 && skwerDelta % 3 != 0;
+    final fail = isFailed(gameProps);
     if (isActive) {
-      return hasPuzzleHighlight ? 1 : (isFailed ? 0.5 : 0.7);
+      return hasPuzzleHighlight ? 1 : (fail ? 0.9 : 0.7);
     } else {
-      return hasPuzzleHighlight ? 0.9 : (isFailed ? 0.1 : 0.3);
+      return hasPuzzleHighlight ? 0.9 : (fail ? 0.7 : 0.3);
     }
   }
 }

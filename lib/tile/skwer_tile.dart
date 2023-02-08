@@ -110,7 +110,8 @@ class _SkwerTilePaint extends CustomPainter {
         start: _getStartColor(),
         end: skTileColors[animationEnd.skwer % 3],
         direction: _getWaveDirectionFromTrigger(),
-        animationValue: animation.value,
+        animationValue: animation.value *
+            (animationEnd.isFailed(gameProps.value) ? 0.75 : 1),
       ),
     );
   }

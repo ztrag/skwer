@@ -176,7 +176,7 @@ class Game {
 
     final puzzleSize = props.puzzle.value!.rotations.length;
     _showPuzzleWin(trigger);
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 1200), () {
       startPuzzle(puzzleSize);
     });
   }

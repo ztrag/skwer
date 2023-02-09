@@ -56,7 +56,7 @@ class SkwerTileState {
   ) {
     return SkwerTileState._(
       skwer: state.skwer + skwerDelta,
-      trigger: trigger,
+      trigger: skwerDelta > 0 ? trigger : null,
       hasFocus: state.hasFocus,
       isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,

@@ -89,13 +89,16 @@ class GameWidget extends StatelessWidget {
         padding: padding,
         child: MouseRegion(
           onEnter: (event) {
-            tileProps.focusNode.requestFocus();
-            _delayedUnfocus = null;
+            if (tileProps.state.value.isActive) {
+              tileProps.focusNode.requestFocus();
+              _delayedUnfocus = null;
+            }
           },
           onExit: (event) {
-            if (tileProps.focusNode.hasFocus) {
-              _delayedUnfocus = Future.delayed(const Duration(seconds: 1), () {
-                if (tileProps.focusNode.hasFocus && _delayedUnfocus != null) {
+            if (tileProps.state.value.hasFocus) {
+              _delayedUnfocus =
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                if (tileProps.state.value.hasFocus && _delayedUnfocus != null) {
                   tileProps.focusNode.unfocus();
                 }
               });

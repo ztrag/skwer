@@ -47,7 +47,7 @@ class Game {
         state.value = SkwerTileState.reset(
           state.value,
           skwer,
-          trigger: trigger,
+          trigger: reSkwer ? trigger : null,
           isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
           hasPuzzle: props.puzzle.value != null,
         );

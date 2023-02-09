@@ -64,12 +64,17 @@ class _SkwerTileState extends State<SkwerTile>
 
   void _onStateChanged() {
     final currentState = widget.props.state.value;
-    if (_animationController.value > 0.1) {
+    final reAnimate = _previousState.skwer < currentState.skwer ||
+        _animationController.value > 0.9 ||
+        !_animationController.isAnimating;
+    if (reAnimate) {
       // FIXME when transitioning, keep transition tile but change colors.
       _paint.animationStart = _previousState;
     }
     _paint.animationEnd = currentState;
-    _animationController.forward(from: 0);
+    if (reAnimate) {
+      _animationController.forward(from: 0);
+    }
     _previousState = currentState;
     if (currentState.hasFocus) {
       _focusTime.value = DateTime.now();
@@ -119,6 +124,9 @@ class _SkwerTilePaint extends CustomPainter {
       );
     }
 
+    final isFailed = animationEnd.isFailed(gameProps.value);
+    const failedAnimationValue = 0.6;
+
     _currentGroup.paint(
       canvas,
       size,
@@ -127,13 +135,18 @@ class _SkwerTilePaint extends CustomPainter {
         start: _getStartColor(),
         end: skTileColors[animationEnd.skwer % 3],
         direction: _getWaveDirectionFromTrigger(),
-        animationValue: animation.value *
-            (animationEnd.isFailed(gameProps.value) ? 0.75 : 1),
+        animationValue: (isFailed &&
+                animationEnd.skwer == animationStart.skwer &&
+                !animationStart.hasFocus &&
+                !animationEnd.hasFocus)
+            ? failedAnimationValue
+            : animation.value * (isFailed ? failedAnimationValue : 1),
         rotate: gameProps.value.puzzle.value == null ||
             animationEnd.skwer > animationStart.skwer ||
             _currentGroup == transition ||
             animationEnd.hasFocus ||
-            animationStart.hasFocus,
+            animationStart.hasFocus ||
+            isFailed,
       ),
     );
   }
@@ -174,7 +187,7 @@ class _SkwerTilePaint extends CustomPainter {
   double _getBrightness() {
     if (animationEnd.isHighlighted &&
         animationEnd.skwer != gameProps.value.skwer) {
-      return 1.1;
+      return 1.05;
     }
     final start = animationStart.getBrightness(gameProps.value);
     final end = animationEnd.getBrightness(gameProps.value);

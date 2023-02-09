@@ -39,8 +39,8 @@ class MosaicRosetta extends Mosaic {
   }
 
   List<MosaicTile> _buildArc(int level) {
-    final r1 = _radiusAtLevel(level) + 0.01;
-    final r2 = _radiusAtLevel(level + 1) - 0.01;
+    final r1 = _radiusAtLevel(level) + 0.0075;
+    final r2 = _radiusAtLevel(level + 1) - 0.0075;
     final numStones = _stonesAtLevel(level);
     final step = 2 * pi / numStones;
     var theta = _random.nextDouble() * 2 * pi;
@@ -59,7 +59,7 @@ class MosaicRosetta extends Mosaic {
 
   MosaicTile _buildStone(
       double r1, double r2, double theta1, double theta2, int level) {
-    final thetaD2 = 0.04 * _random.nextDouble() / level;
+    final thetaD2 = 0.07 * _random.nextDouble() / level;
     return MosaicTile([
       _pointAt(r1, theta1),
       _pointAt(r2, theta1 + thetaD2),
@@ -83,7 +83,7 @@ class MosaicRosetta extends Mosaic {
 
   int _stonesAtLevel(int level) {
     if (level == 1) {
-      return 7;
+      return 6;
     } else if (level == 2) {
       return 10;
     } else if (level == 3) {
@@ -118,7 +118,7 @@ class MosaicRosetta extends Mosaic {
   }
 
   static double get _d2 {
-    const d2 = 0.05;
+    const d2 = 0.085;
     return (1 - d2 / 2 + d2 * _random.nextDouble());
   }
 }

@@ -8,11 +8,4 @@ class SkwerTileProps {
   final SkwerTileIndex index;
 
   SkwerTileProps({required this.index});
-
-  bool get isActive {
-    return true;
-    // FIXME based on game
-    // final index = key.value;
-    // return index.x > 3 && index.x <= 8 && index.y > 1 && index.y <= 5;
-  }
 }

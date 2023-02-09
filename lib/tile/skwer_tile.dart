@@ -33,6 +33,7 @@ class _SkwerTileState extends State<SkwerTile>
   late final Animation<double> _animation;
   late final _SkwerTilePaint _paint;
   late SkwerTileState _previousState;
+  final ValueNotifier<DateTime?> _focusTime = ValueNotifier(null);
 
   @override
   void initState() {
@@ -43,7 +44,12 @@ class _SkwerTileState extends State<SkwerTile>
       vsync: this,
     );
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
-    _paint = _SkwerTilePaint(widget.props, widget.gameProps, _animation);
+    _paint = _SkwerTilePaint(
+      widget.props,
+      widget.gameProps,
+      _animation,
+      _focusTime,
+    );
     _previousState = widget.props.state.value;
 
     widget.props.state.addListener(_onStateChanged);
@@ -59,11 +65,15 @@ class _SkwerTileState extends State<SkwerTile>
   void _onStateChanged() {
     final currentState = widget.props.state.value;
     if (_animationController.value > 0.1) {
+      // FIXME when transitioning, keep transition tile but change colors.
       _paint.animationStart = _previousState;
     }
     _paint.animationEnd = currentState;
     _animationController.forward(from: 0);
     _previousState = currentState;
+    if (currentState.hasFocus) {
+      _focusTime.value = DateTime.now();
+    }
   }
 
   @override
@@ -84,18 +94,25 @@ class _SkwerTilePaint extends CustomPainter {
 
   final Animation<double> animation;
 
+  final ValueNotifier<DateTime?> _focusTime;
+
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
 
-  _SkwerTilePaint(this.props, this.gameProps, this.animation)
+  _SkwerTilePaint(this.props, this.gameProps, this.animation, this._focusTime)
       : super(repaint: Listenable.merge([props.state, animation]));
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (animationEnd.hasFocus) {
+    if (animationEnd.hasFocus || animationEnd.isHighlighted) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth = size.width * 0.13;
-      _focusPaint.color = skTileColors[(animationStart.skwer + 1) % 3];
+      _focusPaint.color = Color.lerp(
+          skTileColors[(animationStart.skwer + 1) % 3],
+          skBlack,
+          animationEnd.hasFocus
+              ? 0.0
+              : (animationStart.skwer == 1 ? 0.3 : 0.5))!;
       canvas.drawRect(
         Rect.fromLTRB(x, x, size.width - x, size.height - x),
         _focusPaint,
@@ -125,8 +142,13 @@ class _SkwerTilePaint extends CustomPainter {
     if (gameProps.value.puzzle.value != null) {
       return false;
     }
-    return animationStart.skwer == animationEnd.skwer &&
-        !animationEnd.isLastPressed;
+
+    final focusTime = _focusTime.value;
+    if (focusTime == null) {
+      return false;
+    }
+    return DateTime.now().difference(focusTime) <
+        const Duration(milliseconds: 400);
   }
 
   Color _getStartColor() {
@@ -150,6 +172,10 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double _getBrightness() {
+    if (animationEnd.isHighlighted &&
+        animationEnd.skwer != gameProps.value.skwer) {
+      return 1.1;
+    }
     final start = animationStart.getBrightness(gameProps.value);
     final end = animationEnd.getBrightness(gameProps.value);
     return start * (1 - animation.value) + end * animation.value;

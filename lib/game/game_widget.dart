@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,23 +10,24 @@ import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 
-const _kDigits = [
-  LogicalKeyboardKey.digit1,
-  LogicalKeyboardKey.digit2,
-  LogicalKeyboardKey.digit3,
-  LogicalKeyboardKey.digit4,
-  LogicalKeyboardKey.digit5,
-  LogicalKeyboardKey.digit6,
-  LogicalKeyboardKey.digit7,
-  LogicalKeyboardKey.digit8,
-  LogicalKeyboardKey.digit9,
-  LogicalKeyboardKey.digit0,
+final _kDigits = [
+  LogicalKeyboardKey.digit1.keyId,
+  LogicalKeyboardKey.digit2.keyId,
+  LogicalKeyboardKey.digit3.keyId,
+  LogicalKeyboardKey.digit4.keyId,
+  LogicalKeyboardKey.digit5.keyId,
+  LogicalKeyboardKey.digit6.keyId,
+  LogicalKeyboardKey.digit7.keyId,
+  LogicalKeyboardKey.digit8.keyId,
+  LogicalKeyboardKey.digit9.keyId,
+  LogicalKeyboardKey.digit0.keyId,
 ];
 
 const Size kMaxSize = Size(1200, 900);
 
 class GameWidget extends StatelessWidget {
   final Game game = Game();
+  Future? _delayedUnfocus;
 
   GameWidget({Key? key}) : super(key: key);
 
@@ -33,6 +35,7 @@ class GameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    window.onKeyData = _onKeyData;
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -45,7 +48,7 @@ class GameWidget extends StatelessWidget {
     );
     final isSmall = size.width < 500 || size.height < 500;
     final tileSize = min(
-      min(size.height, size.width) / (isSmall ? 6 : 8),
+      min(size.height, size.width) / (isSmall ? 6 : 9),
       max(size.height, size.width) / (isSmall ? 7 : 9),
     );
 
@@ -85,7 +88,19 @@ class GameWidget extends StatelessWidget {
       child: Padding(
         padding: padding,
         child: MouseRegion(
-          onHover: (event) => tileProps.focusNode.requestFocus(),
+          onEnter: (event) {
+            tileProps.focusNode.requestFocus();
+            _delayedUnfocus = null;
+          },
+          onExit: (event) {
+            if (tileProps.focusNode.hasFocus) {
+              _delayedUnfocus = Future.delayed(const Duration(seconds: 1), () {
+                if (tileProps.focusNode.hasFocus && _delayedUnfocus != null) {
+                  tileProps.focusNode.unfocus();
+                }
+              });
+            }
+          },
           child: ValueListenableBuilder<Puzzle?>(
             valueListenable: props.puzzle,
             builder: (_, __, ___) => ExcludeFocus(
@@ -105,12 +120,6 @@ class GameWidget extends StatelessWidget {
                     } else {
                       game.rotate(GameRotation(index: tileIndex, delta: 1));
                     }
-                    return KeyEventResult.handled;
-                  } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
-                    game.resetPuzzle();
-                    return KeyEventResult.handled;
-                  } else if (_kDigits.contains(event.logicalKey)) {
-                    _handleDigit(event.logicalKey);
                     return KeyEventResult.handled;
                   }
                   return KeyEventResult.ignored;
@@ -149,7 +158,22 @@ class GameWidget extends StatelessWidget {
     }
   }
 
-  void _handleDigit(LogicalKeyboardKey key) {
+  bool _onKeyData(KeyData keyData) {
+    if (keyData.type == KeyEventType.down) {
+      if (keyData.logical == LogicalKeyboardKey.keyR.keyId) {
+        game.resetPuzzle();
+        return true;
+      } else if (keyData.logical == LogicalKeyboardKey.escape.keyId) {
+        return game.clearFocus();
+      } else if (_kDigits.contains(keyData.logical)) {
+        _handleDigit(keyData.logical);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _handleDigit(int key) {
     final digit = _kDigits.indexOf(key) + 1;
     game.startPuzzle(digit);
   }

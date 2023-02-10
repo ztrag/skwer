@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:skwer/mosaic/mosaic.dart';
@@ -25,15 +26,15 @@ class MosaicRosetta extends Mosaic {
 
   MosaicTile _buildCenterStone() {
     final r = _radiusAtLevel(1) - 0.03;
-    const step = pi / 3.5;
+    final step = 2 * pi / _stonesAtLevel(1);
     var theta = _random.nextDouble() * 2 * pi;
     var left = 2 * pi;
-    final points = <Point<double>>[_pointAt(r, theta)];
+    final points = <Point<double>>[_pointAt(r, theta, 1, 1)];
     while (left > step) {
       final next = step * (1 + (-0.5 + _random.nextDouble()));
       left -= next;
       theta += next;
-      points.add(_pointAt(r, theta));
+      points.add(_pointAt(r, theta, 1, 1));
     }
     return MosaicTile(points);
   }
@@ -43,10 +44,7 @@ class MosaicRosetta extends Mosaic {
     final r2 = _radiusAtLevel(level + 1) - 0.0075;
     final numStones = _stonesAtLevel(level);
     final step = 2 * pi / numStones;
-    var theta = _random.nextDouble() * 2 * pi;
-    if (level == 4) {
-      theta = pi / 4;
-    }
+    var theta = level == 1 ? _random.nextDouble() * 2 * pi : pi/4;
     final stones = <MosaicTile>[];
     final thetaD1 = pi * 0.02 / level;
     for (var i = 0; i < numStones; i++) {
@@ -61,10 +59,10 @@ class MosaicRosetta extends Mosaic {
       double r1, double r2, double theta1, double theta2, int level) {
     final thetaD2 = 0.07 * _random.nextDouble() / level;
     return MosaicTile([
-      _pointAt(r1, theta1),
-      _pointAt(r2, theta1 + thetaD2),
-      _pointAt(r2, theta2 - thetaD2),
-      _pointAt(r1, theta2),
+      _pointAt(r1, theta1, _d2(level), _d2(level)),
+      _pointAt(r2, theta1 + thetaD2, _d2(level), _d2(level)),
+      _pointAt(r2, theta2 - thetaD2, _d2(level), _d2(level)),
+      _pointAt(r1, theta2, _d2(level), _d2(level)),
     ]);
   }
 
@@ -74,25 +72,26 @@ class MosaicRosetta extends Mosaic {
     } else if (level == 2) {
       return 0.20;
     } else if (level == 3) {
-      return 0.34;
+      return 0.33;
     } else if (level == 4) {
-      return 0.48;
+      return 0.46;
     }
     return 0.75;
   }
 
   int _stonesAtLevel(int level) {
+    final isMobile = Platform.isIOS || Platform.isAndroid;
     if (level == 1) {
-      return 6;
+      return isMobile ? 5 : 6;
     } else if (level == 2) {
-      return 10;
+      return isMobile ? 8 : 10;
     } else if (level == 3) {
-      return 16;
+      return isMobile ? 12 : 16;
     }
-    return 20;
+    return isMobile ? 16 : 20;
   }
 
-  Point<double> _pointAt(double r, double theta) {
+  Point<double> _pointAt(double r, double theta, double d1, double d2) {
     final pointX = r * cos(theta);
     final pointY = r * sin(theta);
     var r0 = 1.0;
@@ -111,14 +110,14 @@ class MosaicRosetta extends Mosaic {
 
     final r1 = min(r0, r);
     final point = Point(
-      0.5 + r1 / r * _d2 * pointX,
-      0.5 + r1 / r * _d2 * pointY,
+      0.5 + r1 / r * d1 * pointX,
+      0.5 + r1 / r * d2 * pointY,
     );
     return point;
   }
 
-  static double get _d2 {
-    const d2 = 0.085;
+  static double _d2(int level) {
+    final d2 = 0.15 / level;
     return (1 - d2 / 2 + d2 * _random.nextDouble());
   }
 }

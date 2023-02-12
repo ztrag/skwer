@@ -7,9 +7,12 @@ void main() {
     home: SizedBox(
       width: kMaxSize.width,
       height: kMaxSize.height,
-      child: GameWidget(),
+      child: const SafeArea(child: GameWidget()),
     ),
     debugShowCheckedModeBanner: false,
   ));
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.black, // navigation bar color
+    statusBarColor: Colors.black, // status bar color
+  ));
 }

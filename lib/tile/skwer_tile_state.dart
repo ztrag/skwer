@@ -68,6 +68,9 @@ class SkwerTileState {
     SkwerTileState state,
     bool hasFocus,
   ) {
+    if (hasFocus == state.hasFocus) {
+      return state;
+    }
     return SkwerTileState._(
       skwer: state.skwer,
       hasFocus: hasFocus,
@@ -130,7 +133,7 @@ class SkwerTileState {
     if (isActive) {
       return hasPuzzleHighlight ? 1 : (fail ? 0.9 : 0.7);
     } else {
-      return hasPuzzleHighlight ? 0.8 : (fail ? 0.7 : 0.2);
+      return hasPuzzleHighlight ? 0.5 : (fail ? 0.7 : 0.2);
     }
   }
 }

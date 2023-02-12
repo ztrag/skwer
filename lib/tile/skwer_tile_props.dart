@@ -3,6 +3,7 @@ import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_state.dart';
 
 class SkwerTileProps {
+  final GlobalKey key = GlobalKey();
   final FocusNode focusNode = FocusNode();
   final ValueNotifier<SkwerTileState> state = ValueNotifier(SkwerTileState());
   final SkwerTileIndex index;

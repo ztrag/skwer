@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
+import 'package:skwer/platform.dart';
 
 class MosaicRosetta extends Mosaic {
   static final Random _random = Random();
@@ -44,7 +44,7 @@ class MosaicRosetta extends Mosaic {
     final r2 = _radiusAtLevel(level + 1) - 0.0075;
     final numStones = _stonesAtLevel(level);
     final step = 2 * pi / numStones;
-    var theta = level == 1 ? _random.nextDouble() * 2 * pi : pi/4;
+    var theta = level == 1 ? _random.nextDouble() * 2 * pi : pi / 4;
     final stones = <MosaicTile>[];
     final thetaD1 = pi * 0.02 / level;
     for (var i = 0; i < numStones; i++) {
@@ -80,7 +80,7 @@ class MosaicRosetta extends Mosaic {
   }
 
   int _stonesAtLevel(int level) {
-    final isMobile = Platform.isIOS || Platform.isAndroid;
+    final isMobile = Platform.isMobile;
     if (level == 1) {
       return isMobile ? 5 : 6;
     } else if (level == 2) {

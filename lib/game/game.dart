@@ -3,6 +3,7 @@ import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
 import 'package:skwer/game/puzzle.dart';
+import 'package:skwer/platform.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_state.dart';
@@ -27,27 +28,23 @@ class Game {
   }
 
   void reset({
-    SkwerTileIndex? trigger,
     bool recreate = false,
-    bool reSkwer = false,
+    int? skwer,
   }) {
-    if (reSkwer) {
+    if (skwer != null) {
       gameProps.value = GameProps.reSkwer(
         props: props,
-        skwer: props.skwerTiles[trigger]!.state.value.skwer % 3,
+        skwer: skwer,
       );
-      props.puzzle.value = null;
     }
 
-    final skwer = props.skwer % 3;
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
         final state = props.skwerTiles[index]!.state;
         state.value = SkwerTileState.reset(
           state.value,
-          skwer,
-          trigger: reSkwer ? trigger : null,
+          props.skwer,
           isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
           hasPuzzle: props.puzzle.value != null,
         );
@@ -73,7 +70,7 @@ class Game {
       return;
     }
 
-    reset(trigger: props.puzzle.value!.rotations.last.index);
+    reset(skwer: props.skwer);
     for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
     }
@@ -103,6 +100,9 @@ class Game {
   bool clearFocus() {
     for (final tile in props.skwerTiles.values) {
       if (tile.state.value.hasFocus) {
+        if (Platform.isMobile) {
+          tile.focusNode.unfocus();
+        }
         focus(tile.index, false);
         return true;
       }

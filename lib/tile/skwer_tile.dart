@@ -9,6 +9,7 @@ import 'package:skwer/mosaic/grid_mosaic.dart';
 import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/rosetta_mosaic.dart';
 import 'package:skwer/mosaic/transition_mosaic.dart';
+import 'package:skwer/platform.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_state.dart';
 
@@ -21,7 +22,7 @@ class SkwerTile extends StatefulWidget {
   SkwerTile({
     required this.props,
     required this.gameProps,
-  }) : super(key: ValueKey(props));
+  }) : super(key: ValueKey(props.index));
 
   @override
   State<SkwerTile> createState() => _SkwerTileState();
@@ -125,6 +126,7 @@ class _SkwerTilePaint extends CustomPainter {
     }
 
     final isFailed = animationEnd.isFailed(gameProps.value);
+    final isPuzzle = gameProps.value.puzzle.value != null;
     const failedAnimationValue = 0.6;
 
     _currentGroup.paint(
@@ -141,8 +143,11 @@ class _SkwerTilePaint extends CustomPainter {
                 !animationEnd.hasFocus)
             ? failedAnimationValue
             : animation.value * (isFailed ? failedAnimationValue : 1),
-        rotate: gameProps.value.puzzle.value == null ||
-            animationEnd.skwer > animationStart.skwer ||
+        rotate: (!isPuzzle && !Platform.isMobile) ||
+            animationEnd.skwer > animationStart.skwer &&
+                (isPuzzle ||
+                    (!isPuzzle &&
+                        animationEnd.skwer > gameProps.value.skwer)) ||
             _currentGroup == transition ||
             animationEnd.hasFocus ||
             animationStart.hasFocus ||

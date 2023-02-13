@@ -31,6 +31,7 @@ class SkwerTileState {
     bool? isActive,
     bool hasPuzzle = false,
     bool isSolved = false,
+    bool isLastPressed = false,
   }) {
     if (state.skwer == skwer &&
         state.isActive == isActive &&
@@ -46,6 +47,7 @@ class SkwerTileState {
       hasPuzzle: hasPuzzle,
       isSolved: isSolved,
       isHighlighted: false,
+      isLastPressed: isLastPressed,
     );
   }
 
@@ -77,6 +79,7 @@ class SkwerTileState {
       trigger: state.trigger,
       isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,
+      isLastPressed: state.isLastPressed,
     );
   }
 
@@ -133,7 +136,7 @@ class SkwerTileState {
     if (isActive) {
       return hasPuzzleHighlight ? 1 : (fail ? 0.9 : 0.7);
     } else {
-      return hasPuzzleHighlight ? 0.5 : (fail ? 0.7 : 0.2);
+      return hasPuzzleHighlight ? 0.7 : (fail ? 0.7 : 0.2);
     }
   }
 }

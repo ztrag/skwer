@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -25,8 +24,6 @@ final _kDigits = [
   LogicalKeyboardKey.digit9.keyId,
   LogicalKeyboardKey.digit0.keyId,
 ];
-
-const Size kMaxSize = Size(1200, 900);
 
 class GameWidget extends StatefulWidget {
   const GameWidget({Key? key}) : super(key: key);
@@ -60,18 +57,10 @@ class _GameWidgetState extends State<GameWidget> {
 
     final mediaQueryData = MediaQuery.of(context);
     final mediaSize = mediaQueryData.size;
-    final size = Size(
-      min(kMaxSize.width, mediaSize.width),
-      min(
-        kMaxSize.height,
-        mediaSize.height - (Platform.isMobile ? 150 : 0),
-      ),
-    );
-    final isSmall = size.width < 500 || size.height < 500;
-    final tileSize = min(
-      min(size.height, size.width) / (isSmall ? 6 : 9),
-      max(size.height, size.width) / (isSmall ? 7 : 9),
-    );
+    final size = Platform.isMobile
+        ? Size(mediaSize.width, mediaSize.height - 150)
+        : mediaSize;
+    final tileSize = _getTileSize(size);
 
     final numTilesX = (size.width / tileSize).floor();
     final numTilesY = (size.height / tileSize).floor();
@@ -252,9 +241,7 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   void _onPointerDown(PointerDownEvent event) {
-    print('tile');
     final tile = _findTileAtPosition(event.position);
-    print('tile $tile');
     if (tile == null) {
       return;
     }
@@ -278,7 +265,9 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   void _onPointerUp(PointerUpEvent event) {
-    game.clearFocus();
+    if (Platform.isMobile) {
+      game.clearFocus();
+    }
 
     final tile = _findTileAtPosition(event.position);
     if (tile == null) {
@@ -335,5 +324,9 @@ class _GameWidgetState extends State<GameWidget> {
   void _handleDigit(int key) {
     final digit = _kDigits.indexOf(key) + 1;
     game.startPuzzle(digit);
+  }
+
+  double _getTileSize(Size size) {
+    return 80;
   }
 }

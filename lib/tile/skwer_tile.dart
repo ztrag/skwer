@@ -110,15 +110,23 @@ class _SkwerTilePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final x = _tileSize;
+    canvas.translate(
+      size.width * (1 - x) / 2,
+      size.height * (1 - x) / 2,
+    );
+    size = Size(size.width * x, size.height * x);
+
     if (animationEnd.hasFocus || animationEnd.isHighlighted) {
       final x = size.width * 0.02;
-      _focusPaint.strokeWidth = size.width * 0.13;
+      _focusPaint.strokeWidth =
+          size.width * (animationEnd.hasFocus ? 0.16 : 0.13);
       _focusPaint.color = Color.lerp(
           skTileColors[(animationStart.skwer + 1) % 3],
           skBlack,
           animationEnd.hasFocus
               ? 0.0
-              : (animationStart.skwer == 1 ? 0.3 : 0.5))!;
+              : (animationStart.skwer == 1 ? 0.25 : 0.4))!;
       canvas.drawRect(
         Rect.fromLTRB(x, x, size.width - x, size.height - x),
         _focusPaint,
@@ -132,7 +140,7 @@ class _SkwerTilePaint extends CustomPainter {
     _currentGroup.paint(
       canvas,
       size,
-      _getBrightness(),
+      _getBrightness() * _tileOpacity,
       ColorWave(
         start: _getStartColor(),
         end: skTileColors[animationEnd.skwer % 3],
@@ -191,7 +199,8 @@ class _SkwerTilePaint extends CustomPainter {
 
   double _getBrightness() {
     if (animationEnd.isHighlighted &&
-        animationEnd.skwer != gameProps.value.skwer) {
+        (animationEnd.skwer % 3 != gameProps.value.skwer % 3 ||
+            animationEnd.skwer < gameProps.value.skwer)) {
       return 1.05;
     }
     final start = animationStart.getBrightness(gameProps.value);
@@ -246,4 +255,25 @@ class _SkwerTilePaint extends CustomPainter {
               : 0.5,
     );
   }
+
+  double get _tileSize {
+    if (props.state.value.hasPuzzle && props.state.value.isActive) {
+      return 1;
+    }
+    final x = 0.9 * min(1.0, sqrt(3 / _cartesianDistFromCenter));
+    return pow(x, 1.2).toDouble();
+  }
+
+  double get _tileOpacity {
+    if (props.state.value.hasPuzzle && props.state.value.isActive) {
+      return 1;
+    }
+    final x = min(1.0, 4 / _cartesianDistFromCenter);
+    return pow(x, 1.2).toDouble();
+  }
+
+  double get _cartesianDistFromCenter => max(
+        (props.index.x + 0.5 - gameProps.value.numTilesX / 2).abs(),
+        (props.index.y + 0.5 - gameProps.value.numTilesY / 2).abs(),
+      );
 }

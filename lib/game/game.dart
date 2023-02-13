@@ -227,6 +227,7 @@ class Game {
           trigger: trigger,
           isSolved: true,
           hasPuzzle: true,
+          isLastPressed: index == trigger,
         );
       }
     }

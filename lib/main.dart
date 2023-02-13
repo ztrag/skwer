@@ -3,12 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:skwer/game/game_widget.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: SizedBox(
-      width: kMaxSize.width,
-      height: kMaxSize.height,
-      child: const SafeArea(child: GameWidget()),
-    ),
+  runApp(const MaterialApp(
+    home: SafeArea(child: GameWidget()),
     debugShowCheckedModeBanner: false,
   ));
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

@@ -10,10 +10,11 @@ abstract class Mosaic {
     Canvas canvas,
     Size size,
     double brightness,
-    ColorWave animation,
+    double pressAnimation,
+    ColorWave wave,
   ) {
     for (MosaicTile tile in tiles) {
-      tile.paint(canvas, size, brightness, animation);
+      tile.paint(canvas, size, brightness, pressAnimation, wave);
     }
   }
 }

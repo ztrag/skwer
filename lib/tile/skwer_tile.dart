@@ -28,10 +28,13 @@ class SkwerTile extends StatefulWidget {
   State<SkwerTile> createState() => _SkwerTileState();
 }
 
-class _SkwerTileState extends State<SkwerTile>
-    with SingleTickerProviderStateMixin {
+class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   late final AnimationController _animationController;
   late final Animation<double> _animation;
+  late final AnimationController _pressAnimationController;
+  late final Animation<double> _pressAnimation;
+  late final AnimationController _highlightAnimationController;
+  late final Animation<double> _highlightAnimation;
   late final _SkwerTilePaint _paint;
   late SkwerTileState _previousState;
   final ValueNotifier<DateTime?> _focusTime = ValueNotifier(null);
@@ -45,20 +48,40 @@ class _SkwerTileState extends State<SkwerTile>
       vsync: this,
     );
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
+    _pressAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _pressAnimation =
+        CurveTween(curve: Curves.easeIn).animate(_pressAnimationController);
+    _pressAnimationController.value = 1;
+    _highlightAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _highlightAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_highlightAnimationController);
+    _highlightAnimationController.value = 1;
     _paint = _SkwerTilePaint(
       widget.props,
       widget.gameProps,
       _animation,
+      _pressAnimation,
+      _highlightAnimation,
       _focusTime,
     );
     _previousState = widget.props.state.value;
 
     widget.props.state.addListener(_onStateChanged);
+    widget.props.pressCounter.addListener(_onPressed);
+    widget.props.isHighlighted.addListener(_onHighlighted);
   }
 
   @override
   void dispose() {
     widget.props.state.removeListener(_onStateChanged);
+    widget.props.pressCounter.removeListener(_onPressed);
+    widget.props.isHighlighted.removeListener(_onHighlighted);
     _animationController.dispose();
     super.dispose();
   }
@@ -80,6 +103,26 @@ class _SkwerTileState extends State<SkwerTile>
     if (currentState.hasFocus) {
       _focusTime.value = DateTime.now();
     }
+    _onHighlighted();
+  }
+
+  void _onPressed() {
+    _pressAnimationController.forward(from: 0);
+  }
+
+  void _onHighlighted() {
+    final skwer = widget.props.state.value.skwer;
+    final gameSkwer = widget.gameProps.value.skwer;
+    final fullHighlight = skwer % 3 != gameSkwer % 3 || skwer < gameSkwer;
+    if (widget.props.isHighlighted.value) {
+      if (fullHighlight) {
+        _highlightAnimationController.forward();
+      } else {
+        _highlightAnimationController.value = 0.1;
+      }
+    } else {
+      _highlightAnimationController.reverse();
+    }
   }
 
   @override
@@ -99,14 +142,29 @@ class _SkwerTilePaint extends CustomPainter {
   final ValueNotifier<GameProps> gameProps;
 
   final Animation<double> animation;
+  final Animation<double> pressAnimation;
+  final Animation<double> highlightAnimation;
 
   final ValueNotifier<DateTime?> _focusTime;
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
 
-  _SkwerTilePaint(this.props, this.gameProps, this.animation, this._focusTime)
-      : super(repaint: Listenable.merge([props.state, animation]));
+  _SkwerTilePaint(
+    this.props,
+    this.gameProps,
+    this.animation,
+    this.pressAnimation,
+    this.highlightAnimation,
+    this._focusTime,
+  ) : super(
+          repaint: Listenable.merge([
+            props.state,
+            animation,
+            pressAnimation,
+            highlightAnimation,
+          ]),
+        );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -117,16 +175,17 @@ class _SkwerTilePaint extends CustomPainter {
     );
     size = Size(size.width * x, size.height * x);
 
-    if (animationEnd.hasFocus || animationEnd.isHighlighted) {
+    if (props.state.value.hasFocus ||
+        (highlightAnimation.value > 0 && props.isHighlighted.value)) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth =
           size.width * (animationEnd.hasFocus ? 0.16 : 0.13);
       _focusPaint.color = Color.lerp(
-          skTileColors[(animationStart.skwer + 1) % 3],
+          skTileColors[(props.state.value.skwer + 1) % 3],
           skBlack,
-          animationEnd.hasFocus
+          props.state.value.hasFocus
               ? 0.0
-              : (animationStart.skwer == 1 ? 0.25 : 0.4))!;
+              : (props.state.value.skwer == 1 ? 0.25 : 0.4))!;
       canvas.drawRect(
         Rect.fromLTRB(x, x, size.width - x, size.height - x),
         _focusPaint,
@@ -141,6 +200,7 @@ class _SkwerTilePaint extends CustomPainter {
       canvas,
       size,
       _getBrightness() * _tileOpacity,
+      pressAnimation.value,
       ColorWave(
         start: _getStartColor(),
         end: skTileColors[animationEnd.skwer % 3],
@@ -182,10 +242,6 @@ class _SkwerTilePaint extends CustomPainter {
       return _getRainbowColor();
     }
 
-    if (animationEnd.isLastPressed) {
-      return skWhite;
-    }
-
     return skTileColors[animationStart.skwer % 3];
   }
 
@@ -198,14 +254,10 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double _getBrightness() {
-    if (animationEnd.isHighlighted &&
-        (animationEnd.skwer % 3 != gameProps.value.skwer % 3 ||
-            animationEnd.skwer < gameProps.value.skwer)) {
-      return 1.05;
-    }
     final start = animationStart.getBrightness(gameProps.value);
     final end = animationEnd.getBrightness(gameProps.value);
-    return start * (1 - animation.value) + end * animation.value;
+    final x = start * (1 - animation.value) + end * animation.value;
+    return x * (1 - highlightAnimation.value) + 1.05 * highlightAnimation.value;
   }
 
   @override

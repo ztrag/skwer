@@ -23,7 +23,7 @@ class Game {
       numTilesY: numTilesY,
     );
     Future.microtask(() {
-      reset(recreate: true);
+      reset(skwer: gameProps.value.skwer);
     });
   }
 
@@ -85,14 +85,12 @@ class Game {
     if (hasFocus) {
       _skwerAction(tileProps, (target) {
         highlighted.add(target);
-        final state = props.skwerTiles[target]!.state;
-        state.value = SkwerTileState.onHighlight(state.value, true);
+        props.skwerTiles[target]!.isHighlighted.value = true;
       });
     }
     for (final tile in props.skwerTiles.values) {
-      if (!highlighted.contains(tile.index) && tile.state.value.isHighlighted) {
-        final state = tile.state;
-        state.value = SkwerTileState.onHighlight(state.value, false);
+      if (!highlighted.contains(tile.index) && tile.isHighlighted.value) {
+        tile.isHighlighted.value = false;
       }
     }
   }
@@ -116,8 +114,8 @@ class Game {
       // Maybe caused by resize, skipping this rotation.
       return;
     }
-    final tileState = tileProps.state;
-    tileState.value = SkwerTileState.onPress(tileState.value);
+
+    tileProps.pressCounter.value++;
 
     if (addRotation) {
       rotations.add(rotation);

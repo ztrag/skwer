@@ -4,21 +4,17 @@ import 'package:skwer/tile/skwer_tile_index.dart';
 class SkwerTileState {
   final int skwer;
   final bool hasFocus;
-  final bool isLastPressed;
   final bool isActive;
   final bool hasPuzzle;
   final bool isSolved;
-  final bool isHighlighted;
   final SkwerTileIndex? trigger;
 
   SkwerTileState._({
     this.skwer = -1,
     this.hasFocus = false,
-    this.isLastPressed = false,
     this.isActive = true,
     this.hasPuzzle = false,
     this.isSolved = false,
-    this.isHighlighted = false,
     this.trigger,
   });
 
@@ -46,8 +42,6 @@ class SkwerTileState {
       isActive: isActive ?? state.isActive,
       hasPuzzle: hasPuzzle,
       isSolved: isSolved,
-      isHighlighted: false,
-      isLastPressed: isLastPressed,
     );
   }
 
@@ -62,7 +56,6 @@ class SkwerTileState {
       hasFocus: state.hasFocus,
       isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,
-      isHighlighted: state.isHighlighted,
     );
   }
 
@@ -77,32 +70,6 @@ class SkwerTileState {
       skwer: state.skwer,
       hasFocus: hasFocus,
       trigger: state.trigger,
-      isActive: state.isActive,
-      hasPuzzle: state.hasPuzzle,
-      isLastPressed: state.isLastPressed,
-    );
-  }
-
-  factory SkwerTileState.onHighlight(
-    SkwerTileState state,
-    bool isHighlighted,
-  ) {
-    return SkwerTileState._(
-      skwer: state.skwer,
-      hasFocus: state.hasFocus,
-      trigger: state.trigger,
-      isActive: state.isActive,
-      hasPuzzle: state.hasPuzzle,
-      isSolved: state.isSolved,
-      isHighlighted: isHighlighted,
-    );
-  }
-
-  factory SkwerTileState.onPress(SkwerTileState state) {
-    return SkwerTileState._(
-      skwer: state.skwer,
-      isLastPressed: true,
-      hasFocus: state.hasFocus,
       isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,
     );

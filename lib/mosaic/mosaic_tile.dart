@@ -26,6 +26,7 @@ class MosaicTile {
     Canvas canvas,
     Size size,
     double brightness,
+    double pressAnimation,
     ColorWave wave,
   ) {
     final waveAnimation = _getPositionAnimation(wave);
@@ -37,7 +38,7 @@ class MosaicTile {
     }
     _path.lineTo(p.first.x * size.width, p.first.y * size.height);
 
-    final color = _getCurrentColor(wave, waveAnimation);
+    final color = _getCurrentColor(wave, waveAnimation, pressAnimation);
     final colorD2 = getAnimatedColorD1(wave.animationValue) * brightness;
     _paint.color = colorD2 > 1
         ? Color.lerp(color, skWhite, colorD2 - 1)!
@@ -57,8 +58,16 @@ class MosaicTile {
 
   double getAnimatedColorD1(double animation) => colorD1;
 
-  Color _getCurrentColor(ColorWave animation, double positionAnimation) =>
-      Color.lerp(animation.start, animation.end, positionAnimation)!;
+  Color _getCurrentColor(
+    ColorWave animation,
+    double positionAnimation,
+    double pressAnimation,
+  ) {
+    return Color.lerp(
+        skWhite,
+        Color.lerp(animation.start, animation.end, positionAnimation)!,
+        pressAnimation)!;
+  }
 
   double _getPositionAnimation(ColorWave animation) {
     final distFromCenter = (position - animation.direction).magnitude;

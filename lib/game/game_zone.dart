@@ -18,8 +18,8 @@ class GameZone {
   }
 
   static int _paddingForTiles(int numTiles) {
-    if (numTiles > 10) {
-      return (6 + numTiles - 11) ~/ 2;
+    if (numTiles > 9) {
+      return (6 + numTiles - 10) ~/ 2;
     } else if (numTiles > 6) {
       return 2;
     }

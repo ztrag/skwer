@@ -17,13 +17,21 @@ class Game {
   GameProps get props => gameProps.value;
 
   void resize(int numTilesX, int numTilesY) {
+    final hadPuzzle = gameProps.value.puzzle.value != null;
+    gameProps.value.puzzle.value = null;
     gameProps.value = GameProps.resize(
       props: gameProps.value,
       numTilesX: numTilesX,
       numTilesY: numTilesY,
     );
     Future.microtask(() {
-      reset(skwer: gameProps.value.skwer);
+      reset(
+        skwer: gameProps.value.skwer,
+        recreate: !hadPuzzle,
+      );
+      if (hadPuzzle) {
+        startPuzzle(0);
+      }
     });
   }
 

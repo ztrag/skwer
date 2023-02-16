@@ -34,7 +34,7 @@ abstract class Mosaic {
     final dist = Offset(tile.position.x - hoverPosition.dx / size.width,
         tile.position.y - hoverPosition.dy / size.height)
         .distance;
-    final dist2 = (1.4142 - dist) / 1.4142;
+    final dist2 = max(0, (1.4142 - dist) / 1.4142);
     return 0.35 + 1 * pow(dist2, 1.5);
   }
 }

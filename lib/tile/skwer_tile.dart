@@ -88,6 +88,9 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     widget.props.isHighlighted.removeListener(_onHighlighted);
     widget.props.isFocused.removeListener(_onFocused);
     _animationController.dispose();
+    _focusAnimationController.dispose();
+    _highlightAnimationController.dispose();
+    _pressAnimationController.dispose();
     super.dispose();
   }
 
@@ -181,6 +184,7 @@ class _SkwerTilePaint extends CustomPainter {
     this.focusAnimation,
   ) : super(
           repaint: Listenable.merge([
+            gameProps,
             props.state,
             hoverPosition,
             animation,
@@ -321,7 +325,7 @@ class _SkwerTilePaint extends CustomPainter {
     if (props.state.value.hasPuzzle && props.state.value.isActive) {
       return 1;
     }
-    final x = 0.9 * min(1.0, sqrt(3 / _cartesianDistFromCenter));
+    final x = 0.9 * min(1.0, sqrt(2.5 / _cartesianDistFromCenter));
     return pow(x, 1.2).toDouble();
   }
 

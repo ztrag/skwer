@@ -56,15 +56,60 @@ class _GameWidgetState extends State<GameWidget> {
         : mediaSize;
     final tileSize = _getTileSize(size);
 
-    final numTilesX = (size.width / tileSize).floor();
-    final numTilesY = (size.height / tileSize).floor();
+    final x = (size.width / tileSize).floor();
+    final y = (size.height / tileSize).floor();
+    final numTilesX = x > 9 && x % 2 == 0 ? x - 1 : x;
+    final numTilesY = y > 9 && y % 2 == 0 ? y - 1 : y;
     if (numTilesX != props.numTilesX || numTilesY != props.numTilesY) {
       _positions.clear();
       game.resize(numTilesX, numTilesY);
     }
 
     return Stack(
+      alignment: Alignment.center,
       children: [
+        ValueListenableBuilder<Puzzle?>(
+            valueListenable: game.gameProps.value.puzzle,
+            builder: (_, puzzle, __) {
+              if (puzzle == null) {
+                return Container();
+              }
+              return Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        skBlack,
+                        Color.lerp(skTileColors[game.gameProps.value.skwer % 3],
+                            skBlack, 0.5)!,
+                        Color.lerp(skTileColors[game.gameProps.value.skwer % 3],
+                            skBlack, 0.7)!,
+                        skBlack,
+                        // skBlack,
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: puzzle.zone.size.x * tileSize + 8,
+                      height: puzzle.zone.size.y * tileSize + 8,
+                      decoration: BoxDecoration(
+                        color: skBlack,
+                        border: Border.all(
+                          width: 1,
+                          color: skTileColors[game.gameProps.value.skwer % 3]
+                              .withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
         Listener(
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,
@@ -160,25 +205,25 @@ class _GameWidgetState extends State<GameWidget> {
       key: tileProps.key,
       width: tileSize,
       height: tileSize,
-      child: Padding(
-        padding: padding,
-        child: MouseRegion(
-          onEnter: (event) {
-            if (tileProps.state.value.isActive) {
-              tileProps.focusNode.requestFocus();
-              _delayedUnfocus = null;
-            }
-          },
-          onExit: (event) {
-            if (tileProps.isFocused.value) {
-              _delayedUnfocus =
-                  Future.delayed(const Duration(milliseconds: 50), () {
-                if (tileProps.isFocused.value && _delayedUnfocus != null) {
-                  tileProps.focusNode.unfocus();
-                }
-              });
-            }
-          },
+      child: MouseRegion(
+        onEnter: (event) {
+          if (tileProps.state.value.isActive) {
+            tileProps.focusNode.requestFocus();
+            _delayedUnfocus = null;
+          }
+        },
+        onExit: (event) {
+          if (tileProps.isFocused.value) {
+            _delayedUnfocus =
+                Future.delayed(const Duration(milliseconds: 50), () {
+              if (tileProps.isFocused.value && _delayedUnfocus != null) {
+                tileProps.focusNode.unfocus();
+              }
+            });
+          }
+        },
+        child: Padding(
+          padding: padding,
           child: ValueListenableBuilder<Puzzle?>(
             valueListenable: props.puzzle,
             builder: (_, __, ___) => ExcludeFocus(

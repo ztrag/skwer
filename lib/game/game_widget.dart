@@ -222,7 +222,6 @@ class _GameWidgetState extends State<GameWidget> {
 
     for (final tile in game.props.skwerTiles.values) {
       final box = tile.key.currentContext?.findRenderObject() as RenderBox;
-      // final start = box.localToGlobal(Offset.zero);
       final start = box.localToGlobal(Offset.zero);
       final rect = Rect.fromLTWH(
         start.dx,

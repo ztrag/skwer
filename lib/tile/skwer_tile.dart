@@ -29,6 +29,8 @@ class SkwerTile extends StatefulWidget {
 }
 
 class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
+  final ValueNotifier<Offset?> hoverPosition = ValueNotifier(null);
+
   late final AnimationController _animationController;
   late final Animation<double> _animation;
   late final AnimationController _pressAnimationController;
@@ -69,8 +71,8 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     );
     _focusAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_focusAnimationController);
-    _paint = _SkwerTilePaint(widget.props, widget.gameProps, _animation,
-        _pressAnimation, _highlightAnimation, _focusAnimation);
+    _paint = _SkwerTilePaint(widget.props, widget.gameProps, hoverPosition,
+        _animation, _pressAnimation, _highlightAnimation, _focusAnimation);
     _previousState = widget.props.state.value;
 
     widget.props.state.addListener(_onStateChanged);
@@ -141,7 +143,12 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(child: CustomPaint(painter: _paint));
+    return MouseRegion(
+      onHover: (hover) => hoverPosition.value = hover.localPosition,
+      onEnter: (enter) => hoverPosition.value = enter.localPosition,
+      onExit: (exit) => hoverPosition.value = null,
+      child: RepaintBoundary(child: CustomPaint(painter: _paint)),
+    );
   }
 }
 
@@ -154,6 +161,7 @@ class _SkwerTilePaint extends CustomPainter {
 
   final SkwerTileProps props;
   final ValueNotifier<GameProps> gameProps;
+  final ValueNotifier<Offset?> hoverPosition;
 
   final Animation<double> animation;
   final Animation<double> pressAnimation;
@@ -166,6 +174,7 @@ class _SkwerTilePaint extends CustomPainter {
   _SkwerTilePaint(
     this.props,
     this.gameProps,
+    this.hoverPosition,
     this.animation,
     this.pressAnimation,
     this.highlightAnimation,
@@ -173,6 +182,7 @@ class _SkwerTilePaint extends CustomPainter {
   ) : super(
           repaint: Listenable.merge([
             props.state,
+            hoverPosition,
             animation,
             pressAnimation,
             highlightAnimation,
@@ -230,6 +240,7 @@ class _SkwerTilePaint extends CustomPainter {
             _currentGroup == transition ||
             isFailed,
       ),
+      props.state.value.isActive ? hoverPosition.value : null,
     );
   }
 

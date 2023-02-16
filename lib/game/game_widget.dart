@@ -42,12 +42,6 @@ class _GameWidgetState extends State<GameWidget> {
   GameProps get props => game.gameProps.value;
 
   @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 2), () => game.startPuzzle(7));
-  }
-
-  @override
   Widget build(BuildContext context) {
     window.onKeyData = _onKeyData;
     SystemChrome.setPreferredOrientations([
@@ -176,10 +170,10 @@ class _GameWidgetState extends State<GameWidget> {
             }
           },
           onExit: (event) {
-            if (tileProps.state.value.hasFocus) {
+            if (tileProps.isFocused.value) {
               _delayedUnfocus =
                   Future.delayed(const Duration(milliseconds: 50), () {
-                if (tileProps.state.value.hasFocus && _delayedUnfocus != null) {
+                if (tileProps.isFocused.value && _delayedUnfocus != null) {
                   tileProps.focusNode.unfocus();
                 }
               });
@@ -280,7 +274,7 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   void _maybeEnter(SkwerTileProps tile) {
-    if (tile.state.value.hasFocus) {
+    if (tile.isFocused.value) {
       return;
     }
 

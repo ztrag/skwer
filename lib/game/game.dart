@@ -48,6 +48,10 @@ class Game {
           isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
           hasPuzzle: props.puzzle.value != null,
         );
+        if (props.skwerTiles[index]!.isFocused.value) {
+          focus(index, false);
+          focus(index, true);
+        }
       }
     }
     if (recreate) {
@@ -78,8 +82,7 @@ class Game {
 
   void focus(SkwerTileIndex index, bool hasFocus) {
     final tileProps = props.skwerTiles[index]!;
-    tileProps.state.value =
-        SkwerTileState.onFocus(tileProps.state.value, hasFocus);
+    tileProps.isFocused.value = hasFocus;
 
     final highlighted = <SkwerTileIndex>{};
     if (hasFocus) {
@@ -97,7 +100,7 @@ class Game {
 
   bool clearFocus() {
     for (final tile in props.skwerTiles.values) {
-      if (tile.state.value.hasFocus) {
+      if (tile.isFocused.value) {
         if (Platform.isMobile) {
           tile.focusNode.unfocus();
         }
@@ -194,7 +197,8 @@ class Game {
     final state = props.skwerTiles[target]!.state;
     state.value =
         SkwerTileState.rotate(state.value, rotation.index, rotation.delta);
-    if (state.value.hasFocus) {
+    if (props.skwerTiles[target]!.isFocused.value) {
+      focus(target, false);
       focus(target, true);
     }
   }

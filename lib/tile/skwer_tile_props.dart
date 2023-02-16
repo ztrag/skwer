@@ -8,6 +8,7 @@ class SkwerTileProps {
   final ValueNotifier<SkwerTileState> state = ValueNotifier(SkwerTileState());
   final SkwerTileIndex index;
   final ValueNotifier<int> pressCounter = ValueNotifier(0);
+  final ValueNotifier<bool> isFocused = ValueNotifier(false);
   final ValueNotifier<bool> isHighlighted = ValueNotifier(false);
 
   SkwerTileProps({required this.index});

@@ -3,7 +3,6 @@ import 'package:skwer/tile/skwer_tile_index.dart';
 
 class SkwerTileState {
   final int skwer;
-  final bool hasFocus;
   final bool isActive;
   final bool hasPuzzle;
   final bool isSolved;
@@ -11,7 +10,6 @@ class SkwerTileState {
 
   SkwerTileState._({
     this.skwer = -1,
-    this.hasFocus = false,
     this.isActive = true,
     this.hasPuzzle = false,
     this.isSolved = false,
@@ -38,7 +36,6 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: skwer,
       trigger: trigger,
-      hasFocus: state.hasFocus,
       isActive: isActive ?? state.isActive,
       hasPuzzle: hasPuzzle,
       isSolved: isSolved,
@@ -53,23 +50,6 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: state.skwer + skwerDelta,
       trigger: skwerDelta > 0 ? trigger : null,
-      hasFocus: state.hasFocus,
-      isActive: state.isActive,
-      hasPuzzle: state.hasPuzzle,
-    );
-  }
-
-  factory SkwerTileState.onFocus(
-    SkwerTileState state,
-    bool hasFocus,
-  ) {
-    if (hasFocus == state.hasFocus) {
-      return state;
-    }
-    return SkwerTileState._(
-      skwer: state.skwer,
-      hasFocus: hasFocus,
-      trigger: state.trigger,
       isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,
     );
@@ -87,10 +67,6 @@ class SkwerTileState {
   double getBrightness(GameProps gameProps) {
     if (!hasPuzzle) {
       return 1;
-    }
-
-    if (hasFocus) {
-      return 1.4;
     }
 
     if (isSolved) {

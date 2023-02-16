@@ -35,9 +35,10 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   late final Animation<double> _pressAnimation;
   late final AnimationController _highlightAnimationController;
   late final Animation<double> _highlightAnimation;
+  late final AnimationController _focusAnimationController;
+  late final Animation<double> _focusAnimation;
   late final _SkwerTilePaint _paint;
   late SkwerTileState _previousState;
-  final ValueNotifier<DateTime?> _focusTime = ValueNotifier(null);
 
   @override
   void initState() {
@@ -62,19 +63,20 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _highlightAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_highlightAnimationController);
     _highlightAnimationController.value = 1;
-    _paint = _SkwerTilePaint(
-      widget.props,
-      widget.gameProps,
-      _animation,
-      _pressAnimation,
-      _highlightAnimation,
-      _focusTime,
+    _focusAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
     );
+    _focusAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_focusAnimationController);
+    _paint = _SkwerTilePaint(widget.props, widget.gameProps, _animation,
+        _pressAnimation, _highlightAnimation, _focusAnimation);
     _previousState = widget.props.state.value;
 
     widget.props.state.addListener(_onStateChanged);
     widget.props.pressCounter.addListener(_onPressed);
     widget.props.isHighlighted.addListener(_onHighlighted);
+    widget.props.isFocused.addListener(_onFocused);
   }
 
   @override
@@ -82,6 +84,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     widget.props.state.removeListener(_onStateChanged);
     widget.props.pressCounter.removeListener(_onPressed);
     widget.props.isHighlighted.removeListener(_onHighlighted);
+    widget.props.isFocused.removeListener(_onFocused);
     _animationController.dispose();
     super.dispose();
   }
@@ -100,9 +103,6 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
       _animationController.forward(from: 0);
     }
     _previousState = currentState;
-    if (currentState.hasFocus) {
-      _focusTime.value = DateTime.now();
-    }
     _onHighlighted();
   }
 
@@ -125,6 +125,20 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     }
   }
 
+  void _onFocused() {
+    if (widget.props.isFocused.value) {
+      _focusAnimationController.forward(from: 0);
+    } else {
+      if (widget.gameProps.value.puzzle.value == null) {
+        _previousState = widget.props.state.value;
+        _paint.animationStart = _previousState;
+        _paint.animationEnd = _previousState;
+        _animationController.forward(from: 0);
+      }
+      _focusAnimationController.reverse(from: 1);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(child: CustomPaint(painter: _paint));
@@ -144,8 +158,7 @@ class _SkwerTilePaint extends CustomPainter {
   final Animation<double> animation;
   final Animation<double> pressAnimation;
   final Animation<double> highlightAnimation;
-
-  final ValueNotifier<DateTime?> _focusTime;
+  final Animation<double> focusAnimation;
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
@@ -156,13 +169,14 @@ class _SkwerTilePaint extends CustomPainter {
     this.animation,
     this.pressAnimation,
     this.highlightAnimation,
-    this._focusTime,
+    this.focusAnimation,
   ) : super(
           repaint: Listenable.merge([
             props.state,
             animation,
             pressAnimation,
             highlightAnimation,
+            focusAnimation,
           ]),
         );
 
@@ -175,15 +189,15 @@ class _SkwerTilePaint extends CustomPainter {
     );
     size = Size(size.width * x, size.height * x);
 
-    if (props.state.value.hasFocus ||
+    if (props.isFocused.value ||
         (highlightAnimation.value > 0 && props.isHighlighted.value)) {
       final x = size.width * 0.02;
       _focusPaint.strokeWidth =
-          size.width * (animationEnd.hasFocus ? 0.16 : 0.13);
+          size.width * (props.isFocused.value ? 0.16 : 0.13);
       _focusPaint.color = Color.lerp(
           skTileColors[(props.state.value.skwer + 1) % 3],
           skBlack,
-          props.state.value.hasFocus
+          props.isFocused.value
               ? 0.0
               : (props.state.value.skwer == 1 ? 0.25 : 0.4))!;
       canvas.drawRect(
@@ -202,48 +216,30 @@ class _SkwerTilePaint extends CustomPainter {
       _getBrightness() * _tileOpacity,
       pressAnimation.value,
       ColorWave(
-        start: _getStartColor(),
-        end: skTileColors[animationEnd.skwer % 3],
+        start: _startColor,
+        end: _endColor,
         direction: _getWaveDirectionFromTrigger(),
-        animationValue: (isFailed &&
-                animationEnd.skwer == animationStart.skwer &&
-                !animationStart.hasFocus &&
-                !animationEnd.hasFocus)
-            ? failedAnimationValue
-            : animation.value * (isFailed ? failedAnimationValue : 1),
+        animationValue: (props.state.value.trigger == null ? 0.7 : 1) *
+            animation.value *
+            (isFailed ? failedAnimationValue : 1),
         rotate: (!isPuzzle && !Platform.isMobile) ||
             animationEnd.skwer > animationStart.skwer &&
                 (isPuzzle ||
                     (!isPuzzle &&
                         animationEnd.skwer > gameProps.value.skwer)) ||
             _currentGroup == transition ||
-            animationEnd.hasFocus ||
-            animationStart.hasFocus ||
             isFailed,
       ),
     );
   }
 
-  bool get _shouldShowRainbow {
-    if (gameProps.value.puzzle.value != null) {
-      return false;
-    }
+  bool get _shouldShowRainbow => gameProps.value.puzzle.value == null;
 
-    final focusTime = _focusTime.value;
-    if (focusTime == null) {
-      return false;
-    }
-    return DateTime.now().difference(focusTime) <
-        const Duration(milliseconds: 400);
-  }
+  Color get _startColor => _shouldShowRainbow
+      ? _getRainbowColor()
+      : skTileColors[animationStart.skwer % 3];
 
-  Color _getStartColor() {
-    if (_shouldShowRainbow) {
-      return _getRainbowColor();
-    }
-
-    return skTileColors[animationStart.skwer % 3];
-  }
+  Color get _endColor => skTileColors[animationEnd.skwer % 3];
 
   Color _getRainbowColor() {
     return Color.lerp(
@@ -257,7 +253,9 @@ class _SkwerTilePaint extends CustomPainter {
     final start = animationStart.getBrightness(gameProps.value);
     final end = animationEnd.getBrightness(gameProps.value);
     final x = start * (1 - animation.value) + end * animation.value;
-    return x * (1 - highlightAnimation.value) + 1.05 * highlightAnimation.value;
+    final y =
+        x * (1 - highlightAnimation.value) + 1.05 * highlightAnimation.value;
+    return y * (1 - focusAnimation.value) + 1.4 * focusAnimation.value;
   }
 
   @override

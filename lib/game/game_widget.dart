@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -74,6 +75,12 @@ class _GameWidgetState extends State<GameWidget> {
               if (puzzle == null) {
                 return Container();
               }
+              final skwer = game.gameProps.value.skwer;
+              final zoneSize = min(
+                    puzzle.zone.size.x / size.width,
+                    puzzle.zone.size.y / size.height,
+                  ) *
+                  tileSize;
               return Positioned(
                 left: 0,
                 right: 0,
@@ -82,14 +89,15 @@ class _GameWidgetState extends State<GameWidget> {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
+                      radius: 1 - zoneSize,
+                      stops: [zoneSize, zoneSize * 0.5 + 1 * 0.5, 1],
                       colors: [
-                        skBlack,
-                        Color.lerp(skTileColors[game.gameProps.value.skwer % 3],
-                            skBlack, 0.5)!,
-                        Color.lerp(skTileColors[game.gameProps.value.skwer % 3],
-                            skBlack, 0.7)!,
-                        skBlack,
-                        // skBlack,
+                        Color.lerp(skBackgroundColors[(skwer + 2) % 3], skBlack,
+                            0.70)!,
+                        Color.lerp(skBackgroundColors[(skwer + 0) % 3], skBlack,
+                            0.75)!,
+                        Color.lerp(skBackgroundColors[(skwer + 1) % 3], skBlack,
+                            0.85)!,
                       ],
                     ),
                   ),
@@ -100,9 +108,11 @@ class _GameWidgetState extends State<GameWidget> {
                       decoration: BoxDecoration(
                         color: skBlack,
                         border: Border.all(
-                          width: 1,
-                          color: skTileColors[game.gameProps.value.skwer % 3]
-                              .withOpacity(0.5),
+                          width: 2,
+                          color: Color.lerp(
+                              skTileColors[game.gameProps.value.skwer % 3],
+                              skBlack,
+                              0.5)!,
                         ),
                       ),
                     ),

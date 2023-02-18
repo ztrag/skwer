@@ -64,7 +64,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     );
     _highlightAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_highlightAnimationController);
-    _highlightAnimationController.value = 1;
+    _highlightAnimationController.value = 0;
     _focusAnimationController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
@@ -75,6 +75,8 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
         _animation, _pressAnimation, _highlightAnimation, _focusAnimation);
     _previousState = widget.props.state.value;
 
+    _onStateChanged();
+    _paint.animationStart = _paint.animationEnd;
     widget.props.state.addListener(_onStateChanged);
     widget.props.pressCounter.addListener(_onPressed);
     widget.props.isHighlighted.addListener(_onHighlighted);
@@ -104,7 +106,9 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
       _paint.animationStart = _previousState;
     }
     _paint.animationEnd = currentState;
-    if (reAnimate) {
+    if (currentState.immediate) {
+      _animationController.value = 1;
+    } else if (reAnimate) {
       _animationController.forward(from: 0);
     }
     _previousState = currentState;
@@ -265,7 +269,9 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double _getBrightness() {
-    final start = animationStart.getBrightness(gameProps.value);
+    final start = animationStart.immediate
+        ? animationEnd.getBrightness(gameProps.value)
+        : animationStart.getBrightness(gameProps.value);
     final end = animationEnd.getBrightness(gameProps.value);
     final x = start * (1 - animation.value) + end * animation.value;
     final y =

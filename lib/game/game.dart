@@ -24,20 +24,20 @@ class Game {
       numTilesX: numTilesX,
       numTilesY: numTilesY,
     );
-    Future.microtask(() {
-      reset(
-        skwer: gameProps.value.skwer,
-        recreate: !hadPuzzle,
-      );
-      if (hadPuzzle) {
-        startPuzzle(0);
-      }
-    });
+    reset(
+      skwer: gameProps.value.skwer,
+      recreate: !hadPuzzle,
+      immediate: true,
+    );
+    if (hadPuzzle) {
+      startPuzzle(0);
+    }
   }
 
   void reset({
     bool recreate = false,
     int? skwer,
+    bool immediate = false,
   }) {
     if (skwer != null) {
       gameProps.value = GameProps.reSkwer(
@@ -55,6 +55,7 @@ class Game {
           props.skwer,
           isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
           hasPuzzle: props.puzzle.value != null,
+          immediate: immediate,
         );
         if (props.skwerTiles[index]!.isFocused.value) {
           focus(index, false);

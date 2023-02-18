@@ -7,6 +7,7 @@ class SkwerTileState {
   final bool hasPuzzle;
   final bool isSolved;
   final SkwerTileIndex? trigger;
+  final bool immediate;
 
   SkwerTileState._({
     this.skwer = -1,
@@ -14,6 +15,7 @@ class SkwerTileState {
     this.hasPuzzle = false,
     this.isSolved = false,
     this.trigger,
+    this.immediate = false,
   });
 
   factory SkwerTileState() => SkwerTileState._();
@@ -26,6 +28,7 @@ class SkwerTileState {
     bool hasPuzzle = false,
     bool isSolved = false,
     bool isLastPressed = false,
+    bool immediate = false,
   }) {
     if (state.skwer == skwer &&
         state.isActive == isActive &&
@@ -39,6 +42,7 @@ class SkwerTileState {
       isActive: isActive ?? state.isActive,
       hasPuzzle: hasPuzzle,
       isSolved: isSolved,
+      immediate: immediate,
     );
   }
 

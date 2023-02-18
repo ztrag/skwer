@@ -91,31 +91,29 @@ class _GameWidgetState extends State<GameWidget> {
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
                       radius: 1 - zoneSize,
-                      stops: [zoneSize*0.6, zoneSize * 0.6 + 0.3, 1],
+                      stops: [zoneSize * 0.6, zoneSize * 0.6 + 0.3, 1],
                       colors: [
                         Color.lerp(
-                          Color.lerp(
-                            skTileColors[(skwer + 0) % 3],
-                            skTileColors[(skwer + 1) % 3],
-                            0.3,
-                          )!,
-                          skBlack,
-                          centerShade[skwer%3]
-                        )!,
+                            Color.lerp(
+                              skTileColors[(skwer + 0) % 3],
+                              skTileColors[(skwer + (skwer == 0 ? 2 : 1)) % 3],
+                              0.4,
+                            )!,
+                            skBlack,
+                            centerShade[skwer % 3])!,
                         Color.lerp(
-                          skTileColors[(skwer + (skwer % 3 == 0 ? 2 : 1)) % 3],
+                          Color.lerp(
+                            skTileColors[(skwer + 2) % 3],
+                            skTileColors[skwer % 3],
+                            0.5,
+                          )!,
                           skBlack,
                           0.8,
                         )!,
                         Color.lerp(
-                          Color.lerp(
-                            skTileColors[(skwer + 2) % 3],
-                            skTileColors[
-                                (skwer + (skwer % 3 == 0 ? 2 : 1)) % 3],
-                            0.9,
-                          )!,
+                          skTileColors[skwer % 3],
                           skBlack,
-                          0.7,
+                          0.8,
                         )!,
                       ],
                     ),

@@ -81,6 +81,7 @@ class _GameWidgetState extends State<GameWidget> {
                     puzzle.zone.size.y / size.height,
                   ) *
                   tileSize;
+              const centerShade = [0.55, 0.65, 0.55];
               return Positioned(
                 left: 0,
                 right: 0,
@@ -90,30 +91,31 @@ class _GameWidgetState extends State<GameWidget> {
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
                       radius: 1 - zoneSize,
-                      stops: [0.3, zoneSize * 0.5 + 0.5, 1],
+                      stops: [zoneSize*0.6, zoneSize * 0.6 + 0.3, 1],
                       colors: [
                         Color.lerp(
                           Color.lerp(
-                            skTileColors[(skwer + 2) % 3],
                             skTileColors[(skwer + 0) % 3],
-                            0.5,
+                            skTileColors[(skwer + 1) % 3],
+                            0.3,
                           )!,
                           skBlack,
-                          0.5,
+                          centerShade[skwer%3]
                         )!,
                         Color.lerp(
-                          skTileColors[(skwer + 0) % 3],
+                          skTileColors[(skwer + (skwer % 3 == 0 ? 2 : 1)) % 3],
                           skBlack,
-                          0.55,
+                          0.8,
                         )!,
                         Color.lerp(
                           Color.lerp(
-                            skTileColors[(skwer + 1) % 3],
-                            skTileColors[(skwer + 0) % 3],
-                            0.5,
+                            skTileColors[(skwer + 2) % 3],
+                            skTileColors[
+                                (skwer + (skwer % 3 == 0 ? 2 : 1)) % 3],
+                            0.9,
                           )!,
                           skBlack,
-                          0.6,
+                          0.7,
                         )!,
                       ],
                     ),
@@ -123,7 +125,7 @@ class _GameWidgetState extends State<GameWidget> {
                       width: puzzle.zone.size.x * tileSize + 8,
                       height: puzzle.zone.size.y * tileSize + 8,
                       decoration: BoxDecoration(
-                        color: skBlack,
+                        // color: skBlack,
                         border: Border.all(
                           width: 4,
                           color: Color.lerp(

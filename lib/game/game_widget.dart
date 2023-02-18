@@ -377,7 +377,11 @@ class _GameWidgetState extends State<GameWidget> {
   bool _onKeyData(KeyData keyData) {
     if (keyData.type == KeyEventType.down) {
       if (keyData.logical == LogicalKeyboardKey.keyR.keyId) {
-        game.resetPuzzle();
+        if (game.props.puzzle.value == null) {
+          game.reset();
+        } else {
+          game.resetPuzzle();
+        }
         return true;
       } else if (keyData.logical == LogicalKeyboardKey.escape.keyId) {
         return game.clearFocus();

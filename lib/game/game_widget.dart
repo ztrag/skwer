@@ -267,7 +267,16 @@ class _GameWidgetState extends State<GameWidget> {
                   if (event.logicalKey == LogicalKeyboardKey.space ||
                       event.logicalKey == LogicalKeyboardKey.enter ||
                       event.logicalKey == LogicalKeyboardKey.shiftRight) {
-                    game.rotate(GameRotation(index: tileIndex, delta: 1));
+                    if (RawKeyboard.instance.keysPressed.intersection({
+                      LogicalKeyboardKey.shiftLeft,
+                      LogicalKeyboardKey.shiftRight,
+                      LogicalKeyboardKey.space,
+                      LogicalKeyboardKey.enter,
+                    }).length > 1) {
+                      game.reset(skwer: tileProps.state.value.skwer % 3);
+                    } else {
+                      game.rotate(GameRotation(index: tileIndex, delta: 1));
+                    }
                     return KeyEventResult.handled;
                   } else if (event.logicalKey == LogicalKeyboardKey.tab) {
                     game.clearFocus(true);

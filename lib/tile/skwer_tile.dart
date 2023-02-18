@@ -325,16 +325,16 @@ class _SkwerTilePaint extends CustomPainter {
     if (props.state.value.hasPuzzle && props.state.value.isActive) {
       return 1;
     }
-    final x = 0.9 * min(1.0, sqrt(2.5 / _cartesianDistFromCenter));
-    return pow(x, 1.2).toDouble();
+    final x = 0.9 * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
+    return pow(x, 1.1).toDouble();
   }
 
   double get _tileOpacity {
     if (props.state.value.hasPuzzle && props.state.value.isActive) {
       return 1;
     }
-    final x = min(1.0, 4 / _cartesianDistFromCenter);
-    return pow(x, 1.2).toDouble();
+    final x = min(1.0, 5 / _cartesianDistFromCenter);
+    return pow(x, 1).toDouble();
   }
 
   double get _cartesianDistFromCenter => max(

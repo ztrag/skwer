@@ -90,14 +90,31 @@ class _GameWidgetState extends State<GameWidget> {
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
                       radius: 1 - zoneSize,
-                      stops: [zoneSize, zoneSize * 0.5 + 1 * 0.5, 1],
+                      stops: [0.3, zoneSize * 0.5 + 0.5, 1],
                       colors: [
-                        Color.lerp(skBackgroundColors[(skwer + 2) % 3], skBlack,
-                            0.70)!,
-                        Color.lerp(skBackgroundColors[(skwer + 0) % 3], skBlack,
-                            0.75)!,
-                        Color.lerp(skBackgroundColors[(skwer + 1) % 3], skBlack,
-                            0.85)!,
+                        Color.lerp(
+                          Color.lerp(
+                            skTileColors[(skwer + 2) % 3],
+                            skTileColors[(skwer + 0) % 3],
+                            0.5,
+                          )!,
+                          skBlack,
+                          0.5,
+                        )!,
+                        Color.lerp(
+                          skTileColors[(skwer + 0) % 3],
+                          skBlack,
+                          0.55,
+                        )!,
+                        Color.lerp(
+                          Color.lerp(
+                            skTileColors[(skwer + 1) % 3],
+                            skTileColors[(skwer + 0) % 3],
+                            0.5,
+                          )!,
+                          skBlack,
+                          0.6,
+                        )!,
                       ],
                     ),
                   ),
@@ -108,11 +125,11 @@ class _GameWidgetState extends State<GameWidget> {
                       decoration: BoxDecoration(
                         color: skBlack,
                         border: Border.all(
-                          width: 2,
+                          width: 4,
                           color: Color.lerp(
                               skTileColors[game.gameProps.value.skwer % 3],
                               skBlack,
-                              0.5)!,
+                              0.3)!,
                         ),
                       ),
                     ),

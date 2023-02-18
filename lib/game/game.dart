@@ -25,6 +25,7 @@ class Game {
   int _resetPuzzleCounter = 0;
 
   void resize(int numTilesX, int numTilesY) {
+    clearFocus(true);
     final hadPuzzle = gameProps.value.puzzle.value != null;
     gameProps.value.puzzle.value = null;
     gameProps.value = GameProps.resize(
@@ -116,10 +117,10 @@ class Game {
     }
   }
 
-  bool clearFocus() {
+  bool clearFocus([bool unfocusNode = false]) {
     for (final tile in props.skwerTiles.values) {
       if (tile.isFocused.value) {
-        if (Platform.isMobile) {
+        if (Platform.isMobile || unfocusNode) {
           tile.focusNode.unfocus();
         }
         focus(tile.index, false);

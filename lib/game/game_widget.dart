@@ -270,6 +270,7 @@ class _GameWidgetState extends State<GameWidget> {
                     game.rotate(GameRotation(index: tileIndex, delta: 1));
                     return KeyEventResult.handled;
                   } else if (event.logicalKey == LogicalKeyboardKey.tab) {
+                    game.clearFocus(true);
                     if (game.props.puzzle.value != null) {
                       game.props.puzzle.value = null;
                       game.reset(skwer: (game.props.skwer + 1) % 3);

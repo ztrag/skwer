@@ -10,11 +10,19 @@ import 'package:skwer/tile/skwer_tile_state.dart';
 
 typedef SkwerTileAction = void Function(SkwerTileIndex target);
 
+enum GameState {
+  inProgress,
+  clear,
+  failed,
+}
+
 class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
   final List<GameRotation> rotations = [];
 
   GameProps get props => gameProps.value;
+  GameState state = GameState.inProgress;
+  int _resetPuzzleCounter = 0;
 
   void resize(int numTilesX, int numTilesY) {
     final hadPuzzle = gameProps.value.puzzle.value != null;
@@ -83,6 +91,7 @@ class Game {
       return;
     }
 
+    state = GameState.inProgress;
     reset(skwer: props.skwer);
     for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
@@ -129,8 +138,21 @@ class Game {
 
     tileProps.pressCounter.value++;
 
+    if (state == GameState.clear && props.puzzle.value != null) {
+      return;
+    }
+
     if (addRotation) {
-      rotations.add(rotation);
+      if (rotations.length > 1 &&
+          rotations[rotations.length - 1].index == rotation.index &&
+          rotations[rotations.length - 2].index == rotation.index &&
+          state == GameState.failed) {
+        rotations.removeLast();
+        rotations.removeLast();
+        rotation = GameRotation(index: rotation.index, delta: -2);
+      } else {
+        rotations.add(rotation);
+      }
     }
 
     _skwerAction(tileProps, (target) => _rotateTile(rotation, target));
@@ -213,17 +235,35 @@ class Game {
   }
 
   void _checkEndGame(SkwerTileIndex trigger) {
-    if (props.puzzle.value == null || !_isClearState()) {
+    final puzzle = props.puzzle.value;
+    if (puzzle == null) {
       return;
     }
 
-    final puzzleSize = props.puzzle.value!.rotations.length;
-    _showPuzzleWin(trigger);
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (_isClearState()) {
-        startPuzzle(puzzleSize);
-      }
-    });
+    _checkGameState();
+    if (state == GameState.clear) {
+      _showPuzzleWin(trigger);
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        if (props.puzzle.value == puzzle) {
+          startPuzzle(puzzle.rotations.length);
+        }
+      });
+    } else if (state == GameState.failed) {
+      final counter = ++_resetPuzzleCounter;
+      Future.delayed(
+        const Duration(milliseconds: 1200),
+        () {
+          if (counter != _resetPuzzleCounter) {
+            return;
+          }
+
+          _checkGameState();
+          if (state == GameState.failed) {
+            resetPuzzle();
+          }
+        },
+      );
+    }
   }
 
   void _showPuzzleWin(SkwerTileIndex trigger) {
@@ -244,16 +284,23 @@ class Game {
     }
   }
 
-  bool _isClearState() {
+  void _checkGameState() {
+    state = _getGameState();
+  }
+
+  GameState _getGameState() {
+    var gameState = GameState.clear;
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
         final state = props.skwerTiles[index]!.state;
-        if (state.value.skwer % 3 != props.skwer) {
-          return false;
+        if (state.value.skwer > props.skwer) {
+          return GameState.failed;
+        } else if (state.value.skwer < props.skwer) {
+          gameState = GameState.inProgress;
         }
       }
     }
-    return true;
+    return gameState;
   }
 }

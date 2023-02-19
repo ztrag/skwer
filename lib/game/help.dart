@@ -48,7 +48,7 @@ class Help extends StatelessWidget {
                   style: TextStyle(fontSize: 40, color: skRed),
                 ),
                 Text(
-                  'return to base color',
+                  'return to base state',
                   style: TextStyle(fontSize: 24),
                 ),
                 Text(''),

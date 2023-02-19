@@ -123,7 +123,10 @@ class _GameWidgetState extends State<GameWidget> {
                                         0.4,
                                       )!,
                                       skBlack,
-                                      centerShade[skwer % 3])!,
+                                      centerShade[skwer % 3] *
+                                          (game.props.puzzle.value == null
+                                              ? 1.4
+                                              : 0.8))!,
                                   Color.lerp(
                                     Color.lerp(
                                       skTileColors[(skwer + 2) % 3],
@@ -136,7 +139,7 @@ class _GameWidgetState extends State<GameWidget> {
                                   Color.lerp(
                                     skTileColors[skwer % 3],
                                     skBlack,
-                                    0.87,
+                                    0.92,
                                   )!,
                                 ],
                               ),

@@ -10,7 +10,10 @@ class GameZone {
 
   factory GameZone(int numTilesX, int numTilesY) {
     final paddingX = _paddingForTiles(numTilesX);
-    final paddingY = _paddingForTiles(numTilesY);
+    var paddingY = _paddingForTiles(numTilesY);
+    if (paddingX == 1 && paddingY == 1 && numTilesY > 5 && numTilesX <= 5) {
+      paddingY = 2;
+    }
     return GameZone._(
       Point(paddingX, paddingY),
       Point(numTilesX - paddingX * 2, numTilesY - paddingY * 2),
@@ -18,7 +21,7 @@ class GameZone {
   }
 
   static int _paddingForTiles(int numTiles) {
-    if (numTiles > 9) {
+    if (numTiles >= 10) {
       return (6 + numTiles - 10) ~/ 2;
     } else if (numTiles > 6) {
       return 2;

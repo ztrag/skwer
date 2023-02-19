@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/game/game.dart';
+import 'package:skwer/game/game_bottom_menu.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
@@ -45,6 +46,12 @@ class _GameWidgetState extends State<GameWidget> {
   GameProps get props => game.gameProps.value;
 
   @override
+  void initState() {
+    super.initState();
+    game.prefs.numTiles.addListener(() => setState(() {}));
+  }
+
+  @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -54,14 +61,16 @@ class _GameWidgetState extends State<GameWidget> {
     final mediaQueryData = MediaQuery.of(context);
     final mediaSize = mediaQueryData.size;
     final size = Platform.isMobile
-        ? Size(mediaSize.width, mediaSize.height - 150)
+        ? Size(mediaSize.width, mediaSize.height - 100)
         : mediaSize;
-    final tileSize = _tileSize;
 
+    final numTilesFromPrefs = getNumTilesFromPrefs();
+    final tileSize = getTileSize(size, numTilesFromPrefs);
     final x = (size.width / tileSize).floor();
     final y = (size.height / tileSize).floor();
-    final numTilesX = x > 9 && x % 2 == 0 ? x - 1 : x;
-    final numTilesY = y > 9 && y % 2 == 0 ? y - 1 : y;
+    final numTilesX = numTilesFromPrefs?.x ?? (x > 9 && x % 2 == 0 ? x - 1 : x);
+    final numTilesY = numTilesFromPrefs?.y ?? (y > 9 && y % 2 == 0 ? y - 1 : y);
+
     if (numTilesX != props.numTilesX || numTilesY != props.numTilesY) {
       _positions.clear();
       game.resize(numTilesX, numTilesY);
@@ -71,188 +80,164 @@ class _GameWidgetState extends State<GameWidget> {
       autofocus: true,
       node: focusScopeNode,
       onKeyEvent: _onTopKeyEvent,
-      child: Stack(
-        alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ValueListenableBuilder(
-            valueListenable: game.gameProps,
-            builder: (_, props, __) => ValueListenableBuilder<Puzzle?>(
-                valueListenable: game.gameProps.value.puzzle,
-                builder: (_, puzzle, __) {
-                  final zone = GameZone(props.numTilesX, props.numTilesY);
-                  final skwer = game.gameProps.value.skwer;
-                  final zoneSize = min(
-                        zone.size.x / size.width,
-                        zone.size.y / size.height,
-                      ) *
-                      tileSize;
-                  const centerShade = [0.55, 0.65, 0.55];
-                  return Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          radius: 1 - zoneSize,
-                          stops: [zoneSize * 0.6, zoneSize * 0.6 + 0.3, 1],
-                          colors: [
-                            Color.lerp(
-                                Color.lerp(
-                                  skTileColors[(skwer + 0) % 3],
-                                  skTileColors[
-                                      (skwer + (skwer == 0 ? 2 : 1)) % 3],
-                                  0.4,
-                                )!,
-                                skBlack,
-                                centerShade[skwer % 3])!,
-                            Color.lerp(
-                              Color.lerp(
-                                skTileColors[(skwer + 2) % 3],
-                                skTileColors[skwer % 3],
-                                0.5,
-                              )!,
-                              skBlack,
-                              0.87,
-                            )!,
-                            Color.lerp(
-                              skTileColors[skwer % 3],
-                              skBlack,
-                              0.87,
-                            )!,
-                          ],
-                        ),
-                      ),
-                      child: puzzle == null
-                          ? Container()
-                          : Center(
-                              child: Container(
-                                width: zone.size.x * tileSize,
-                                height: zone.size.y * tileSize,
-                                decoration: BoxDecoration(
-                                  color: skBlack,
-                                  border: Border.all(
-                                    width: Platform.isMobile ? 2 : 4,
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                    color: Color.lerp(
+          Expanded(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: game.gameProps,
+                  builder: (_, props, __) => ValueListenableBuilder<Puzzle?>(
+                      valueListenable: game.gameProps.value.puzzle,
+                      builder: (_, puzzle, __) {
+                        final zone = GameZone(props.numTilesX, props.numTilesY);
+                        final skwer = game.gameProps.value.skwer;
+                        final zoneSize = min(
+                              zone.size.x / size.width,
+                              zone.size.y / size.height,
+                            ) *
+                            tileSize;
+                        const centerShade = [0.55, 0.65, 0.55];
+                        return Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                radius: 1 - zoneSize,
+                                stops: [
+                                  zoneSize * 0.6,
+                                  zoneSize * 0.6 + 0.3,
+                                  1
+                                ],
+                                colors: [
+                                  Color.lerp(
+                                      Color.lerp(
+                                        skTileColors[(skwer + 0) % 3],
                                         skTileColors[
-                                            game.gameProps.value.skwer % 3],
-                                        skBlack,
-                                        0.3)!,
-                                  ),
-                                ),
+                                            (skwer + (skwer == 0 ? 2 : 1)) % 3],
+                                        0.4,
+                                      )!,
+                                      skBlack,
+                                      centerShade[skwer % 3])!,
+                                  Color.lerp(
+                                    Color.lerp(
+                                      skTileColors[(skwer + 2) % 3],
+                                      skTileColors[skwer % 3],
+                                      0.5,
+                                    )!,
+                                    skBlack,
+                                    0.87,
+                                  )!,
+                                  Color.lerp(
+                                    skTileColors[skwer % 3],
+                                    skBlack,
+                                    0.87,
+                                  )!,
+                                ],
                               ),
                             ),
-                    ),
-                  );
-                }),
-          ),
-          Listener(
-            onPointerDown: _onPointerDown,
-            onPointerMove: _onPointerMove,
-            onPointerUp: _onPointerUp,
-            onPointerCancel: (_) => game.clearFocus(),
-            child: ValueListenableBuilder(
-              valueListenable: game.gameProps,
-              builder: (_, props, __) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    numTilesY,
-                    (y) => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        numTilesX,
-                        (x) => _buildTile(x, y, tileSize),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (Platform.isMobile)
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: ValueListenableBuilder(
-                valueListenable: game.gameProps,
-                builder: (_, props, __) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: GestureDetector(
-                      onLongPress: () {
-                        game.props.puzzle.value = null;
-                        game.reset(skwer: (game.gameProps.value.skwer + 1) % 3);
-                      },
-                      onTap: () {
-                        if (game.props.puzzle.value == null) {
-                          game.startPuzzle(1);
-                        } else {
-                          if (game.rotations.length ==
-                              game.props.puzzle.value!.rotations.length) {
-                            game.startPuzzle((game.rotations.length + 1) % 8);
-                          }
-                          game.resetPuzzle();
-                        }
-                      },
-                      child: Opacity(
-                        opacity: 0.5,
-                        child: Container(
-                          color: skWhite.withOpacity(0.3),
-                          width: 50,
-                          height: 50,
-                          child: Center(
-                            child: Container(
-                              color: skTileColors[(props.skwer + 2) % 3],
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Container(
-                                  color: skTileColors[(props.skwer + 1) % 3],
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(2),
+                            child: puzzle == null
+                                ? Container()
+                                : Center(
                                     child: Container(
-                                      color: skTileColors[props.skwer % 3],
-                                      child: const SizedBox(
-                                        width: 16,
-                                        height: 16,
+                                      width: zone.size.x * tileSize,
+                                      height: zone.size.y * tileSize,
+                                      decoration: BoxDecoration(
+                                        color: skBlack,
+                                        border: Border.all(
+                                          width: Platform.isMobile ? 2 : 4,
+                                          strokeAlign:
+                                              BorderSide.strokeAlignOutside,
+                                          color: Color.lerp(
+                                              skTileColors[
+                                                  game.gameProps.value.skwer %
+                                                      3],
+                                              skBlack,
+                                              0.3)!,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
+                          ),
+                        );
+                      }),
+                ),
+                Listener(
+                  onPointerDown: _onPointerDown,
+                  onPointerMove: _onPointerMove,
+                  onPointerUp: _onPointerUp,
+                  onPointerCancel: (_) => game.clearFocus(),
+                  child: ValueListenableBuilder(
+                    valueListenable: game.gameProps,
+                    builder: (_, props, __) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          numTilesY,
+                          (y) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              numTilesX,
+                              (x) => _buildTile(x, y, tileSize),
                             ),
                           ),
                         ),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: AnimatedOpacity(
+                          opacity: _isShowingHelp ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          child: IgnorePointer(
+                            ignoring: !_isShowingHelp,
+                            child: const Help(),
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          Positioned(
-            left: 0,
-            bottom: 0,
-            child: AnimatedOpacity(
-              opacity: _isShowingHelp ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 250),
-              child: IgnorePointer(
-                ignoring: !_isShowingHelp,
-                child: const Help(),
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+          if (Platform.isMobile)
+            GameMenuButton(
+              game: game,
+              onHelp: () => setState(() {
+                _isShowingHelp = !_isShowingHelp;
+              }),
+            ),
         ],
       ),
     );
   }
 
-  double get _tileSize {
+  Point<int>? getNumTilesFromPrefs() {
     if (Platform.isMobile) {
-      return 60;
+      return game.prefs.numTiles.value;
     }
-    return 80.0;
+    return null;
+  }
+
+  double getTileSize(Size size, Point<int>? numTilesFromPrefs) {
+    if (numTilesFromPrefs == null) {
+      return 80;
+    }
+    return min(
+        size.width / numTilesFromPrefs.x, size.height / numTilesFromPrefs.y);
   }
 
   Widget _buildTile(int x, int y, double tileSize) {

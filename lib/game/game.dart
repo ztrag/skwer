@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:skwer/game/game_prefs.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
@@ -20,9 +21,11 @@ class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
   final List<GameRotation> rotations = [];
 
-  GameProps get props => gameProps.value;
+  GamePrefs prefs = GamePrefs();
   GameState state = GameState.inProgress;
   int _resetPuzzleCounter = 0;
+
+  GameProps get props => gameProps.value;
 
   void resize(int numTilesX, int numTilesY) {
     clearFocus(true);

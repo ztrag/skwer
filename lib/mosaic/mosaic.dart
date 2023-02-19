@@ -15,7 +15,6 @@ abstract class Mosaic {
     ColorWave wave,
     Offset? hoverPosition,
   ) {
-
     for (MosaicTile tile in tiles) {
       tile.paint(
         canvas,
@@ -27,12 +26,13 @@ abstract class Mosaic {
     }
   }
 
-  double _getHoverBrightness(MosaicTile tile, Offset? hoverPosition, Size size) {
+  double _getHoverBrightness(
+      MosaicTile tile, Offset? hoverPosition, Size size) {
     if (hoverPosition == null) {
       return 1;
     }
     final dist = Offset(tile.position.x - hoverPosition.dx / size.width,
-        tile.position.y - hoverPosition.dy / size.height)
+            tile.position.y - hoverPosition.dy / size.height)
         .distance;
     final dist2 = max(0, (1.4142 - dist) / 1.4142);
     return 0.35 + 1 * pow(dist2, 1.5);

@@ -329,16 +329,35 @@ class _SkwerTilePaint extends CustomPainter {
 
   double get _tileSize {
     if (Platform.isMobile) {
-      if (props.state.value.hasPuzzle) {
-        return props.state.value.isActive ? 1 : 0.8;
+      final numTiles = min(
+        gameProps.value.numTilesX,
+        gameProps.value.numTilesY,
+      );
+      final x = _tileSizeFromNumTiles(numTiles);
+      if (props.state.value.hasPuzzle && props.state.value.isActive) {
+        return x;
       }
-      final x = min(1.0, pow(2 / _cartesianDistFromCenter, 0.7));
-      return pow(x, 0.5).toDouble();
+      final z = min(1.0, pow(1 / _cartesianDistFromCenter, 0.7));
+      return x * pow(z, 0.5).toDouble();
     }
     final amp =
         props.state.value.hasPuzzle && props.state.value.isActive ? 0.9 : 0.85;
     final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
+  }
+
+  double _tileSizeFromNumTiles(int numTiles) {
+    switch (numTiles) {
+      case 3:
+        return 0.8;
+      case 4:
+        return 0.85;
+      case 5:
+        return 0.9;
+      case 6:
+        return 0.95;
+    }
+    return 1;
   }
 
   double get _tileOpacity {

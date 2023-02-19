@@ -7,6 +7,7 @@ import 'package:skwer/game/game.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
+import 'package:skwer/game/help.dart';
 import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/tile/skwer_tile.dart';
@@ -23,7 +24,6 @@ final _kDigits = [
   LogicalKeyboardKey.digit7,
   LogicalKeyboardKey.digit8,
   LogicalKeyboardKey.digit9,
-  LogicalKeyboardKey.digit0,
 ];
 
 class GameWidget extends StatefulWidget {
@@ -40,6 +40,7 @@ class _GameWidgetState extends State<GameWidget> {
   final Map<Rect, SkwerTileProps> _positions = {};
   Future? _delayedUnfocus;
   SkwerTileIndex? _singlePointer;
+  bool _isShowingHelp = false;
 
   GameProps get props => game.gameProps.value;
 
@@ -230,6 +231,18 @@ class _GameWidgetState extends State<GameWidget> {
                 },
               ),
             ),
+          Positioned(
+            left: 0,
+            bottom: 0,
+            child: AnimatedOpacity(
+              opacity: _isShowingHelp ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              child: IgnorePointer(
+                ignoring: !_isShowingHelp,
+                child: const Help(),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -294,6 +307,13 @@ class _GameWidgetState extends State<GameWidget> {
       }
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+      if (_isShowingHelp) {
+        setState(() {
+          _isShowingHelp = false;
+        });
+        return KeyEventResult.handled;
+      }
+
       final didClearFocus = game.clearFocus();
       if (!didClearFocus && game.props.puzzle.value != null) {
         game.props.puzzle.value = null;
@@ -305,13 +325,17 @@ class _GameWidgetState extends State<GameWidget> {
       final digit = _kDigits.indexOf(event.logicalKey) + 1;
       game.startPuzzle(digit);
       return KeyEventResult.handled;
-    }
-    if (event.logicalKey == LogicalKeyboardKey.tab) {
+    } else if (event.logicalKey == LogicalKeyboardKey.tab) {
       game.clearFocus();
       game.reset(skwer: (game.props.skwer + 1) % 3);
       if (game.props.puzzle.value != null) {
         game.resetPuzzle();
       }
+      return KeyEventResult.handled;
+    } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
+      setState(() {
+        _isShowingHelp = !_isShowingHelp;
+      });
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;

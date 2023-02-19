@@ -90,6 +90,10 @@ class Game {
     resetPuzzle();
   }
 
+  void addToPuzzle() {
+    props.puzzle.value = Puzzle.add(props.puzzle.value!);
+  }
+
   void resetPuzzle() {
     if (props.puzzle.value == null) {
       return;

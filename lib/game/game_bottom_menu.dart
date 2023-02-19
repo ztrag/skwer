@@ -40,9 +40,11 @@ class GameMenuButton extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
                       onLongPress: () {
-                        game.reset(skwer: (game.props.skwer + 1) % 3);
                         if (game.props.puzzle.value != null) {
-                          game.resetPuzzle();
+                          game.props.puzzle.value = null;
+                          game.reset(skwer: game.props.skwer);
+                        } else {
+                          game.reset(skwer: (game.props.skwer + 1) % 3);
                         }
                       },
                       onTap: () {
@@ -51,13 +53,7 @@ class GameMenuButton extends StatelessWidget {
                         } else {
                           if (game.rotations.length ==
                               game.props.puzzle.value!.rotations.length) {
-                            final puzzleSize = (game.rotations.length + 1) % 8;
-                            if (puzzleSize > 0) {
-                              game.startPuzzle(puzzleSize);
-                            } else {
-                              game.props.puzzle.value = null;
-                              game.reset(skwer: game.props.skwer);
-                            }
+                            game.addToPuzzle();
                           }
                           game.resetPuzzle();
                         }

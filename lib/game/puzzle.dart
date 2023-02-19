@@ -10,7 +10,15 @@ class Puzzle {
   final GameZone zone;
   final List<GameRotation> rotations;
 
-  Puzzle(this.zone, int size) : rotations = _calcRandomRotations(size, zone);
+  Puzzle._(this.zone, this.rotations);
+
+  factory Puzzle(GameZone zone, int size) =>
+      Puzzle._(zone, _calcRandomRotations(size, zone));
+
+  factory Puzzle.add(Puzzle puzzle) => Puzzle._(puzzle.zone, [
+        ...puzzle.rotations,
+        GameRotation(index: _getRandomIndex(puzzle.zone), delta: -1),
+      ]);
 
   static List<GameRotation> _calcRandomRotations(int size, GameZone zone) =>
       List.generate(

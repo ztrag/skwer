@@ -100,73 +100,62 @@ class _GameWidgetState extends State<GameWidget> {
                             ) *
                             tileSize;
                         const centerShade = [0.55, 0.65, 0.55];
-                        return Positioned(
-                          left: 0,
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: RadialGradient(
-                                radius: 1 - zoneSize,
-                                stops: [
-                                  zoneSize * 0.6,
-                                  zoneSize * 0.6 + 0.3,
-                                  1
-                                ],
-                                colors: [
-                                  Color.lerp(
-                                      Color.lerp(
-                                        skTileColors[(skwer + 0) % 3],
-                                        skTileColors[
-                                            (skwer + (skwer == 0 ? 2 : 1)) % 3],
-                                        0.4,
-                                      )!,
-                                      skBlack,
-                                      centerShade[skwer % 3] *
-                                          (game.props.puzzle.value == null
-                                              ? 1.4
-                                              : 0.8))!,
-                                  Color.lerp(
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              radius: 1 - zoneSize,
+                              stops: [zoneSize * 0.6, zoneSize * 0.6 + 0.3, 1],
+                              colors: [
+                                Color.lerp(
                                     Color.lerp(
-                                      skTileColors[(skwer + 2) % 3],
-                                      skTileColors[skwer % 3],
-                                      0.5,
+                                      skTileColors[(skwer + 0) % 3],
+                                      skTileColors[
+                                          (skwer + (skwer == 0 ? 2 : 1)) % 3],
+                                      0.4,
                                     )!,
                                     skBlack,
-                                    0.87,
-                                  )!,
+                                    centerShade[skwer % 3] *
+                                        (game.props.puzzle.value == null
+                                            ? 1.4
+                                            : 0.8))!,
+                                Color.lerp(
                                   Color.lerp(
+                                    skTileColors[(skwer + 2) % 3],
                                     skTileColors[skwer % 3],
-                                    skBlack,
-                                    0.92,
+                                    0.5,
                                   )!,
-                                ],
-                              ),
+                                  skBlack,
+                                  0.87,
+                                )!,
+                                Color.lerp(
+                                  skTileColors[skwer % 3],
+                                  skBlack,
+                                  0.92,
+                                )!,
+                              ],
                             ),
-                            child: puzzle == null
-                                ? Container()
-                                : Center(
-                                    child: Container(
-                                      width: zone.size.x * tileSize,
-                                      height: zone.size.y * tileSize,
-                                      decoration: BoxDecoration(
-                                        color: skBlack,
-                                        border: Border.all(
-                                          width: Platform.isMobile ? 2 : 4,
-                                          strokeAlign:
-                                              BorderSide.strokeAlignOutside,
-                                          color: Color.lerp(
-                                              skTileColors[
-                                                  game.gameProps.value.skwer %
-                                                      3],
-                                              skBlack,
-                                              0.3)!,
-                                        ),
+                          ),
+                          child: puzzle == null
+                              ? Container()
+                              : Center(
+                                  child: Container(
+                                    width: zone.size.x * tileSize,
+                                    height: zone.size.y * tileSize,
+                                    decoration: BoxDecoration(
+                                      color: skBlack,
+                                      border: Border.all(
+                                        width: Platform.isMobile ? 2 : 4,
+                                        strokeAlign:
+                                            BorderSide.strokeAlignOutside,
+                                        color: Color.lerp(
+                                            skTileColors[
+                                                game.gameProps.value.skwer % 3],
+                                            skBlack,
+                                            0.3)!,
                                       ),
                                     ),
                                   ),
-                          ),
+                                ),
                         );
                       }),
                 ),
@@ -194,30 +183,24 @@ class _GameWidgetState extends State<GameWidget> {
                     },
                   ),
                 ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: AnimatedOpacity(
-                    opacity: _isShowingHelp ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    child: IgnorePointer(
-                      ignoring: !_isShowingHelp,
-                      child: GestureDetector(
-                        onTap: () => setState(() => _isShowingHelp = false),
-                        child: Container(
-                          color: skBlack.withOpacity(0.5),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Row(children: const [
-                                Flexible(
-                                  child: Help(),
-                                ),
-                              ]),
-                            ],
-                          ),
+                AnimatedOpacity(
+                  opacity: _isShowingHelp ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: IgnorePointer(
+                    ignoring: !_isShowingHelp,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isShowingHelp = false),
+                      child: Container(
+                        color: skBlack.withOpacity(0.5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(children: const [
+                              Flexible(
+                                child: Help(),
+                              ),
+                            ]),
+                          ],
                         ),
                       ),
                     ),

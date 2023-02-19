@@ -56,7 +56,7 @@ class _GameWidgetState extends State<GameWidget> {
     final size = Platform.isMobile
         ? Size(mediaSize.width, mediaSize.height - 150)
         : mediaSize;
-    const tileSize = 80.0;
+    final tileSize = _tileSize;
 
     final x = (size.width / tileSize).floor();
     final y = (size.height / tileSize).floor();
@@ -114,12 +114,12 @@ class _GameWidgetState extends State<GameWidget> {
                                 0.5,
                               )!,
                               skBlack,
-                              0.8,
+                              0.87,
                             )!,
                             Color.lerp(
                               skTileColors[skwer % 3],
                               skBlack,
-                              0.8,
+                              0.87,
                             )!,
                           ],
                         ),
@@ -133,7 +133,7 @@ class _GameWidgetState extends State<GameWidget> {
                                 decoration: BoxDecoration(
                                   color: skBlack,
                                   border: Border.all(
-                                    width: 4,
+                                    width: Platform.isMobile ? 2 : 4,
                                     strokeAlign: BorderSide.strokeAlignOutside,
                                     color: Color.lerp(
                                         skTileColors[
@@ -246,6 +246,13 @@ class _GameWidgetState extends State<GameWidget> {
         ],
       ),
     );
+  }
+
+  double get _tileSize {
+    if (Platform.isMobile) {
+      return 60;
+    }
+    return 80.0;
   }
 
   Widget _buildTile(int x, int y, double tileSize) {

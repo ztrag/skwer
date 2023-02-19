@@ -22,32 +22,43 @@ class GameMenuButton extends StatelessWidget {
       valueListenable: game.gameProps,
       builder: (_, props, __) {
         return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
+          padding: const EdgeInsets.all(6.0),
+          child: Theme(
+            data: ThemeData(
+                textButtonTheme: TextButtonThemeData(
                     style: TextButton.styleFrom(
-                      foregroundColor: skTileColors[
-                          game.gameProps.value.skwer % 3], // Text Color
-                    ),
-                    onPressed: () => game.prefs.tileLevel--,
-                    child: const Text('-'),
+              foregroundColor:
+                  skTileColors[game.gameProps.value.skwer % 3], // Text Color
+            ))),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  child: TextButton(
+                    onPressed: () => game.prefs.tileLevel++,
+                    child: const Icon(Icons.zoom_out_map),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: GestureDetector(
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        game.reset(skwer: (game.props.skwer + 2) % 3);
+                        if (game.props.puzzle.value != null) {
+                          game.resetPuzzle();
+                        }
+                      },
+                      child: const Icon(Icons.chevron_left),
+                    ),
+                    TextButton(
                       onLongPress: () {
                         if (game.props.puzzle.value != null) {
                           game.props.puzzle.value = null;
-                          game.reset(skwer: game.props.skwer);
-                        } else {
-                          game.reset(skwer: (game.props.skwer + 1) % 3);
                         }
+                        game.reset(skwer: game.props.skwer);
                       },
-                      onTap: () {
+                      onPressed: () {
                         if (game.props.puzzle.value == null) {
                           game.startPuzzle(1);
                         } else {
@@ -66,29 +77,26 @@ class GameMenuButton extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      foregroundColor: skTileColors[
-                          game.gameProps.value.skwer % 3], // Text Color
+                    TextButton(
+                      onPressed: () {
+                        game.reset(skwer: (game.props.skwer + 1) % 3);
+                        if (game.props.puzzle.value != null) {
+                          game.resetPuzzle();
+                        }
+                      },
+                      child: const Icon(Icons.chevron_right),
                     ),
-                    onPressed: () => game.prefs.tileLevel++,
-                    child: const Text('+'),
-                  ),
-                ],
-              ),
-              Positioned(
-                right: 0,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: skTileColors[
-                        game.gameProps.value.skwer % 3], // Text Color
-                  ),
-                  onPressed: onHelp,
-                  child: const Text('?'),
+                  ],
                 ),
-              ),
-            ],
+                Positioned(
+                  right: 0,
+                  child: TextButton(
+                    onPressed: onHelp,
+                    child: const Icon(Icons.help_center),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

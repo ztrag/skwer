@@ -24,7 +24,7 @@ class GamePrefs {
   int get tileLevel => _tileLevel;
 
   set tileLevel(int level) {
-    _tileLevel = max(0, min(kNumTiles.length - 1, level));
+    _tileLevel = level % kNumTiles.length;
     _numTiles.value = kNumTiles[_tileLevel];
   }
 

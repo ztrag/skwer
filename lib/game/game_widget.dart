@@ -196,21 +196,31 @@ class _GameWidgetState extends State<GameWidget> {
                 ),
                 Positioned(
                   left: 0,
-                  bottom: 0,
                   right: 0,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: AnimatedOpacity(
-                          opacity: _isShowingHelp ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 250),
-                          child: IgnorePointer(
-                            ignoring: !_isShowingHelp,
-                            child: const Help(),
+                  top: 0,
+                  bottom: 0,
+                  child: AnimatedOpacity(
+                    opacity: _isShowingHelp ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 250),
+                    child: IgnorePointer(
+                      ignoring: !_isShowingHelp,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isShowingHelp = false),
+                        child: Container(
+                          color: skBlack.withOpacity(0.5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Row(children: const [
+                                Flexible(
+                                  child: Help(),
+                                ),
+                              ]),
+                            ],
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],

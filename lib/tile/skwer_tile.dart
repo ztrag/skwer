@@ -328,10 +328,9 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double get _tileSize {
-    if (props.state.value.hasPuzzle && props.state.value.isActive) {
-      return 1;
-    }
-    final x = 0.9 * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
+    final amp =
+        props.state.value.hasPuzzle && props.state.value.isActive ? 0.9 : 0.85;
+    final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
   }
 
@@ -343,8 +342,9 @@ class _SkwerTilePaint extends CustomPainter {
     return pow(x, 1).toDouble();
   }
 
-  double get _cartesianDistFromCenter => max(
-        (props.index.x + 0.5 - gameProps.value.numTilesX / 2).abs(),
-        (props.index.y + 0.5 - gameProps.value.numTilesY / 2).abs(),
-      );
+  double get _cartesianDistFromCenter {
+    final dx = props.index.x + 0.5 - gameProps.value.numTilesX / 2;
+    final dy = props.index.y + 0.5 - gameProps.value.numTilesY / 2;
+    return 1.0 * pow(dx * dx + dy * dy, 0.45);
+  }
 }

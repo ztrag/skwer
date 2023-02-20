@@ -51,19 +51,4 @@ class SkwerTileState {
     final skwerDelta = skwer - gameProps.skwer.value;
     return skwerDelta > 0 && skwerDelta % 3 != 0;
   }
-
-  double getBrightness(SkwerTileProps props, GameProps gameProps) {
-    if (!gameProps.hasPuzzle) {
-      return 1;
-    }
-
-    final skwerDelta = skwer - gameProps.skwer.value;
-    final hasPuzzleHighlight = skwerDelta < 0;
-    final fail = isFailed(props, gameProps);
-    if (props.isActive.value) {
-      return hasPuzzleHighlight ? 1.4 : (fail ? 1.2 : 1);
-    } else {
-      return hasPuzzleHighlight ? 5 : (fail ? 5 : 1);
-    }
-  }
 }

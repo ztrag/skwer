@@ -43,6 +43,8 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   late final Animation<double> _solvedAnimation;
   late final AnimationController _activeAnimationController;
   late final Animation<double> _activeAnimation;
+  late final AnimationController _puzzleHighlightAnimationController;
+  late final Animation<double> _puzzleHighlightAnimation;
   late final _SkwerTilePaint _paint;
   late SkwerTileState _previousState;
 
@@ -50,15 +52,12 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
+    const puzzleStateDuration = Duration(milliseconds: 300);
+    _animationController =
+        AnimationController(duration: puzzleStateDuration, vsync: this);
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
-    _pressAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+    _pressAnimationController =
+        AnimationController(duration: puzzleStateDuration, vsync: this);
     _pressAnimation =
         CurveTween(curve: Curves.easeIn).animate(_pressAnimationController);
     _highlightAnimationController = AnimationController(
@@ -74,17 +73,17 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _focusAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_focusAnimationController);
     _solvedAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+        duration: const Duration(milliseconds: 600), vsync: this);
     _solvedAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_solvedAnimationController);
-    _activeAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+    _activeAnimationController =
+        AnimationController(duration: puzzleStateDuration, vsync: this);
     _activeAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_activeAnimationController);
+    _puzzleHighlightAnimationController =
+        AnimationController(duration: puzzleStateDuration, vsync: this);
+    _puzzleHighlightAnimation = Tween(begin: 0.0, end: 1.0)
+        .animate(_puzzleHighlightAnimationController);
     _paint = _SkwerTilePaint(
       widget.props,
       widget.gameProps,
@@ -95,6 +94,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
       _focusAnimation,
       _solvedAnimation,
       _activeAnimation,
+      _puzzleHighlightAnimation,
     );
     _previousState = widget.props.state.value;
 
@@ -123,6 +123,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _pressAnimationController.dispose();
     _activeAnimationController.dispose();
     _solvedAnimationController.dispose();
+    _puzzleHighlightAnimationController.dispose();
     super.dispose();
   }
 
@@ -131,9 +132,11 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _highlightAnimationController.value = 0;
     _solvedAnimationController.value = widget.gameProps.isSolved.value ? 1 : 0;
     _activeAnimationController.value = widget.props.isActive.value ? 1 : 0;
+    _puzzleHighlightAnimationController.value = 0;
   }
 
   void _onStateChanged() {
+    _onPuzzleHighlightChanged();
     final currentState = widget.props.state.value;
     final reAnimate = _previousState.skwer < currentState.skwer ||
         _animationController.value > 0.9 ||
@@ -158,15 +161,8 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   }
 
   void _onHighlighted() {
-    final skwer = widget.props.state.value.skwer;
-    final gameSkwer = widget.gameProps.skwer.value;
-    final fullHighlight = skwer % 3 != gameSkwer % 3 || skwer < gameSkwer;
     if (widget.props.isHighlighted.value) {
-      if (fullHighlight) {
-        _highlightAnimationController.forward();
-      } else {
-        _highlightAnimationController.value = 0.1;
-      }
+      _highlightAnimationController.forward();
     } else {
       _highlightAnimationController.reverse();
     }
@@ -202,6 +198,17 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     }
   }
 
+  void _onPuzzleHighlightChanged() {
+    final skwerDelta =
+        widget.props.state.value.skwer - widget.gameProps.skwer.value;
+    final hasPuzzleHighlight = skwerDelta < 0 || skwerDelta % 3 != 0;
+    if (hasPuzzleHighlight) {
+      _puzzleHighlightAnimationController.forward();
+    } else {
+      _puzzleHighlightAnimationController.reverse();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -230,6 +237,7 @@ class _SkwerTilePaint extends CustomPainter {
   final Animation<double> focusAnimation;
   final Animation<double> solvedAnimation;
   final Animation<double> activeAnimation;
+  final Animation<double> puzzleHighlightAnimation;
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
@@ -244,6 +252,7 @@ class _SkwerTilePaint extends CustomPainter {
     this.focusAnimation,
     this.solvedAnimation,
     this.activeAnimation,
+    this.puzzleHighlightAnimation,
   ) : super(
           repaint: Listenable.merge([
             gameProps.skwer,
@@ -257,6 +266,7 @@ class _SkwerTilePaint extends CustomPainter {
             focusAnimation,
             solvedAnimation,
             activeAnimation,
+            puzzleHighlightAnimation,
           ]),
         );
 
@@ -331,20 +341,20 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double _getBrightness() {
-    final start = animationStart.immediate
-        ? animationEnd.getBrightness(props, gameProps)
-        : animationStart.getBrightness(props, gameProps);
-    final end = animationEnd.getBrightness(props, gameProps);
-    final x = start * (1 - animation.value) + end * animation.value;
     final solved = solvedAnimation.value;
     final active = activeAnimation.value;
-    final z = solved * active * 0.9 +
-        solved * (1 - active) * 0.5 +
-        (1 - solved) * active * 0.7 +
-        (1 - solved) * (1 - active) * 0.15;
-    final y = x * z * (1 - highlightAnimation.value) +
-        1.05 * highlightAnimation.value;
-    return y * (1 - focusAnimation.value) + 1.4 * focusAnimation.value;
+    final puzzle = puzzleHighlightAnimation.value;
+    final highlight = highlightAnimation.value;
+    final focus = focusAnimation.value;
+
+    final z = (solved * active) * 1 +
+        (solved * (1 - active)) * 0.7 +
+        ((1 - solved) * active * puzzle) * 1 +
+        ((1 - solved) * active * (1 - puzzle)) * 0.7 +
+        ((1 - solved) * (1 - active) * puzzle) * 0.75 +
+        ((1 - solved) * (1 - active) * (1 - puzzle)) * 0.15;
+    final y = z * (1 - highlight * puzzle) + 1.05 * highlight * puzzle;
+    return y * (1 - focus) + 1.4 * focus;
   }
 
   @override

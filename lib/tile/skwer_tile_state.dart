@@ -4,14 +4,12 @@ import 'package:skwer/tile/skwer_tile_props.dart';
 
 class SkwerTileState {
   final int skwer;
-  final bool hasPuzzle;
   final bool isSolved;
   final SkwerTileIndex? trigger;
   final bool immediate;
 
   SkwerTileState._({
     this.skwer = -1,
-    this.hasPuzzle = false,
     this.isSolved = false,
     this.trigger,
     this.immediate = false,
@@ -23,20 +21,17 @@ class SkwerTileState {
     SkwerTileState state,
     int skwer, {
     SkwerTileIndex? trigger,
-    bool hasPuzzle = false,
     bool isSolved = false,
     bool isLastPressed = false,
     bool immediate = false,
   }) {
     if (state.skwer == skwer &&
-        state.isSolved == isSolved &&
-        state.hasPuzzle == hasPuzzle) {
+        state.isSolved == isSolved) {
       return state;
     }
     return SkwerTileState._(
       skwer: skwer,
       trigger: trigger,
-      hasPuzzle: hasPuzzle,
       isSolved: isSolved,
       immediate: immediate,
     );
@@ -50,12 +45,11 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: state.skwer + skwerDelta,
       trigger: skwerDelta > 0 ? trigger : null,
-      hasPuzzle: state.hasPuzzle,
     );
   }
 
-  bool isFailed(GameProps gameProps) {
-    if (!hasPuzzle) {
+  bool isFailed(SkwerTileProps props, GameProps gameProps) {
+    if (!gameProps.hasPuzzle) {
       return false;
     }
 
@@ -64,7 +58,7 @@ class SkwerTileState {
   }
 
   double getBrightness(SkwerTileProps props, GameProps gameProps) {
-    if (!hasPuzzle) {
+    if (!gameProps.hasPuzzle) {
       return 1;
     }
 
@@ -74,7 +68,7 @@ class SkwerTileState {
 
     final skwerDelta = skwer - gameProps.skwer;
     final hasPuzzleHighlight = skwerDelta < 0;
-    final fail = isFailed(gameProps);
+    final fail = isFailed(props, gameProps);
     if (props.isActive.value) {
       return hasPuzzleHighlight ? 1 : (fail ? 0.9 : 0.7);
     } else {

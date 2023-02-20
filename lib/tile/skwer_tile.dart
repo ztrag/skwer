@@ -138,7 +138,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     if (widget.props.isFocused.value) {
       _focusAnimationController.forward(from: 0);
     } else {
-      if (widget.gameProps.value.puzzle.value == null) {
+      if (!widget.gameProps.value.hasPuzzle) {
         _previousState = widget.props.state.value;
         _paint.animationStart = _previousState;
         _paint.animationEnd = _previousState;
@@ -224,8 +224,8 @@ class _SkwerTilePaint extends CustomPainter {
       );
     }
 
-    final isFailed = animationEnd.isFailed(gameProps.value);
-    final isPuzzle = gameProps.value.puzzle.value != null;
+    final isFailed = animationEnd.isFailed(props, gameProps.value);
+    final isPuzzle = gameProps.value.hasPuzzle;
     const failedAnimationValue = 0.6;
 
     _currentGroup.paint(
@@ -252,7 +252,7 @@ class _SkwerTilePaint extends CustomPainter {
     );
   }
 
-  bool get _shouldShowRainbow => gameProps.value.puzzle.value == null;
+  bool get _shouldShowRainbow => !gameProps.value.hasPuzzle;
 
   Color get _startColor => _shouldShowRainbow
       ? _getRainbowColor()
@@ -334,14 +334,14 @@ class _SkwerTilePaint extends CustomPainter {
         gameProps.value.numTilesY,
       );
       final x = _tileSizeFromNumTiles(numTiles);
-      if (props.state.value.hasPuzzle && props.isActive.value) {
+      if (gameProps.value.hasPuzzle && props.isActive.value) {
         return x;
       }
       final z = min(1.0, pow(1 / _cartesianDistFromCenter, 0.7));
       return x * pow(z, 0.5).toDouble();
     }
     final amp =
-        props.state.value.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
+        gameProps.value.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
     final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
   }
@@ -362,14 +362,14 @@ class _SkwerTilePaint extends CustomPainter {
 
   double get _tileOpacity {
     if (Platform.isMobile) {
-      if (props.state.value.hasPuzzle) {
+      if (gameProps.value.hasPuzzle) {
         return 1;
       }
       final x = min(1.0, 2 / _cartesianDistFromCenter);
       return pow(x, 1).toDouble();
     }
 
-    if (props.state.value.hasPuzzle && props.isActive.value) {
+    if (gameProps.value.hasPuzzle && props.isActive.value) {
       return 1;
     }
     final x = min(1.0, 5 / _cartesianDistFromCenter);

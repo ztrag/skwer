@@ -115,9 +115,7 @@ class _GameWidgetState extends State<GameWidget> {
                                     )!,
                                     skBlack,
                                     centerShade[skwer % 3] *
-                                        (game.props.puzzle.value == null
-                                            ? 1.4
-                                            : 0.8))!,
+                                        (game.props.hasPuzzle ? 0.8 : 1.4))!,
                                 Color.lerp(
                                   Color.lerp(
                                     skTileColors[(skwer + 2) % 3],
@@ -288,10 +286,10 @@ class _GameWidgetState extends State<GameWidget> {
     }
 
     if (event.logicalKey == LogicalKeyboardKey.keyR) {
-      if (game.props.puzzle.value == null) {
-        game.reset();
-      } else {
+      if (game.props.hasPuzzle) {
         game.resetPuzzle();
+      } else {
+        game.reset();
       }
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -303,9 +301,8 @@ class _GameWidgetState extends State<GameWidget> {
       }
 
       final didClearFocus = game.clearFocus();
-      if (!didClearFocus && game.props.puzzle.value != null) {
-        game.props.puzzle.value = null;
-        game.reset();
+      if (!didClearFocus && game.props.hasPuzzle) {
+        game.endPuzzle();
         return KeyEventResult.handled;
       }
       return didClearFocus ? KeyEventResult.handled : KeyEventResult.ignored;
@@ -316,7 +313,7 @@ class _GameWidgetState extends State<GameWidget> {
     } else if (event.logicalKey == LogicalKeyboardKey.tab) {
       game.clearFocus();
       game.reset(skwer: (game.props.skwer + 1) % 3);
-      if (game.props.puzzle.value != null) {
+      if (game.props.hasPuzzle) {
         game.resetPuzzle();
       }
       return KeyEventResult.handled;
@@ -338,18 +335,7 @@ class _GameWidgetState extends State<GameWidget> {
     if (event.logicalKey == LogicalKeyboardKey.space ||
         event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.shiftRight) {
-      if (RawKeyboard.instance.keysPressed.intersection({
-            LogicalKeyboardKey.shiftLeft,
-            LogicalKeyboardKey.shiftRight,
-            LogicalKeyboardKey.space,
-            LogicalKeyboardKey.enter,
-          }).length >
-          1) {
-        game.props.puzzle.value = null;
-        game.reset(skwer: tileProps.state.value.skwer % 3);
-      } else {
-        game.rotate(GameRotation(index: tileIndex, delta: 1));
-      }
+      game.rotate(GameRotation(index: tileIndex, delta: 1));
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;

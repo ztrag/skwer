@@ -56,4 +56,6 @@ class GameProps {
     }
     return currentPuzzle.zone.containsTile(index);
   }
+
+  bool get hasPuzzle => puzzle.value != null;
 }

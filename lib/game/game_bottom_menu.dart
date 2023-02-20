@@ -45,7 +45,7 @@ class GameMenuButton extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         game.reset(skwer: (game.props.skwer + 2) % 3);
-                        if (game.props.puzzle.value != null) {
+                        if (game.props.hasPuzzle) {
                           game.resetPuzzle();
                         }
                       },
@@ -53,13 +53,14 @@ class GameMenuButton extends StatelessWidget {
                     ),
                     TextButton(
                       onLongPress: () {
-                        if (game.props.puzzle.value != null) {
-                          game.props.puzzle.value = null;
+                        if (game.props.hasPuzzle) {
+                          game.endPuzzle();
+                        } else {
+                          game.reset(skwer: game.props.skwer);
                         }
-                        game.reset(skwer: game.props.skwer);
                       },
                       onPressed: () {
-                        if (game.props.puzzle.value == null) {
+                        if (!game.props.hasPuzzle) {
                           game.startPuzzle(1);
                         } else {
                           if (game.rotations.length ==
@@ -80,7 +81,7 @@ class GameMenuButton extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         game.reset(skwer: (game.props.skwer + 1) % 3);
-                        if (game.props.puzzle.value != null) {
+                        if (game.props.hasPuzzle) {
                           game.resetPuzzle();
                         }
                       },

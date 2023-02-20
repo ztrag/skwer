@@ -30,8 +30,8 @@ class Game {
 
   void resize(int numTilesX, int numTilesY) {
     clearFocus(true);
-    final hadPuzzle = gameProps.value.puzzle.value != null;
-    gameProps.value.puzzle.value = null;
+    final hadPuzzle = gameProps.value.hasPuzzle;
+    endPuzzle(false);
     gameProps.value = GameProps.resize(
       props: gameProps.value,
       numTilesX: numTilesX,
@@ -70,7 +70,6 @@ class Game {
         state.value = SkwerTileState.reset(
           state.value,
           props.skwer,
-          hasPuzzle: props.puzzle.value != null,
           immediate: immediate,
         );
         if (tileProps.isFocused.value) {
@@ -100,7 +99,7 @@ class Game {
   }
 
   void resetPuzzle() {
-    if (props.puzzle.value == null) {
+    if (!props.hasPuzzle) {
       return;
     }
 
@@ -108,6 +107,13 @@ class Game {
     reset(skwer: props.skwer);
     for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
+    }
+  }
+
+  void endPuzzle([bool shouldReset = true]) {
+    props.puzzle.value = null;
+    if (shouldReset) {
+      reset(skwer: props.skwer);
     }
   }
 
@@ -151,7 +157,7 @@ class Game {
 
     tileProps.pressCounter.value++;
 
-    if (state == GameState.clear && props.puzzle.value != null) {
+    if (state == GameState.clear && props.hasPuzzle) {
       return;
     }
 
@@ -167,7 +173,7 @@ class Game {
       } else {
         rotations.add(rotation);
         rotationCounter.value +=
-            gameProps.value.puzzle.value != null ? -rotation.delta : 1;
+            gameProps.value.hasPuzzle ? -rotation.delta : 1;
       }
     }
 
@@ -293,7 +299,6 @@ class Game {
           props.skwer,
           trigger: trigger,
           isSolved: true,
-          hasPuzzle: true,
           isLastPressed: index == trigger,
         );
       }

@@ -19,16 +19,15 @@ class GameMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: game.gameProps,
-      builder: (_, props, __) {
+      valueListenable: game.props.skwer,
+      builder: (_, skwer, __) {
         return Padding(
           padding: const EdgeInsets.all(6.0),
           child: Theme(
             data: ThemeData(
                 textButtonTheme: TextButtonThemeData(
                     style: TextButton.styleFrom(
-              foregroundColor:
-                  skTileColors[game.gameProps.value.skwer % 3], // Text Color
+              foregroundColor: skTileColors[skwer % 3], // Text Color
             ))),
             child: Stack(
               children: [
@@ -39,55 +38,58 @@ class GameMenuButton extends StatelessWidget {
                     child: const Icon(Icons.zoom_out_map),
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        game.reset(skwer: (game.props.skwer + 2) % 3);
-                        if (game.props.hasPuzzle) {
-                          game.resetPuzzle();
-                        }
-                      },
-                      child: const Icon(Icons.chevron_left),
-                    ),
-                    TextButton(
-                      onLongPress: () {
-                        if (game.props.hasPuzzle) {
-                          game.endPuzzle();
-                        } else {
-                          game.reset(skwer: game.props.skwer);
-                        }
-                      },
-                      onPressed: () {
-                        if (!game.props.hasPuzzle) {
-                          game.startPuzzle(1);
-                        } else {
-                          if (game.rotations.length ==
-                              game.props.puzzle.value!.rotations.length) {
-                            game.addToPuzzle();
+                ValueListenableBuilder(
+                  valueListenable: game.props.puzzle,
+                  builder: (_, __, ___) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          game.reset(skwer: (skwer + 2) % 3);
+                          if (game.props.hasPuzzle) {
+                            game.resetPuzzle();
                           }
-                          game.resetPuzzle();
-                        }
-                      },
-                      child: RepaintBoundary(
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: CustomPaint(painter: _painter),
+                        },
+                        child: const Icon(Icons.chevron_left),
+                      ),
+                      TextButton(
+                        onLongPress: () {
+                          if (game.props.hasPuzzle) {
+                            game.endPuzzle();
+                          } else {
+                            game.reset(skwer: game.props.skwer.value);
+                          }
+                        },
+                        onPressed: () {
+                          if (!game.props.hasPuzzle) {
+                            game.startPuzzle(1);
+                          } else {
+                            if (game.rotations.length ==
+                                game.props.puzzle.value!.rotations.length) {
+                              game.addToPuzzle();
+                            }
+                            game.resetPuzzle();
+                          }
+                        },
+                        child: RepaintBoundary(
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CustomPaint(painter: _painter),
+                          ),
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        game.reset(skwer: (game.props.skwer + 1) % 3);
-                        if (game.props.hasPuzzle) {
-                          game.resetPuzzle();
-                        }
-                      },
-                      child: const Icon(Icons.chevron_right),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () {
+                          game.reset(skwer: (game.props.skwer.value + 1) % 3);
+                          if (game.props.hasPuzzle) {
+                            game.resetPuzzle();
+                          }
+                        },
+                        child: const Icon(Icons.chevron_right),
+                      ),
+                    ],
+                  ),
                 ),
                 Positioned(
                   right: 0,
@@ -113,7 +115,8 @@ class _GameMenuMainPainter extends CustomPainter {
       : super(
           repaint: Listenable.merge(
             [
-              game.gameProps,
+              game.props.skwer,
+              game.props.numTiles,
               game.rotationCounter,
             ],
           ),
@@ -125,8 +128,8 @@ class _GameMenuMainPainter extends CustomPainter {
     final numTiles = max(game.props.numTilesX, game.props.numTilesY);
     final tileSize = size.width / numTiles;
     final space = tileSize * 0.1;
-    final baseColor = skTileColors[game.gameProps.value.skwer % 3];
-    final puzzleColor = skTileColors[(game.gameProps.value.skwer + 1) % 3];
+    final baseColor = skTileColors[game.props.skwer.value % 3];
+    final puzzleColor = skTileColors[(game.props.skwer.value + 1) % 3];
     var count = game.rotationCounter.value;
     for (var j = 0; j < numTiles; j++) {
       for (var i = 0; i < numTiles; i++) {

@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/game/game.dart';
 import 'package:skwer/game/game_bottom_menu.dart';
-import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
 import 'package:skwer/game/help.dart';
@@ -43,8 +42,6 @@ class _GameWidgetState extends State<GameWidget> {
   SkwerTileIndex? _singlePointer;
   bool _isShowingHelp = false;
 
-  GameProps get props => game.gameProps.value;
-
   @override
   void initState() {
     super.initState();
@@ -71,7 +68,8 @@ class _GameWidgetState extends State<GameWidget> {
     final numTilesX = numTilesFromPrefs?.x ?? (x > 9 && x % 2 == 0 ? x - 1 : x);
     final numTilesY = numTilesFromPrefs?.y ?? (y > 9 && y % 2 == 0 ? y - 1 : y);
 
-    if (numTilesX != props.numTilesX || numTilesY != props.numTilesY) {
+    if (numTilesX != game.props.numTilesX ||
+        numTilesY != game.props.numTilesY) {
       _positions.clear();
       game.resize(numTilesX, numTilesY);
     }
@@ -88,74 +86,79 @@ class _GameWidgetState extends State<GameWidget> {
               alignment: Alignment.center,
               children: [
                 ValueListenableBuilder(
-                  valueListenable: game.gameProps,
-                  builder: (_, props, __) => ValueListenableBuilder<Puzzle?>(
-                      valueListenable: game.gameProps.value.puzzle,
-                      builder: (_, puzzle, __) {
-                        final zone = GameZone(props.numTilesX, props.numTilesY);
-                        final skwer = game.gameProps.value.skwer;
-                        final zoneSize = min(
-                              zone.size.x / size.width,
-                              zone.size.y / size.height,
-                            ) *
-                            tileSize;
-                        const centerShade = [0.55, 0.65, 0.55];
-                        return Container(
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(
-                              radius: 1 - zoneSize,
-                              stops: [zoneSize * 0.6, zoneSize * 0.6 + 0.3, 1],
-                              colors: [
-                                Color.lerp(
+                  valueListenable: game.props.numTiles,
+                  builder: (_, numTiles, __) => ValueListenableBuilder(
+                    valueListenable: game.props.skwer,
+                    builder: (_, skwer, __) => ValueListenableBuilder<Puzzle?>(
+                        valueListenable: game.props.puzzle,
+                        builder: (_, puzzle, __) {
+                          final zone = GameZone(numTiles.x, numTiles.y);
+                          final zoneSize = min(
+                                zone.size.x / size.width,
+                                zone.size.y / size.height,
+                              ) *
+                              tileSize;
+                          const centerShade = [0.55, 0.65, 0.55];
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                radius: 1 - zoneSize,
+                                stops: [
+                                  zoneSize * 0.6,
+                                  zoneSize * 0.6 + 0.3,
+                                  1
+                                ],
+                                colors: [
+                                  Color.lerp(
+                                      Color.lerp(
+                                        skTileColors[(skwer + 0) % 3],
+                                        skTileColors[
+                                            (skwer + (skwer == 0 ? 2 : 1)) % 3],
+                                        0.4,
+                                      )!,
+                                      skBlack,
+                                      centerShade[skwer % 3] *
+                                          (game.props.hasPuzzle ? 0.8 : 1.4))!,
+                                  Color.lerp(
                                     Color.lerp(
-                                      skTileColors[(skwer + 0) % 3],
-                                      skTileColors[
-                                          (skwer + (skwer == 0 ? 2 : 1)) % 3],
-                                      0.4,
+                                      skTileColors[(skwer + 2) % 3],
+                                      skTileColors[skwer % 3],
+                                      0.5,
                                     )!,
                                     skBlack,
-                                    centerShade[skwer % 3] *
-                                        (game.props.hasPuzzle ? 0.8 : 1.4))!,
-                                Color.lerp(
-                                  Color.lerp(
-                                    skTileColors[(skwer + 2) % 3],
-                                    skTileColors[skwer % 3],
-                                    0.5,
+                                    0.87,
                                   )!,
-                                  skBlack,
-                                  0.87,
-                                )!,
-                                Color.lerp(
-                                  skTileColors[skwer % 3],
-                                  skBlack,
-                                  0.92,
-                                )!,
-                              ],
+                                  Color.lerp(
+                                    skTileColors[skwer % 3],
+                                    skBlack,
+                                    0.92,
+                                  )!,
+                                ],
+                              ),
                             ),
-                          ),
-                          child: puzzle == null
-                              ? Container()
-                              : Center(
-                                  child: Container(
-                                    width: zone.size.x * tileSize,
-                                    height: zone.size.y * tileSize,
-                                    decoration: BoxDecoration(
-                                      color: skBlack,
-                                      border: Border.all(
-                                        width: Platform.isMobile ? 2 : 4,
-                                        strokeAlign:
-                                            BorderSide.strokeAlignOutside,
-                                        color: Color.lerp(
-                                            skTileColors[
-                                                game.gameProps.value.skwer % 3],
-                                            skBlack,
-                                            0.3)!,
+                            child: puzzle == null
+                                ? Container()
+                                : Center(
+                                    child: Container(
+                                      width: zone.size.x * tileSize,
+                                      height: zone.size.y * tileSize,
+                                      decoration: BoxDecoration(
+                                        color: skBlack,
+                                        border: Border.all(
+                                          width: Platform.isMobile ? 2 : 4,
+                                          strokeAlign:
+                                              BorderSide.strokeAlignOutside,
+                                          color: Color.lerp(
+                                              skTileColors[skwer % 3],
+                                              skBlack,
+                                              0.3)!,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                        );
-                      }),
+                          );
+                        }),
+                  ),
                 ),
                 Listener(
                   onPointerDown: _onPointerDown,
@@ -163,16 +166,16 @@ class _GameWidgetState extends State<GameWidget> {
                   onPointerUp: _onPointerUp,
                   onPointerCancel: (_) => game.clearFocus(),
                   child: ValueListenableBuilder(
-                    valueListenable: game.gameProps,
-                    builder: (_, props, __) {
+                    valueListenable: game.props.numTiles,
+                    builder: (_, numTiles, __) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
-                          numTilesY,
+                          numTiles.y,
                           (y) => Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(
-                              numTilesX,
+                              numTiles.x,
                               (x) => _buildTile(x, y, tileSize),
                             ),
                           ),
@@ -237,7 +240,7 @@ class _GameWidgetState extends State<GameWidget> {
   Widget _buildTile(int x, int y, double tileSize) {
     final padding = EdgeInsets.all(tileSize * 0.06);
     final tileIndex = SkwerTileIndex(x, y);
-    final tileProps = props.skwerTiles[tileIndex]!;
+    final tileProps = game.props.skwerTiles[tileIndex]!;
     return SizedBox(
       key: tileProps.key,
       width: tileSize,
@@ -262,16 +265,15 @@ class _GameWidgetState extends State<GameWidget> {
         child: Padding(
           padding: padding,
           child: ValueListenableBuilder<Puzzle?>(
-            valueListenable: props.puzzle,
-            builder: (_, __, ___) => ExcludeFocus(
-              excluding:
-                  !(props.puzzle.value?.zone.containsTile(tileIndex) ?? true),
+            valueListenable: game.props.puzzle,
+            builder: (_, puzzle, ___) => ExcludeFocus(
+              excluding: !(puzzle?.zone.containsTile(tileIndex) ?? true),
               child: Focus(
                 focusNode: tileProps.focusNode,
                 onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
                 onKeyEvent: (_, event) =>
                     _onTileKeyEvent(event, tileProps, tileIndex),
-                child: SkwerTile(props: tileProps, gameProps: game.gameProps),
+                child: SkwerTile(props: tileProps, gameProps: game.props),
               ),
             ),
           ),
@@ -312,7 +314,7 @@ class _GameWidgetState extends State<GameWidget> {
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.tab) {
       game.clearFocus();
-      game.reset(skwer: (game.props.skwer + 1) % 3);
+      game.reset(skwer: (game.props.skwer.value + 1) % 3);
       if (game.props.hasPuzzle) {
         game.resetPuzzle();
       }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:skwer/game/game_prefs.dart';
 import 'package:skwer/game/game_props.dart';
@@ -18,7 +20,7 @@ enum GameState {
 }
 
 class Game {
-  final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
+  final GameProps props = GameProps();
   final List<GameRotation> rotations = [];
   final ValueNotifier<int> rotationCounter = ValueNotifier(0);
 
@@ -26,25 +28,12 @@ class Game {
   GameState state = GameState.inProgress;
   int _resetPuzzleCounter = 0;
 
-  GameProps get props => gameProps.value;
-
   void resize(int numTilesX, int numTilesY) {
     clearFocus(true);
-    final hadPuzzle = gameProps.value.hasPuzzle;
     endPuzzle(false);
-    gameProps.value = GameProps.resize(
-      props: gameProps.value,
-      numTilesX: numTilesX,
-      numTilesY: numTilesY,
-    );
-    reset(
-      skwer: gameProps.value.skwer,
-      recreate: !hadPuzzle,
-      immediate: true,
-    );
-    if (hadPuzzle) {
-      startPuzzle(0);
-    }
+    props.numTiles.value = Point(numTilesX, numTilesY);
+    startPuzzle(0);
+    reset(immediate: true);
   }
 
   void reset({
@@ -53,10 +42,7 @@ class Game {
     bool immediate = false,
   }) {
     if (skwer != null) {
-      gameProps.value = GameProps.reSkwer(
-        props: props,
-        skwer: skwer,
-      );
+      props.skwer.value = skwer;
     }
 
     for (var x = 0; x < props.numTilesX; x++) {
@@ -69,7 +55,7 @@ class Game {
             props.puzzle.value?.zone.containsTile(index) ?? true;
         state.value = SkwerTileState.reset(
           state.value,
-          props.skwer,
+          props.skwer.value,
           immediate: immediate,
         );
         if (tileProps.isFocused.value) {
@@ -89,6 +75,7 @@ class Game {
   }
 
   void startPuzzle(int size) {
+    props.isSolved.value = false;
     props.puzzle.value =
         Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
     resetPuzzle();
@@ -104,7 +91,7 @@ class Game {
     }
 
     state = GameState.inProgress;
-    reset(skwer: props.skwer);
+    reset(skwer: props.skwer.value);
     for (final rotation in props.puzzle.value!.rotations) {
       rotate(rotation);
     }
@@ -112,8 +99,9 @@ class Game {
 
   void endPuzzle([bool shouldReset = true]) {
     props.puzzle.value = null;
+    props.isSolved.value = true;
     if (shouldReset) {
-      reset(skwer: props.skwer);
+      reset(skwer: props.skwer.value);
     }
   }
 
@@ -172,8 +160,7 @@ class Game {
         rotationCounter.value += 2;
       } else {
         rotations.add(rotation);
-        rotationCounter.value +=
-            gameProps.value.hasPuzzle ? -rotation.delta : 1;
+        rotationCounter.value += props.hasPuzzle ? -rotation.delta : 1;
       }
     }
 
@@ -290,19 +277,7 @@ class Game {
 
   void _showPuzzleWin(SkwerTileIndex trigger) {
     clearFocus();
-    for (var x = 0; x < props.numTilesX; x++) {
-      for (var y = 0; y < props.numTilesY; y++) {
-        final index = SkwerTileIndex(x, y);
-        final state = props.skwerTiles[index]!.state;
-        state.value = SkwerTileState.reset(
-          state.value,
-          props.skwer,
-          trigger: trigger,
-          isSolved: true,
-          isLastPressed: index == trigger,
-        );
-      }
-    }
+    props.isSolved.value = true;
   }
 
   void _checkGameState() {
@@ -315,9 +290,9 @@ class Game {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
         final state = props.skwerTiles[index]!.state;
-        if (state.value.skwer > props.skwer) {
+        if (state.value.skwer > props.skwer.value) {
           return GameState.failed;
-        } else if (state.value.skwer < props.skwer) {
+        } else if (state.value.skwer < props.skwer.value) {
           gameState = GameState.inProgress;
         }
       }

@@ -17,7 +17,7 @@ final Random _random = Random();
 
 class SkwerTile extends StatefulWidget {
   final SkwerTileProps props;
-  final ValueNotifier<GameProps> gameProps;
+  final GameProps gameProps;
 
   SkwerTile({
     required this.props,
@@ -39,6 +39,10 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   late final Animation<double> _highlightAnimation;
   late final AnimationController _focusAnimationController;
   late final Animation<double> _focusAnimation;
+  late final AnimationController _solvedAnimationController;
+  late final Animation<double> _solvedAnimation;
+  late final AnimationController _activeAnimationController;
+  late final Animation<double> _activeAnimation;
   late final _SkwerTilePaint _paint;
   late SkwerTileState _previousState;
 
@@ -57,30 +61,52 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     );
     _pressAnimation =
         CurveTween(curve: Curves.easeIn).animate(_pressAnimationController);
-    _pressAnimationController.value = 1;
     _highlightAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 100),
       vsync: this,
     );
     _highlightAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_highlightAnimationController);
-    _highlightAnimationController.value = 0;
     _focusAnimationController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
     _focusAnimation =
         Tween(begin: 0.0, end: 1.0).animate(_focusAnimationController);
-    _paint = _SkwerTilePaint(widget.props, widget.gameProps, hoverPosition,
-        _animation, _pressAnimation, _highlightAnimation, _focusAnimation);
+    _solvedAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _solvedAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_solvedAnimationController);
+    _activeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _activeAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_activeAnimationController);
+    _paint = _SkwerTilePaint(
+      widget.props,
+      widget.gameProps,
+      hoverPosition,
+      _animation,
+      _pressAnimation,
+      _highlightAnimation,
+      _focusAnimation,
+      _solvedAnimation,
+      _activeAnimation,
+    );
     _previousState = widget.props.state.value;
 
     _onStateChanged();
+    _setImmediateState();
     _paint.animationStart = _paint.animationEnd;
     widget.props.state.addListener(_onStateChanged);
     widget.props.pressCounter.addListener(_onPressed);
     widget.props.isHighlighted.addListener(_onHighlighted);
     widget.props.isFocused.addListener(_onFocused);
+    widget.props.isActive.addListener(_onActive);
+    widget.gameProps.isSolved.addListener(_onSolved);
   }
 
   @override
@@ -89,11 +115,22 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     widget.props.pressCounter.removeListener(_onPressed);
     widget.props.isHighlighted.removeListener(_onHighlighted);
     widget.props.isFocused.removeListener(_onFocused);
+    widget.props.isActive.removeListener(_onActive);
+    widget.gameProps.isSolved.removeListener(_onSolved);
     _animationController.dispose();
     _focusAnimationController.dispose();
     _highlightAnimationController.dispose();
     _pressAnimationController.dispose();
+    _activeAnimationController.dispose();
+    _solvedAnimationController.dispose();
     super.dispose();
+  }
+
+  void _setImmediateState() {
+    _pressAnimationController.value = 1;
+    _highlightAnimationController.value = 0;
+    _solvedAnimationController.value = widget.gameProps.isSolved.value ? 1 : 0;
+    _activeAnimationController.value = widget.props.isActive.value ? 1 : 0;
   }
 
   void _onStateChanged() {
@@ -108,6 +145,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _paint.animationEnd = currentState;
     if (currentState.immediate) {
       _animationController.value = 1;
+      _setImmediateState();
     } else if (reAnimate) {
       _animationController.forward(from: 0);
     }
@@ -121,7 +159,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
 
   void _onHighlighted() {
     final skwer = widget.props.state.value.skwer;
-    final gameSkwer = widget.gameProps.value.skwer;
+    final gameSkwer = widget.gameProps.skwer.value;
     final fullHighlight = skwer % 3 != gameSkwer % 3 || skwer < gameSkwer;
     if (widget.props.isHighlighted.value) {
       if (fullHighlight) {
@@ -138,13 +176,29 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     if (widget.props.isFocused.value) {
       _focusAnimationController.forward(from: 0);
     } else {
-      if (!widget.gameProps.value.hasPuzzle) {
+      if (!widget.gameProps.hasPuzzle) {
         _previousState = widget.props.state.value;
         _paint.animationStart = _previousState;
         _paint.animationEnd = _previousState;
         _animationController.forward(from: 0);
       }
       _focusAnimationController.reverse(from: 1);
+    }
+  }
+
+  void _onActive() {
+    if (widget.props.isActive.value) {
+      _activeAnimationController.forward();
+    } else {
+      _activeAnimationController.reverse();
+    }
+  }
+
+  void _onSolved() {
+    if (widget.gameProps.isSolved.value) {
+      _solvedAnimationController.forward();
+    } else {
+      _solvedAnimationController.reverse();
     }
   }
 
@@ -167,13 +221,15 @@ class _SkwerTilePaint extends CustomPainter {
   late final TransitionMosaic transition = TransitionMosaic(grid, rosetta);
 
   final SkwerTileProps props;
-  final ValueNotifier<GameProps> gameProps;
+  final GameProps gameProps;
   final ValueNotifier<Offset?> hoverPosition;
 
   final Animation<double> animation;
   final Animation<double> pressAnimation;
   final Animation<double> highlightAnimation;
   final Animation<double> focusAnimation;
+  final Animation<double> solvedAnimation;
+  final Animation<double> activeAnimation;
 
   SkwerTileState animationStart = SkwerTileState();
   SkwerTileState animationEnd = SkwerTileState();
@@ -186,15 +242,21 @@ class _SkwerTilePaint extends CustomPainter {
     this.pressAnimation,
     this.highlightAnimation,
     this.focusAnimation,
+    this.solvedAnimation,
+    this.activeAnimation,
   ) : super(
           repaint: Listenable.merge([
-            gameProps,
+            gameProps.skwer,
+            gameProps.puzzle,
+            gameProps.numTiles,
             props.state,
             hoverPosition,
             animation,
             pressAnimation,
             highlightAnimation,
             focusAnimation,
+            solvedAnimation,
+            activeAnimation,
           ]),
         );
 
@@ -224,8 +286,8 @@ class _SkwerTilePaint extends CustomPainter {
       );
     }
 
-    final isFailed = animationEnd.isFailed(props, gameProps.value);
-    final isPuzzle = gameProps.value.hasPuzzle;
+    final isFailed = animationEnd.isFailed(props, gameProps);
+    final isPuzzle = gameProps.hasPuzzle;
     const failedAnimationValue = 0.6;
 
     _currentGroup.paint(
@@ -244,7 +306,7 @@ class _SkwerTilePaint extends CustomPainter {
             animationEnd.skwer > animationStart.skwer &&
                 (isPuzzle ||
                     (!isPuzzle &&
-                        animationEnd.skwer > gameProps.value.skwer)) ||
+                        animationEnd.skwer > gameProps.skwer.value)) ||
             _currentGroup == transition ||
             isFailed,
       ),
@@ -252,7 +314,7 @@ class _SkwerTilePaint extends CustomPainter {
     );
   }
 
-  bool get _shouldShowRainbow => !gameProps.value.hasPuzzle;
+  bool get _shouldShowRainbow => !gameProps.hasPuzzle;
 
   Color get _startColor => _shouldShowRainbow
       ? _getRainbowColor()
@@ -270,12 +332,18 @@ class _SkwerTilePaint extends CustomPainter {
 
   double _getBrightness() {
     final start = animationStart.immediate
-        ? animationEnd.getBrightness(props, gameProps.value)
-        : animationStart.getBrightness(props, gameProps.value);
-    final end = animationEnd.getBrightness(props, gameProps.value);
+        ? animationEnd.getBrightness(props, gameProps)
+        : animationStart.getBrightness(props, gameProps);
+    final end = animationEnd.getBrightness(props, gameProps);
     final x = start * (1 - animation.value) + end * animation.value;
-    final y =
-        x * (1 - highlightAnimation.value) + 1.05 * highlightAnimation.value;
+    final solved = solvedAnimation.value;
+    final active = activeAnimation.value;
+    final z = solved * active * 0.9 +
+        solved * (1 - active) * 0.5 +
+        (1 - solved) * active * 0.7 +
+        (1 - solved) * (1 - active) * 0.15;
+    final y = x * z * (1 - highlightAnimation.value) +
+        1.05 * highlightAnimation.value;
     return y * (1 - focusAnimation.value) + 1.4 * focusAnimation.value;
   }
 
@@ -289,8 +357,8 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   Mosaic get _currentGroup {
-    final startDelta = animationStart.skwer - gameProps.value.skwer;
-    final endDelta = animationEnd.skwer - gameProps.value.skwer;
+    final startDelta = animationStart.skwer - gameProps.skwer.value;
+    final endDelta = animationEnd.skwer - gameProps.skwer.value;
     if (startDelta >= -2 && endDelta <= -3) {
       transition.dir = 1;
       return transition;
@@ -330,18 +398,17 @@ class _SkwerTilePaint extends CustomPainter {
   double get _tileSize {
     if (Platform.isMobile) {
       final numTiles = min(
-        gameProps.value.numTilesX,
-        gameProps.value.numTilesY,
+        gameProps.numTilesX,
+        gameProps.numTilesY,
       );
       final x = _tileSizeFromNumTiles(numTiles);
-      if (gameProps.value.hasPuzzle && props.isActive.value) {
+      if (gameProps.hasPuzzle && props.isActive.value) {
         return x;
       }
       final z = min(1.0, pow(1 / _cartesianDistFromCenter, 0.7));
       return x * pow(z, 0.5).toDouble();
     }
-    final amp =
-        gameProps.value.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
+    final amp = gameProps.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
     final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
   }
@@ -362,14 +429,14 @@ class _SkwerTilePaint extends CustomPainter {
 
   double get _tileOpacity {
     if (Platform.isMobile) {
-      if (gameProps.value.hasPuzzle) {
+      if (gameProps.hasPuzzle) {
         return 1;
       }
       final x = min(1.0, 2 / _cartesianDistFromCenter);
       return pow(x, 1).toDouble();
     }
 
-    if (gameProps.value.hasPuzzle && props.isActive.value) {
+    if (gameProps.hasPuzzle && props.isActive.value) {
       return 1;
     }
     final x = min(1.0, 5 / _cartesianDistFromCenter);
@@ -377,8 +444,8 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double get _cartesianDistFromCenter {
-    final dx = props.index.x + 0.5 - gameProps.value.numTilesX / 2;
-    final dy = props.index.y + 0.5 - gameProps.value.numTilesY / 2;
+    final dx = props.index.x + 0.5 - gameProps.numTilesX / 2;
+    final dy = props.index.y + 0.5 - gameProps.numTilesY / 2;
     return 1.0 * pow(dx * dx + dy * dy, 0.45);
   }
 }

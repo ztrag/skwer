@@ -246,7 +246,7 @@ class _GameWidgetState extends State<GameWidget> {
       height: tileSize,
       child: MouseRegion(
         onEnter: (event) {
-          if (tileProps.state.value.isActive) {
+          if (tileProps.isActive.value) {
             tileProps.focusNode.requestFocus();
             _delayedUnfocus = null;
           }
@@ -389,7 +389,7 @@ class _GameWidgetState extends State<GameWidget> {
       return;
     }
 
-    if (tile.state.value.isActive) {
+    if (tile.isActive.value) {
       game.rotate(GameRotation(index: tile.index, delta: 1));
     }
   }
@@ -399,7 +399,7 @@ class _GameWidgetState extends State<GameWidget> {
       return;
     }
 
-    if (tile.state.value.isActive) {
+    if (tile.isActive.value) {
       if (tile.focusNode.hasFocus) {
         game.focus(tile.index, true);
       } else {

@@ -1,9 +1,9 @@
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
+import 'package:skwer/tile/skwer_tile_props.dart';
 
 class SkwerTileState {
   final int skwer;
-  final bool isActive;
   final bool hasPuzzle;
   final bool isSolved;
   final SkwerTileIndex? trigger;
@@ -11,7 +11,6 @@ class SkwerTileState {
 
   SkwerTileState._({
     this.skwer = -1,
-    this.isActive = true,
     this.hasPuzzle = false,
     this.isSolved = false,
     this.trigger,
@@ -24,14 +23,12 @@ class SkwerTileState {
     SkwerTileState state,
     int skwer, {
     SkwerTileIndex? trigger,
-    bool? isActive,
     bool hasPuzzle = false,
     bool isSolved = false,
     bool isLastPressed = false,
     bool immediate = false,
   }) {
     if (state.skwer == skwer &&
-        state.isActive == isActive &&
         state.isSolved == isSolved &&
         state.hasPuzzle == hasPuzzle) {
       return state;
@@ -39,7 +36,6 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: skwer,
       trigger: trigger,
-      isActive: isActive ?? state.isActive,
       hasPuzzle: hasPuzzle,
       isSolved: isSolved,
       immediate: immediate,
@@ -54,7 +50,6 @@ class SkwerTileState {
     return SkwerTileState._(
       skwer: state.skwer + skwerDelta,
       trigger: skwerDelta > 0 ? trigger : null,
-      isActive: state.isActive,
       hasPuzzle: state.hasPuzzle,
     );
   }
@@ -68,19 +63,19 @@ class SkwerTileState {
     return skwerDelta > 0 && skwerDelta % 3 != 0;
   }
 
-  double getBrightness(GameProps gameProps) {
+  double getBrightness(SkwerTileProps props, GameProps gameProps) {
     if (!hasPuzzle) {
       return 1;
     }
 
     if (isSolved) {
-      return isActive ? 0.9 : 0.5;
+      return props.isActive.value ? 0.9 : 0.5;
     }
 
     final skwerDelta = skwer - gameProps.skwer;
     final hasPuzzleHighlight = skwerDelta < 0;
     final fail = isFailed(gameProps);
-    if (isActive) {
+    if (props.isActive.value) {
       return hasPuzzleHighlight ? 1 : (fail ? 0.9 : 0.7);
     } else {
       return hasPuzzleHighlight ? 0.7 : (fail ? 0.7 : 0.15);

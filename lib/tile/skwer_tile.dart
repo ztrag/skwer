@@ -248,7 +248,7 @@ class _SkwerTilePaint extends CustomPainter {
             _currentGroup == transition ||
             isFailed,
       ),
-      props.state.value.isActive ? hoverPosition.value : null,
+      props.isActive.value ? hoverPosition.value : null,
     );
   }
 
@@ -270,9 +270,9 @@ class _SkwerTilePaint extends CustomPainter {
 
   double _getBrightness() {
     final start = animationStart.immediate
-        ? animationEnd.getBrightness(gameProps.value)
-        : animationStart.getBrightness(gameProps.value);
-    final end = animationEnd.getBrightness(gameProps.value);
+        ? animationEnd.getBrightness(props, gameProps.value)
+        : animationStart.getBrightness(props, gameProps.value);
+    final end = animationEnd.getBrightness(props, gameProps.value);
     final x = start * (1 - animation.value) + end * animation.value;
     final y =
         x * (1 - highlightAnimation.value) + 1.05 * highlightAnimation.value;
@@ -334,14 +334,14 @@ class _SkwerTilePaint extends CustomPainter {
         gameProps.value.numTilesY,
       );
       final x = _tileSizeFromNumTiles(numTiles);
-      if (props.state.value.hasPuzzle && props.state.value.isActive) {
+      if (props.state.value.hasPuzzle && props.isActive.value) {
         return x;
       }
       final z = min(1.0, pow(1 / _cartesianDistFromCenter, 0.7));
       return x * pow(z, 0.5).toDouble();
     }
     final amp =
-        props.state.value.hasPuzzle && props.state.value.isActive ? 0.9 : 0.85;
+        props.state.value.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
     final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
   }
@@ -369,7 +369,7 @@ class _SkwerTilePaint extends CustomPainter {
       return pow(x, 1).toDouble();
     }
 
-    if (props.state.value.hasPuzzle && props.state.value.isActive) {
+    if (props.state.value.hasPuzzle && props.isActive.value) {
       return 1;
     }
     final x = min(1.0, 5 / _cartesianDistFromCenter);

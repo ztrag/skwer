@@ -62,15 +62,18 @@ class Game {
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
-        final state = props.skwerTiles[index]!.state;
+        final tileProps = props.skwerTiles[index]!;
+        final state = tileProps.state;
+
+        tileProps.isActive.value =
+            props.puzzle.value?.zone.containsTile(index) ?? true;
         state.value = SkwerTileState.reset(
           state.value,
           props.skwer,
-          isActive: props.puzzle.value?.zone.containsTile(index) ?? true,
           hasPuzzle: props.puzzle.value != null,
           immediate: immediate,
         );
-        if (props.skwerTiles[index]!.isFocused.value) {
+        if (tileProps.isFocused.value) {
           focus(index, false);
           focus(index, true);
         }

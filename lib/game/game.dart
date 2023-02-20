@@ -20,6 +20,7 @@ enum GameState {
 class Game {
   final ValueNotifier<GameProps> gameProps = ValueNotifier(GameProps());
   final List<GameRotation> rotations = [];
+  final ValueNotifier<int> rotationCounter = ValueNotifier(0);
 
   GamePrefs prefs = GamePrefs();
   GameState state = GameState.inProgress;
@@ -80,6 +81,7 @@ class Game {
         rotate(rotation, false);
       }
     } else {
+      rotationCounter.value = 0;
       rotations.clear();
     }
   }
@@ -158,8 +160,11 @@ class Game {
         rotations.removeLast();
         rotations.removeLast();
         rotation = GameRotation(index: rotation.index, delta: -2);
+        rotationCounter.value += 2;
       } else {
         rotations.add(rotation);
+        rotationCounter.value +=
+            gameProps.value.puzzle.value != null ? -rotation.delta : 1;
       }
     }
 

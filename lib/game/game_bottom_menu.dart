@@ -108,7 +108,15 @@ class _GameMenuMainPainter extends CustomPainter {
   final Game game;
   final Paint _paint = Paint();
 
-  _GameMenuMainPainter(this.game) : super(repaint: game.gameProps);
+  _GameMenuMainPainter(this.game)
+      : super(
+          repaint: Listenable.merge(
+            [
+              game.gameProps,
+              game.rotationCounter,
+            ],
+          ),
+        );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -118,7 +126,7 @@ class _GameMenuMainPainter extends CustomPainter {
     final space = tileSize * 0.1;
     final baseColor = skTileColors[game.gameProps.value.skwer % 3];
     final puzzleColor = skTileColors[(game.gameProps.value.skwer + 1) % 3];
-    var count = game.props.puzzle.value?.rotations.length ?? 0;
+    var count = game.rotationCounter.value;
     for (var j = 0; j < numTiles; j++) {
       for (var i = 0; i < numTiles; i++) {
         final color = --count >= 0 ? puzzleColor : baseColor;

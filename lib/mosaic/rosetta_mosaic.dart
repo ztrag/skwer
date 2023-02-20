@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
-import 'package:skwer/platform.dart';
 
 class MosaicRosetta extends Mosaic {
   static final Random _random = Random();
@@ -80,15 +79,14 @@ class MosaicRosetta extends Mosaic {
   }
 
   int _stonesAtLevel(int level) {
-    final isMobile = Platform.isMobile;
     if (level == 1) {
-      return isMobile ? 5 : 6;
+      return 5;
     } else if (level == 2) {
-      return isMobile ? 8 : 10;
+      return 8;
     } else if (level == 3) {
-      return isMobile ? 12 : 16;
+      return 12;
     }
-    return isMobile ? 16 : 20;
+    return 16;
   }
 
   Point<double> _pointAt(double r, double theta, double d1, double d2) {

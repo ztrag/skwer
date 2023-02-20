@@ -92,7 +92,7 @@ class GameMenuButton extends StatelessWidget {
                   right: 0,
                   child: TextButton(
                     onPressed: onHelp,
-                    child: const Icon(Icons.help_center),
+                    child: const Icon(Icons.help_center_outlined),
                   ),
                 ),
               ],

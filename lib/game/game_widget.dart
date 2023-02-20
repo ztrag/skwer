@@ -230,7 +230,7 @@ class _GameWidgetState extends State<GameWidget> {
 
   double getTileSize(Size size, Point<int>? numTilesFromPrefs) {
     if (numTilesFromPrefs == null) {
-      return 80;
+      return 75;
     }
     return min(
         size.width / numTilesFromPrefs.x, size.height / numTilesFromPrefs.y);

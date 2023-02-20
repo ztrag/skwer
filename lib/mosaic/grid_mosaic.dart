@@ -2,12 +2,10 @@ import 'dart:math';
 
 import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
-import 'package:skwer/platform.dart';
 
 class GridMosaic extends Mosaic {
+  static const int gridSize = 5;
   static final Random _random = Random();
-
-  final int gridSize = Platform.isMobile ? 5 : 6;
 
   List<MosaicTile>? _tiles;
 

@@ -274,7 +274,9 @@ class _SkwerTilePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final x = _tileSize;
+    final x = _geometricTileSize *
+        _focusTileSize *
+        _pressTileSize;
     canvas.translate(
       size.width * (1 - x) / 2,
       size.height * (1 - x) / 2,
@@ -407,7 +409,7 @@ class _SkwerTilePaint extends CustomPainter {
     );
   }
 
-  double get _tileSize {
+  double get _geometricTileSize {
     if (Platform.isMobile) {
       final numTiles = min(
         gameProps.numTilesX,
@@ -424,6 +426,12 @@ class _SkwerTilePaint extends CustomPainter {
     final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
     return pow(x, 1.1).toDouble();
   }
+
+  double get _focusTileSize =>
+      focusAnimation.value * 1.05 + (1 - focusAnimation.value) * 1;
+
+  double get _pressTileSize =>
+      pressAnimation.value * 1 + (1 - pressAnimation.value) * 0.9;
 
   double _tileSizeFromNumTiles(int numTiles) {
     switch (numTiles) {

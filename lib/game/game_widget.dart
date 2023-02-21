@@ -238,7 +238,6 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   Widget _buildTile(int x, int y, double tileSize) {
-    final padding = EdgeInsets.all(tileSize * 0.06);
     final tileIndex = SkwerTileIndex(x, y);
     final tileProps = game.props.skwerTiles[tileIndex]!;
     return SizedBox(
@@ -262,19 +261,16 @@ class _GameWidgetState extends State<GameWidget> {
             });
           }
         },
-        child: Padding(
-          padding: padding,
-          child: ValueListenableBuilder<Puzzle?>(
-            valueListenable: game.props.puzzle,
-            builder: (_, puzzle, ___) => ExcludeFocus(
-              excluding: !(puzzle?.zone.containsTile(tileIndex) ?? true),
-              child: Focus(
-                focusNode: tileProps.focusNode,
-                onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
-                onKeyEvent: (_, event) =>
-                    _onTileKeyEvent(event, tileProps, tileIndex),
-                child: SkwerTile(props: tileProps, gameProps: game.props),
-              ),
+        child: ValueListenableBuilder<Puzzle?>(
+          valueListenable: game.props.puzzle,
+          builder: (_, puzzle, ___) => ExcludeFocus(
+            excluding: !(puzzle?.zone.containsTile(tileIndex) ?? true),
+            child: Focus(
+              focusNode: tileProps.focusNode,
+              onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
+              onKeyEvent: (_, event) =>
+                  _onTileKeyEvent(event, tileProps, tileIndex),
+              child: SkwerTile(props: tileProps, gameProps: game.props),
             ),
           ),
         ),
@@ -345,8 +341,8 @@ class _GameWidgetState extends State<GameWidget> {
       return;
     }
 
-    _singlePointer = tile.index;
-    _maybeEnter(tile);
+    _singlePointer = tile.value.index;
+    _maybeEnter(tile.value, tile.key, event.position);
   }
 
   void _onPointerMove(PointerMoveEvent event) {
@@ -357,10 +353,10 @@ class _GameWidgetState extends State<GameWidget> {
       return;
     }
 
-    if (_singlePointer != tile.index) {
+    if (_singlePointer != tile.value.index) {
       _singlePointer = null;
     }
-    _maybeEnter(tile);
+    _maybeEnter(tile.value, tile.key, event.position);
   }
 
   void _onPointerUp(PointerUpEvent event) {
@@ -373,12 +369,13 @@ class _GameWidgetState extends State<GameWidget> {
       return;
     }
 
-    if (tile.isActive.value) {
-      game.rotate(GameRotation(index: tile.index, delta: 1));
+    if (tile.value.isActive.value) {
+      game.rotate(GameRotation(index: tile.value.index, delta: 1));
     }
   }
 
-  void _maybeEnter(SkwerTileProps tile) {
+  void _maybeEnter(SkwerTileProps tile, Rect rect, Offset position) {
+    tile.hoverPosition.value = position - rect.topLeft;
     if (tile.isFocused.value) {
       return;
     }
@@ -412,11 +409,11 @@ class _GameWidgetState extends State<GameWidget> {
     }
   }
 
-  SkwerTileProps? _findTileAtPosition(Offset position) {
+  MapEntry<Rect, SkwerTileProps>? _findTileAtPosition(Offset position) {
     _initPositions();
     for (final tile in _positions.entries) {
       if (tile.key.contains(position)) {
-        return tile.value;
+        return tile;
       }
     }
 

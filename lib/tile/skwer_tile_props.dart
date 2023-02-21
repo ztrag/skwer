@@ -11,6 +11,7 @@ class SkwerTileProps {
   final ValueNotifier<bool> isFocused = ValueNotifier(false);
   final ValueNotifier<bool> isHighlighted = ValueNotifier(false);
   final ValueNotifier<bool> isActive = ValueNotifier(true);
+  final ValueNotifier<Offset?> hoverPosition = ValueNotifier(null);
 
   SkwerTileProps({required this.index});
 }

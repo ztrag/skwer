@@ -29,8 +29,6 @@ class SkwerTile extends StatefulWidget {
 }
 
 class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
-  final ValueNotifier<Offset?> hoverPosition = ValueNotifier(null);
-
   late final AnimationController _animationController;
   late final Animation<double> _animation;
   late final AnimationController _pressAnimationController;
@@ -87,7 +85,6 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     _paint = _SkwerTilePaint(
       widget.props,
       widget.gameProps,
-      hoverPosition,
       _animation,
       _pressAnimation,
       _highlightAnimation,
@@ -180,7 +177,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
         _paint.animationEnd = _previousState;
         _animationController.forward(from: 0);
       }
-      _focusAnimationController.reverse(from: 1);
+      _focusAnimationController.value = 0;
     }
   }
 
@@ -214,9 +211,11 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onHover: (hover) => hoverPosition.value = hover.localPosition,
-      onEnter: (enter) => hoverPosition.value = enter.localPosition,
-      onExit: (exit) => hoverPosition.value = null,
+      onHover: (hover) =>
+          widget.props.hoverPosition.value = hover.localPosition,
+      onEnter: (enter) =>
+          widget.props.hoverPosition.value = enter.localPosition,
+      onExit: (exit) => widget.props.hoverPosition.value = null,
       child: RepaintBoundary(child: CustomPaint(painter: _paint)),
     );
   }
@@ -231,7 +230,6 @@ class _SkwerTilePaint extends CustomPainter {
 
   final SkwerTileProps props;
   final GameProps gameProps;
-  final ValueNotifier<Offset?> hoverPosition;
 
   final Animation<double> animation;
   final Animation<double> pressAnimation;
@@ -247,7 +245,6 @@ class _SkwerTilePaint extends CustomPainter {
   _SkwerTilePaint(
     this.props,
     this.gameProps,
-    this.hoverPosition,
     this.animation,
     this.pressAnimation,
     this.highlightAnimation,
@@ -261,7 +258,7 @@ class _SkwerTilePaint extends CustomPainter {
             gameProps.puzzle,
             gameProps.numTiles,
             props.state,
-            hoverPosition,
+            props.hoverPosition,
             animation,
             pressAnimation,
             highlightAnimation,
@@ -274,7 +271,7 @@ class _SkwerTilePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final x = _geometricTileSize * _focusTileSize * _pressTileSize;
+    final x = 0.88 * _geometricTileSize * _focusTileSize * _pressTileSize;
     canvas.translate(
       size.width * (1 - x) / 2,
       size.height * (1 - x) / 2,
@@ -322,7 +319,9 @@ class _SkwerTilePaint extends CustomPainter {
             _currentGroup == transition ||
             isFailed,
       ),
-      props.isActive.value ? hoverPosition.value : null,
+      props.isFocused.value && props.isActive.value
+          ? props.hoverPosition.value
+          : null,
     );
   }
 

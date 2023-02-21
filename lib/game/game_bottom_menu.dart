@@ -54,10 +54,22 @@ class GameMenuButton extends StatelessWidget {
                           }
                         },
                         onPressed: () {
+                          // if (game.props.puzzleLength == 0) {
                           if (!game.props.hasPuzzle) {
-                            game.startPuzzle(game.prefs.puzzleSize.value);
+                            if (game.rotationCounter.value > 0) {
+                              game.undoLastRotation();
+                            } else {
+                              game.startPuzzle(game.prefs.puzzleSize.value);
+                            }
                           } else {
-                            game.resetPuzzle();
+                            if (game.props.puzzleLength == 0) {
+                              game.startPuzzle(game.prefs.puzzleSize.value);
+                            } else if (game.rotations.length <=
+                                game.props.puzzleLength) {
+                              game.undoLastRotation();
+                            } else {
+                              game.resetPuzzle();
+                            }
                           }
                         },
                         child: RepaintBoundary(
@@ -75,7 +87,8 @@ class GameMenuButton extends StatelessWidget {
                   onPressed: () {
                     final puzzleSize = game.prefs.puzzleSize.value % 8 + 1;
                     game.prefs.puzzleSize.value = puzzleSize;
-                    if (!game.props.hasPuzzle || puzzleSize == 1) {
+                    if ((game.props.puzzle.value?.rotations.isEmpty ?? true) ||
+                        puzzleSize == 1) {
                       game.startPuzzle(puzzleSize);
                     } else {
                       game.addToPuzzle();
@@ -129,12 +142,14 @@ class _GameMenuMainPainter extends CustomPainter {
     final numTiles = max(game.props.numTilesX, game.props.numTilesY);
     final tileSize = size.width / numTiles;
     final space = tileSize * 0.1;
-    final baseColor = skTileColors[game.props.skwer.value % 3];
-    final puzzleColor = skTileColors[(game.props.skwer.value + 1) % 3];
+    // final baseColor = skTileColors[game.props.skwer.value % 3];
+    // final puzzleColor = skTileColors[(game.props.skwer.value + 1) % 3];
     var count = game.rotationCounter.value;
     for (var j = 0; j < numTiles; j++) {
       for (var i = 0; i < numTiles; i++) {
-        final color = --count >= 0 ? puzzleColor : baseColor;
+        final countDiv = --count ~/ (numTiles * numTiles);
+        final countSkwer = count >= 0 ? (countDiv + 1) : 0;
+        final color = skTileColors[(game.props.skwer.value + countSkwer) % 3];
         final d1 = _d1(random);
         _paint.color = d1 > 1
             ? Color.lerp(color, skWhite, d1 - 1)!

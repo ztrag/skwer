@@ -40,6 +40,8 @@ class GameProps {
 
   bool get hasPuzzle => puzzle.value != null;
 
+  int get puzzleLength => puzzle.value?.rotations.length ?? 0;
+
   int get numTilesX => numTiles.value.x;
 
   int get numTilesY => numTiles.value.y;

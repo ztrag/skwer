@@ -86,6 +86,19 @@ class Game {
     resetPuzzle();
   }
 
+  void undoLastRotation() {
+    if (rotations.isEmpty) {
+      return;
+    }
+
+    final last = rotations.removeLast();
+    rotate(
+      GameRotation(index: last.index, delta: -last.delta),
+      false,
+    );
+    rotationCounter.value += props.hasPuzzle ? last.delta : -1;
+  }
+
   void resetPuzzle() {
     if (!props.hasPuzzle) {
       return;

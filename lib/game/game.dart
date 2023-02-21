@@ -75,7 +75,6 @@ class Game {
   }
 
   void startPuzzle(int size) {
-    props.isSolved.value = false;
     for (var i = 0; i < 5; i++) {
       if (i > 0) {
         reset(immediate: true);
@@ -87,6 +86,7 @@ class Game {
         return;
       }
     }
+    props.isSolved.value = false;
   }
 
   void addToPuzzle() {

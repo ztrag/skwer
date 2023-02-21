@@ -115,18 +115,19 @@ class Game {
     state = GameState.inProgress;
     reset(skwer: props.skwer.value);
 
+    var hasSkwerCycle = false;
     final map = <SkwerTileIndex, Map<int, int>>{};
     for (final rotation in props.puzzle.value!.rotations) {
       final skwer = props.skwerTiles[rotation.index]!.state.value.skwer % 3;
       map[rotation.index] = map[rotation.index] ?? <int, int>{};
       map[rotation.index]![skwer] = (map[rotation.index]![skwer] ?? 0) + 1;
       if (map[rotation.index]![skwer]! > 2) {
-        return false;
+        hasSkwerCycle = true;
       }
       rotate(rotation);
     }
 
-    return true;
+    return !hasSkwerCycle;
   }
 
   void endPuzzle([bool shouldReset = true]) {

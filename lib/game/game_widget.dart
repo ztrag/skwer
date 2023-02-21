@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/game/game.dart';
+import 'package:skwer/game/game_background.dart';
 import 'package:skwer/game/game_bottom_counter.dart';
 import 'package:skwer/game/game_bottom_menu.dart';
 import 'package:skwer/game/game_rotation.dart';
-import 'package:skwer/game/game_zone.dart';
 import 'package:skwer/game/help.dart';
 import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/platform.dart';
@@ -87,80 +87,10 @@ class _GameWidgetState extends State<GameWidget> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                ValueListenableBuilder(
-                  valueListenable: game.props.numTiles,
-                  builder: (_, numTiles, __) => ValueListenableBuilder(
-                    valueListenable: game.props.skwer,
-                    builder: (_, skwer, __) => ValueListenableBuilder<Puzzle?>(
-                        valueListenable: game.props.puzzle,
-                        builder: (_, puzzle, __) {
-                          final zone = GameZone(numTiles.x, numTiles.y);
-                          final zoneSize = min(
-                                zone.size.x / size.width,
-                                zone.size.y / size.height,
-                              ) *
-                              tileSize;
-                          const centerShade = [0.55, 0.65, 0.55];
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: RadialGradient(
-                                radius: 1 - zoneSize,
-                                stops: [
-                                  zoneSize * 0.6,
-                                  zoneSize * 0.6 + 0.3,
-                                  1
-                                ],
-                                colors: [
-                                  Color.lerp(
-                                      Color.lerp(
-                                        skTileColors[(skwer + 0) % 3],
-                                        skTileColors[
-                                            (skwer + (skwer == 0 ? 2 : 1)) % 3],
-                                        0.4,
-                                      )!,
-                                      skBlack,
-                                      centerShade[skwer % 3] *
-                                          (game.props.hasPuzzle ? 0.8 : 1.4))!,
-                                  Color.lerp(
-                                    Color.lerp(
-                                      skTileColors[(skwer + 2) % 3],
-                                      skTileColors[skwer % 3],
-                                      0.5,
-                                    )!,
-                                    skBlack,
-                                    0.87,
-                                  )!,
-                                  Color.lerp(
-                                    skTileColors[skwer % 3],
-                                    skBlack,
-                                    0.92,
-                                  )!,
-                                ],
-                              ),
-                            ),
-                            child: puzzle == null
-                                ? Container()
-                                : Center(
-                                    child: Container(
-                                      width: zone.size.x * tileSize,
-                                      height: zone.size.y * tileSize,
-                                      decoration: BoxDecoration(
-                                        color: skBlack,
-                                        border: Border.all(
-                                          width: Platform.isMobile ? 2 : 4,
-                                          strokeAlign:
-                                              BorderSide.strokeAlignOutside,
-                                          color: Color.lerp(
-                                              skTileColors[skwer % 3],
-                                              skBlack,
-                                              0.3)!,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                          );
-                        }),
-                  ),
+                GameBackground(
+                  props: game.props,
+                  size: size,
+                  tileSize: tileSize,
                 ),
                 Listener(
                   onPointerDown: _onPointerDown,

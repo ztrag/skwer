@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/game/game.dart';
 
-class GameMenuButton extends StatelessWidget {
+class GameBottomMenu extends StatelessWidget {
   final Game game;
   final VoidCallback onHelp;
 
   late final _GameMenuMainPainter _painter = _GameMenuMainPainter(game);
 
-  GameMenuButton({
+  GameBottomMenu({
     Key? key,
     required this.game,
     required this.onHelp,
@@ -56,7 +56,7 @@ class GameMenuButton extends StatelessWidget {
                         onPressed: () {
                           // if (game.props.puzzleLength == 0) {
                           if (!game.props.hasPuzzle) {
-                            if (game.rotationCounter.value > 0) {
+                            if (game.props.rotationCounter.value > 0) {
                               game.undoLastRotation();
                             } else {
                               game.startPuzzle(game.prefs.puzzleSize.value);
@@ -131,7 +131,7 @@ class _GameMenuMainPainter extends CustomPainter {
             [
               game.props.skwer,
               game.props.numTiles,
-              game.rotationCounter,
+              game.props.rotationCounter,
             ],
           ),
         );
@@ -142,9 +142,7 @@ class _GameMenuMainPainter extends CustomPainter {
     final numTiles = max(game.props.numTilesX, game.props.numTilesY);
     final tileSize = size.width / numTiles;
     final space = tileSize * 0.1;
-    // final baseColor = skTileColors[game.props.skwer.value % 3];
-    // final puzzleColor = skTileColors[(game.props.skwer.value + 1) % 3];
-    var count = game.rotationCounter.value;
+    var count = game.props.rotationCounter.value;
     for (var j = 0; j < numTiles; j++) {
       for (var i = 0; i < numTiles; i++) {
         final countDiv = --count ~/ (numTiles * numTiles);

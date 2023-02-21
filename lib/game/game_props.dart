@@ -11,6 +11,7 @@ class GameProps {
       ValueNotifier(const Point<int>(0, 0));
   final ValueNotifier<Puzzle?> puzzle = ValueNotifier(null);
   final ValueNotifier<bool> isSolved = ValueNotifier(true);
+  final ValueNotifier<int> rotationCounter = ValueNotifier(0);
 
   final Map<SkwerTileIndex, SkwerTileProps> skwerTiles =
       <SkwerTileIndex, SkwerTileProps>{};

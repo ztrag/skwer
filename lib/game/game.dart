@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:skwer/game/game_prefs.dart';
 import 'package:skwer/game/game_props.dart';
 import 'package:skwer/game/game_rotation.dart';
@@ -22,7 +21,6 @@ enum GameState {
 class Game {
   final GameProps props = GameProps();
   final List<GameRotation> rotations = [];
-  final ValueNotifier<int> rotationCounter = ValueNotifier(0);
 
   GamePrefs prefs = GamePrefs();
   GameState state = GameState.inProgress;
@@ -69,7 +67,7 @@ class Game {
         rotate(rotation, false);
       }
     } else {
-      rotationCounter.value = 0;
+      props.rotationCounter.value = 0;
       rotations.clear();
     }
   }
@@ -103,7 +101,7 @@ class Game {
       GameRotation(index: last.index, delta: -last.delta),
       false,
     );
-    rotationCounter.value += props.hasPuzzle ? last.delta : -1;
+    props.rotationCounter.value += props.hasPuzzle ? last.delta : -1;
   }
 
   bool resetPuzzle() {
@@ -198,10 +196,10 @@ class Game {
         rotations.removeLast();
         rotations.removeLast();
         rotation = GameRotation(index: rotation.index, delta: -2);
-        rotationCounter.value += 2;
+        props.rotationCounter.value += 2;
       } else {
         rotations.add(rotation);
-        rotationCounter.value += props.hasPuzzle ? -rotation.delta : 1;
+        props.rotationCounter.value += props.hasPuzzle ? -rotation.delta : 1;
       }
     }
 

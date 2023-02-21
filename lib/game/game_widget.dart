@@ -211,7 +211,7 @@ class _GameWidgetState extends State<GameWidget> {
             ),
           ),
           if (Platform.isMobile)
-            GameMenuButton(
+            GameBottomMenu(
               game: game,
               onHelp: () => setState(() {
                 _isShowingHelp = !_isShowingHelp;

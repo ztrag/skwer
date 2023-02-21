@@ -71,8 +71,8 @@ class GameBackground extends StatelessWidget {
                   ? Container()
                   : Center(
                       child: Container(
-                        width: zone.size.x * tileSize,
-                        height: zone.size.y * tileSize,
+                        width: zone.size.x * tileSize + (tileSize * 0.04),
+                        height: zone.size.y * tileSize + (tileSize * 0.04),
                         decoration: BoxDecoration(
                           color: skBlack,
                           border: Border.all(

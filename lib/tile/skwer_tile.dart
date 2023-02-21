@@ -411,14 +411,15 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double get _geometricTileSize {
-    final numTiles = min(gameProps.numTilesX, gameProps.numTilesY);
+    final numTiles = max(gameProps.numTilesX, gameProps.numTilesY);
     final xNumTiles = _tileSizeFromNumTiles(numTiles);
-    if (Platform.isMobile && gameProps.hasPuzzle && props.isActive.value) {
-      return xNumTiles;
-    }
-
-    final xPuzzle = gameProps.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
-    final xDist = 0.5 * xNumTiles * numTiles / _cartesianDistFromCenter;
+    final xPuzzle = gameProps.hasPuzzle && props.isActive.value ? 0.9 : 0.8;
+    final xDist = 0.3 *
+        xNumTiles *
+        numTiles /
+        (props.isActive.value && gameProps.hasPuzzle
+            ? 0.1
+            : _cartesianDistFromCenter);
     final x = xPuzzle * min(1.0, pow(xDist, 0.7));
     return pow(x, 1.1).toDouble();
   }

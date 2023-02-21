@@ -316,6 +316,9 @@ class _GameWidgetState extends State<GameWidget> {
         _isShowingHelp = !_isShowingHelp;
       });
       return KeyEventResult.handled;
+    } else if (event.logicalKey == LogicalKeyboardKey.backspace) {
+      game.undoLastRotation();
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }

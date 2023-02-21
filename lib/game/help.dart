@@ -68,15 +68,17 @@ class Help extends StatelessWidget {
     if (Platform.isMobile) {
       return [];
     }
+    const textStyle = TextStyle(color: Colors.grey);
     return const [
       Text(''),
-      Text('[arrows] ------> move', style: TextStyle(color: Colors.grey)),
-      Text('[space/enter] -> press', style: TextStyle(color: Colors.grey)),
-      Text('[tab] ---------> toggle', style: TextStyle(color: Colors.grey)),
-      Text('[1-9] ---------> puzzle', style: TextStyle(color: Colors.grey)),
-      Text('[r]  ----------> reset', style: TextStyle(color: Colors.grey)),
-      Text('[h] -----------> help', style: TextStyle(color: Colors.grey)),
-      Text('[escape] ------> cancel', style: TextStyle(color: Colors.grey)),
+      Text('[arrows] ------> move', style: textStyle),
+      Text('[space/enter] -> press', style: textStyle),
+      Text('[tab] ---------> toggle', style: textStyle),
+      Text('[1-9] ---------> puzzle', style: textStyle),
+      Text('[r]  ----------> reset', style: textStyle),
+      Text('[backspace] ---> undo', style: textStyle),
+      Text('[escape] ------> cancel', style: textStyle),
+      Text('[h] -----------> help', style: textStyle),
     ];
   }
 }

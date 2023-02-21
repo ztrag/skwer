@@ -64,7 +64,7 @@ class GameMenuButton extends StatelessWidget {
                           } else {
                             if (game.props.puzzleLength == 0) {
                               game.startPuzzle(game.prefs.puzzleSize.value);
-                            } else if (game.rotations.length <=
+                            } else if (game.rotations.length >
                                 game.props.puzzleLength) {
                               game.undoLastRotation();
                             } else {

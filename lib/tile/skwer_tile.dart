@@ -180,7 +180,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
         _paint.animationEnd = _previousState;
         _animationController.forward(from: 0);
       }
-      _focusAnimationController.value = 0;
+      _focusAnimationController.reverse();
     }
   }
 

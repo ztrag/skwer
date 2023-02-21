@@ -67,7 +67,7 @@ class GameBackground extends StatelessWidget {
                   ],
                 ),
               ),
-              child: puzzle == null
+              child: puzzle == null || zone.size.x == 0 || zone.size.y == 0
                   ? Container()
                   : Center(
                       child: Container(

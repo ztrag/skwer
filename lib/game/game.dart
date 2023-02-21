@@ -27,6 +27,9 @@ class Game {
   int _resetPuzzleCounter = 0;
 
   void resize(int numTilesX, int numTilesY) {
+    if (numTilesX < 0 || numTilesY < 0) {
+      return;
+    }
     clearFocus(true);
     endPuzzle(false);
     props.numTiles.value = Point(numTilesX, numTilesY);

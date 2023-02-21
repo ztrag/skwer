@@ -76,9 +76,17 @@ class Game {
 
   void startPuzzle(int size) {
     props.isSolved.value = false;
-    props.puzzle.value =
-        Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
-    resetPuzzle();
+    for (var i = 0; i < 5; i++) {
+      props.puzzle.value =
+          Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
+      final result = resetPuzzle();
+      if (result) {
+        return;
+      }
+
+      // Three rotations on same tile with same color.
+      reset(immediate: true);
+    }
   }
 
   void addToPuzzle() {
@@ -99,16 +107,26 @@ class Game {
     rotationCounter.value += props.hasPuzzle ? last.delta : -1;
   }
 
-  void resetPuzzle() {
+  bool resetPuzzle() {
     if (!props.hasPuzzle) {
-      return;
+      return true;
     }
 
     state = GameState.inProgress;
     reset(skwer: props.skwer.value);
+
+    final map = <SkwerTileIndex, Map<int, int>>{};
     for (final rotation in props.puzzle.value!.rotations) {
+      final skwer = props.skwerTiles[rotation.index]!.state.value.skwer % 3;
+      map[rotation.index] = map[rotation.index] ?? <int, int>{};
+      map[rotation.index]![skwer] = (map[rotation.index]![skwer] ?? 0) + 1;
+      if (map[rotation.index]![skwer]! > 2) {
+        return false;
+      }
       rotate(rotation);
     }
+
+    return true;
   }
 
   void endPuzzle([bool shouldReset = true]) {

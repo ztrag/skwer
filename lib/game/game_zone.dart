@@ -25,8 +25,10 @@ class GameZone {
       return (6 + numTiles - 10) ~/ 2;
     } else if (numTiles > 6) {
       return 2;
+    } else if (numTiles > 3) {
+      return 1;
     }
-    return 1;
+    return 0;
   }
 
   bool containsTile(SkwerTileIndex tile) {

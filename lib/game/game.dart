@@ -77,15 +77,15 @@ class Game {
   void startPuzzle(int size) {
     props.isSolved.value = false;
     for (var i = 0; i < 5; i++) {
+      if (i > 0) {
+        reset(immediate: true);
+      }
       props.puzzle.value =
           Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
       final result = resetPuzzle();
       if (result) {
         return;
       }
-
-      // Three rotations on same tile with same color.
-      reset(immediate: true);
     }
   }
 

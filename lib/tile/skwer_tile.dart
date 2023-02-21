@@ -354,7 +354,7 @@ class _SkwerTilePaint extends CustomPainter {
         ((1 - solved) * active * puzzle) * 1 +
         ((1 - solved) * active * (1 - puzzle)) * 0.7 +
         ((1 - solved) * (1 - active) * puzzle) * 0.75 +
-        ((1 - solved) * (1 - active) * (1 - puzzle)) * 0.15;
+        ((1 - solved) * (1 - active) * (1 - puzzle)) * 0.2;
     final y = z * (1 - highlight * puzzle) + 1.05 * highlight * puzzle;
     return y * (1 - focus) + 1.4 * focus;
   }

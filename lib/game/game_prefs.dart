@@ -18,7 +18,7 @@ class GamePrefs {
   static const int defaultTileLevel = 5;
   static const int defaultPuzzleSize = 7;
 
-  final ValueNotifier<int> puzzleSize = ValueNotifier(1);
+  final ValueNotifier<int> puzzleSize = ValueNotifier(defaultPuzzleSize);
   final ValueNotifier<Point<int>> _numTiles =
       ValueNotifier(kNumTiles[defaultTileLevel]);
 

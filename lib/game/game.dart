@@ -141,8 +141,10 @@ class Game {
     clearFocus();
     props.isSolved.value = true;
     reset(skwer: (props.skwer.value + 1) % 3, immediate: true);
-    props.isSolved.value = false;
-    resetPuzzle();
+    if (props.hasPuzzle) {
+      props.isSolved.value = false;
+      resetPuzzle();
+    }
   }
 
   void rotate(GameRotation rotation, [bool addRotation = true]) {

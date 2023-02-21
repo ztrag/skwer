@@ -274,9 +274,7 @@ class _SkwerTilePaint extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final x = _geometricTileSize *
-        _focusTileSize *
-        _pressTileSize;
+    final x = _geometricTileSize * _focusTileSize * _pressTileSize;
     canvas.translate(
       size.width * (1 - x) / 2,
       size.height * (1 - x) / 2,
@@ -428,7 +426,8 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double get _focusTileSize =>
-      focusAnimation.value * 1.05 + (1 - focusAnimation.value) * 1;
+      focusAnimation.value * (Platform.isMobile ? 0.9 : 1.05) +
+      (1 - focusAnimation.value) * 1;
 
   double get _pressTileSize =>
       pressAnimation.value * 1 + (1 - pressAnimation.value) * 0.9;

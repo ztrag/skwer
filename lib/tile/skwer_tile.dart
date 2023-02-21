@@ -53,8 +53,8 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     super.initState();
 
     const puzzleStateDuration = Duration(milliseconds: 300);
-    _animationController =
-        AnimationController(duration: puzzleStateDuration, vsync: this);
+    _animationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     _pressAnimationController =
         AnimationController(duration: puzzleStateDuration, vsync: this);
@@ -65,24 +65,24 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
       vsync: this,
     );
     _highlightAnimation =
-        Tween(begin: 0.0, end: 1.0).animate(_highlightAnimationController);
+        CurveTween(curve: Curves.ease).animate(_highlightAnimationController);
     _focusAnimationController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
     _focusAnimation =
-        Tween(begin: 0.0, end: 1.0).animate(_focusAnimationController);
+        CurveTween(curve: Curves.ease).animate(_focusAnimationController);
     _solvedAnimationController = AnimationController(
-        duration: const Duration(milliseconds: 600), vsync: this);
+        duration: const Duration(milliseconds: 900), vsync: this);
     _solvedAnimation =
-        Tween(begin: 0.0, end: 1.0).animate(_solvedAnimationController);
+        CurveTween(curve: Curves.ease).animate(_solvedAnimationController);
     _activeAnimationController =
         AnimationController(duration: puzzleStateDuration, vsync: this);
     _activeAnimation =
-        Tween(begin: 0.0, end: 1.0).animate(_activeAnimationController);
+        CurveTween(curve: Curves.ease).animate(_activeAnimationController);
     _puzzleHighlightAnimationController =
         AnimationController(duration: puzzleStateDuration, vsync: this);
-    _puzzleHighlightAnimation = Tween(begin: 0.0, end: 1.0)
+    _puzzleHighlightAnimation = CurveTween(curve: Curves.ease)
         .animate(_puzzleHighlightAnimationController);
     _paint = _SkwerTilePaint(
       widget.props,
@@ -107,6 +107,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     widget.props.isFocused.addListener(_onFocused);
     widget.props.isActive.addListener(_onActive);
     widget.gameProps.isSolved.addListener(_onSolved);
+    widget.gameProps.skwer.addListener(_onPuzzleHighlightChanged);
   }
 
   @override
@@ -117,6 +118,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     widget.props.isFocused.removeListener(_onFocused);
     widget.props.isActive.removeListener(_onActive);
     widget.gameProps.isSolved.removeListener(_onSolved);
+    widget.gameProps.skwer.removeListener(_onPuzzleHighlightChanged);
     _animationController.dispose();
     _focusAnimationController.dispose();
     _highlightAnimationController.dispose();

@@ -66,6 +66,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
         CurveTween(curve: Curves.ease).animate(_highlightAnimationController);
     _focusAnimationController = AnimationController(
       duration: const Duration(milliseconds: 150),
+      reverseDuration: const Duration(milliseconds: 50),
       vsync: this,
     );
     _focusAnimation =
@@ -410,20 +411,15 @@ class _SkwerTilePaint extends CustomPainter {
   }
 
   double get _geometricTileSize {
-    if (Platform.isMobile) {
-      final numTiles = min(
-        gameProps.numTilesX,
-        gameProps.numTilesY,
-      );
-      final x = _tileSizeFromNumTiles(numTiles);
-      if (gameProps.hasPuzzle && props.isActive.value) {
-        return x;
-      }
-      final z = min(1.0, pow(1 / _cartesianDistFromCenter, 0.7));
-      return x * pow(z, 0.5).toDouble();
+    final numTiles = min(gameProps.numTilesX, gameProps.numTilesY);
+    final xNumTiles = _tileSizeFromNumTiles(numTiles);
+    if (Platform.isMobile && gameProps.hasPuzzle && props.isActive.value) {
+      return xNumTiles;
     }
-    final amp = gameProps.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
-    final x = amp * min(1.0, pow(2.7 / _cartesianDistFromCenter, 0.7));
+
+    final xPuzzle = gameProps.hasPuzzle && props.isActive.value ? 0.9 : 0.85;
+    final xDist = 0.5 * xNumTiles * numTiles / _cartesianDistFromCenter;
+    final x = xPuzzle * min(1.0, pow(xDist, 0.7));
     return pow(x, 1.1).toDouble();
   }
 

@@ -3,15 +3,12 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 const kNumTiles = [
-  Point(3, 4),
-  Point(3, 5),
   Point(4, 6),
   Point(4, 7),
   Point(5, 7),
   Point(5, 8),
   Point(6, 10),
   Point(6, 9),
-  Point(6, 11),
 ];
 
 class GamePrefs {

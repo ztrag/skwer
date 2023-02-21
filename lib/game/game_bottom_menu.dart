@@ -44,12 +44,7 @@ class GameMenuButton extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () {
-                          game.reset(skwer: (skwer + 2) % 3);
-                          if (game.props.hasPuzzle) {
-                            game.resetPuzzle();
-                          }
-                        },
+                        onPressed: () => game.rotateBase(),
                         child: const Icon(Icons.chevron_left),
                       ),
                       TextButton(

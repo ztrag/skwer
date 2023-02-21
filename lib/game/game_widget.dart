@@ -313,11 +313,7 @@ class _GameWidgetState extends State<GameWidget> {
       game.startPuzzle(digit);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.tab) {
-      game.clearFocus();
-      game.reset(skwer: (game.props.skwer.value + 1) % 3);
-      if (game.props.hasPuzzle) {
-        game.resetPuzzle();
-      }
+      game.rotateBase();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
       setState(() {

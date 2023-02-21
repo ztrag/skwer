@@ -136,6 +136,14 @@ class Game {
     return false;
   }
 
+  void rotateBase() {
+    clearFocus();
+    props.isSolved.value = true;
+    reset(skwer: (props.skwer.value + 1) % 3, immediate: true);
+    props.isSolved.value = false;
+    resetPuzzle();
+  }
+
   void rotate(GameRotation rotation, [bool addRotation = true]) {
     final tileProps = props.skwerTiles[rotation.index];
     if (tileProps == null) {

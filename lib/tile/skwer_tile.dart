@@ -72,7 +72,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
         CurveTween(curve: Curves.ease).animate(_focusAnimationController);
     _solvedAnimationController = AnimationController(
       duration: const Duration(milliseconds: 900),
-      reverseDuration: const Duration(milliseconds: 1500),
+      reverseDuration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     _solvedAnimation =

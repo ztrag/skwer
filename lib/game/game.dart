@@ -81,9 +81,8 @@ class Game {
       }
       props.puzzle.value =
           Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
-      final result = resetPuzzle();
-      if (result) {
-        return;
+      if (resetPuzzle()) {
+        continue;
       }
     }
     props.isSolved.value = false;

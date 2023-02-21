@@ -8,7 +8,7 @@ class GameBottomMenu extends StatelessWidget {
   final VoidCallback onHelp;
 
   late final GameRotationCounterPainter _painter =
-      GameRotationCounterPainter(game.props);
+      GameRotationCounterPainter(props: game.props);
 
   GameBottomMenu({
     Key? key,

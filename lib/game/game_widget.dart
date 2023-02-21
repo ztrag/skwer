@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/game/game.dart';
+import 'package:skwer/game/game_bottom_counter.dart';
 import 'package:skwer/game/game_bottom_menu.dart';
 import 'package:skwer/game/game_rotation.dart';
 import 'package:skwer/game/game_zone.dart';
@@ -57,9 +58,10 @@ class _GameWidgetState extends State<GameWidget> {
 
     final mediaQueryData = MediaQuery.of(context);
     final mediaSize = mediaQueryData.size;
-    final size = Platform.isMobile
-        ? Size(mediaSize.width, mediaSize.height - 100)
-        : mediaSize;
+    final size = Size(
+        mediaSize.width,
+        mediaSize.height -
+            (Platform.isMobile ? 100 : kGameBottomCounterHeight * 3));
 
     final numTilesFromPrefs = getNumTilesFromPrefs();
     final tileSize = getTileSize(size, numTilesFromPrefs);
@@ -184,6 +186,13 @@ class _GameWidgetState extends State<GameWidget> {
                     },
                   ),
                 ),
+                if (!Platform.isMobile)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: GameBottomCounter(props: game.props),
+                  ),
                 AnimatedOpacity(
                   opacity: _isShowingHelp ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 250),

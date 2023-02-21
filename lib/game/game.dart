@@ -83,6 +83,7 @@ class Game {
 
   void addToPuzzle() {
     props.puzzle.value = Puzzle.add(props.puzzle.value!);
+    resetPuzzle();
   }
 
   void resetPuzzle() {

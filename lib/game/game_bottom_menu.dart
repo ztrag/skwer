@@ -29,24 +29,22 @@ class GameMenuButton extends StatelessWidget {
                     style: TextButton.styleFrom(
               foregroundColor: skTileColors[skwer % 3], // Text Color
             ))),
-            child: Stack(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Positioned(
-                  left: 0,
-                  child: TextButton(
-                    onPressed: () => game.prefs.tileLevel++,
-                    child: const Icon(Icons.zoom_out_map),
-                  ),
+                TextButton(
+                  onPressed: () => game.prefs.tileLevel++,
+                  child: const Icon(Icons.zoom_out_map),
+                ),
+                TextButton(
+                  onPressed: () => game.rotateBase(),
+                  child: const Icon(Icons.compare_arrows),
                 ),
                 ValueListenableBuilder(
                   valueListenable: game.props.puzzle,
                   builder: (_, __, ___) => Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextButton(
-                        onPressed: () => game.rotateBase(),
-                        child: const Icon(Icons.chevron_left),
-                      ),
                       TextButton(
                         onLongPress: () {
                           if (game.props.hasPuzzle) {
@@ -57,12 +55,8 @@ class GameMenuButton extends StatelessWidget {
                         },
                         onPressed: () {
                           if (!game.props.hasPuzzle) {
-                            game.startPuzzle(1);
+                            game.startPuzzle(game.prefs.puzzleSize.value);
                           } else {
-                            if (game.rotations.length ==
-                                game.props.puzzle.value!.rotations.length) {
-                              game.addToPuzzle();
-                            }
                             game.resetPuzzle();
                           }
                         },
@@ -74,24 +68,36 @@ class GameMenuButton extends StatelessWidget {
                           ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          game.reset(skwer: (game.props.skwer.value + 1) % 3);
-                          if (game.props.hasPuzzle) {
-                            game.resetPuzzle();
-                          }
-                        },
-                        child: const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final puzzleSize = game.prefs.puzzleSize.value % 8 + 1;
+                    game.prefs.puzzleSize.value = puzzleSize;
+                    if (!game.props.hasPuzzle || puzzleSize == 1) {
+                      game.startPuzzle(puzzleSize);
+                    } else {
+                      game.addToPuzzle();
+                    }
+                  },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(Icons.square_outlined),
+                      ValueListenableBuilder(
+                        valueListenable: game.prefs.puzzleSize,
+                        builder: (_, __, ___) => Text(
+                          '${game.prefs.puzzleSize.value}',
+                          textScaleFactor: 0.9,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  child: TextButton(
-                    onPressed: onHelp,
-                    child: const Icon(Icons.help_center_outlined),
-                  ),
+                TextButton(
+                  onPressed: onHelp,
+                  child: const Text('?', textScaleFactor: 1.5),
                 ),
               ],
             ),

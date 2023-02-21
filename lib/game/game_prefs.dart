@@ -16,10 +16,15 @@ const kNumTiles = [
 
 class GamePrefs {
   static const int defaultTileLevel = 5;
+  static const int defaultPuzzleSize = 7;
 
+  final ValueNotifier<int> puzzleSize = ValueNotifier(1);
   final ValueNotifier<Point<int>> _numTiles =
       ValueNotifier(kNumTiles[defaultTileLevel]);
+
   int _tileLevel = defaultTileLevel;
+
+  ValueListenable<Point<int>> get numTiles => _numTiles;
 
   int get tileLevel => _tileLevel;
 
@@ -27,6 +32,4 @@ class GamePrefs {
     _tileLevel = level % kNumTiles.length;
     _numTiles.value = kNumTiles[_tileLevel];
   }
-
-  ValueListenable<Point<int>> get numTiles => _numTiles;
 }

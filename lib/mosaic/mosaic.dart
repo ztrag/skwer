@@ -12,7 +12,7 @@ abstract class Mosaic {
     Size size,
     double brightness,
     double pressAnimation,
-    ColorWave wave,
+    List<ColorWave> waves,
     Offset? hoverPosition,
   ) {
     for (MosaicTile tile in tiles) {
@@ -21,7 +21,7 @@ abstract class Mosaic {
         size,
         brightness * _getHoverBrightness(tile, hoverPosition, size),
         pressAnimation,
-        wave,
+        waves,
       );
     }
   }

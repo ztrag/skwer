@@ -8,7 +8,7 @@ import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
-import 'package:skwer/tile/skwer_tile_state.dart';
+import 'package:skwer/tile/skwer_tile_skwer.dart';
 
 typedef SkwerTileAction = void Function(SkwerTileIndex target);
 
@@ -50,14 +50,12 @@ class Game {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
         final tileProps = props.skwerTiles[index]!;
-        final state = tileProps.state;
 
         tileProps.isActive.value =
             props.puzzle.value?.zone.containsTile(index) ?? true;
-        state.value = SkwerTileState.reset(
-          state.value,
-          props.skwer.value,
-          immediate: immediate,
+        tileProps.skwer.value = SkwerTileSkwer(
+          skwer: props.skwer.value,
+          animateColor: !immediate,
         );
         if (tileProps.isFocused.value) {
           focus(index, false);
@@ -118,7 +116,7 @@ class Game {
     var hasSkwerCycle = false;
     final map = <SkwerTileIndex, Map<int, int>>{};
     for (final rotation in props.puzzle.value!.rotations) {
-      final skwer = props.skwerTiles[rotation.index]!.state.value.skwer % 3;
+      final skwer = props.skwerTiles[rotation.index]!.skwer.value.skwer % 3;
       map[rotation.index] = map[rotation.index] ?? <int, int>{};
       map[rotation.index]![skwer] = (map[rotation.index]![skwer] ?? 0) + 1;
       if (map[rotation.index]![skwer]! > 2) {
@@ -192,6 +190,7 @@ class Game {
       return;
     }
 
+    var hasFailFix = false;
     if (addRotation) {
       if (rotations.length > 1 &&
           rotations[rotations.length - 1].index == rotation.index &&
@@ -201,18 +200,26 @@ class Game {
         rotations.removeLast();
         rotation = GameRotation(index: rotation.index, delta: -2);
         props.rotationCounter.value += 2;
+        hasFailFix = true;
       } else {
         rotations.add(rotation);
         props.rotationCounter.value += props.hasPuzzle ? -rotation.delta : 1;
       }
     }
 
-    _skwerAction(tileProps, (target) => _rotateTile(rotation, target));
+    _skwerAction(
+      tileProps,
+      (target) => _rotateTile(
+        rotation,
+        target,
+        hasFailFix || rotation.delta == 1,
+      ),
+    );
     _checkEndGame(rotation.index);
   }
 
   void _skwerAction(SkwerTileProps trigger, SkwerTileAction action) {
-    final skwer = trigger.state.value.skwer;
+    final skwer = trigger.skwer.value.skwer;
     if (skwer % 3 == 0) {
       _redAction(trigger.index, action);
     } else if (skwer % 3 == 1) {
@@ -276,10 +283,14 @@ class Game {
   void _rotateTile(
     GameRotation rotation,
     SkwerTileIndex target,
+    bool animateWave,
   ) {
-    final state = props.skwerTiles[target]!.state;
-    state.value =
-        SkwerTileState.rotate(state.value, rotation.index, rotation.delta);
+    final state = props.skwerTiles[target]!.skwer;
+    state.value = state.value.rotate(
+      rotation.index,
+      rotation.delta,
+      animateWave,
+    );
     if (props.skwerTiles[target]!.isFocused.value) {
       focus(target, false);
       focus(target, true);
@@ -303,7 +314,7 @@ class Game {
     } else if (state == GameState.failed) {
       final counter = ++_resetPuzzleCounter;
       Future.delayed(
-        const Duration(milliseconds: 1200),
+        const Duration(milliseconds: 3000),
         () {
           if (counter != _resetPuzzleCounter) {
             return;
@@ -332,7 +343,7 @@ class Game {
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
         final index = SkwerTileIndex(x, y);
-        final state = props.skwerTiles[index]!.state;
+        final state = props.skwerTiles[index]!.skwer;
         if (state.value.skwer > props.skwer.value) {
           return GameState.failed;
         } else if (state.value.skwer < props.skwer.value) {

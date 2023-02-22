@@ -7,7 +7,7 @@ class TransitionMosaic extends Mosaic {
   final Mosaic mosaicB;
 
   List<MosaicTile>? _tiles;
-  int dir = 1;
+  double transition = 0;
 
   TransitionMosaic(this.mosaicA, this.mosaicB);
 
@@ -15,7 +15,7 @@ class TransitionMosaic extends Mosaic {
   List<MosaicTile> get tiles {
     _tiles ??= _buildTiles();
     for (final tile in _tiles!) {
-      (tile as TransitionMosaicTile).dir = dir;
+      (tile as TransitionMosaicTile).transition = transition;
     }
     return _tiles!;
   }
@@ -28,7 +28,12 @@ class TransitionMosaic extends Mosaic {
       tiles.add(TransitionMosaicTile(tile, match));
     }
     for (final tile in remaining) {
-      tiles.add(TransitionMosaicTile(MosaicTile([tile.position]), tile));
+      tiles.add(
+        TransitionMosaicTile(
+          MosaicTile(List.generate(4, (_) => tile.position)),
+          tile,
+        ),
+      );
     }
     return tiles;
   }

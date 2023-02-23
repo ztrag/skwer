@@ -447,7 +447,11 @@ class _SkwerTilePaint extends CustomPainter {
 
       waves.add(
         ColorWave(
-          color: skTileColors[(skwer.skwer) % 3],
+          color: skTileColors[
+              ((props.skwer.value.skwer == gameProps.skwer.value)
+                      ? props.skwer.value.skwer
+                      : skwer.skwer) %
+                  3],
           animation: animation,
           rotate: skwer.animateWave,
           direction: getWaveDirectionFromTrigger(skwer.trigger),

@@ -190,6 +190,14 @@ class _GameWidgetState extends State<GameWidget> {
             _delayedUnfocus = null;
           }
         },
+        onHover: (event) {
+          if (tileProps.isActive.value &&
+              !tileProps.isFocused.value &&
+              tileProps.focusNode.hasFocus) {
+            game.focus(tileProps.index, true);
+            _delayedUnfocus = null;
+          }
+        },
         onExit: (event) {
           if (tileProps.isFocused.value) {
             _delayedUnfocus =

@@ -54,7 +54,6 @@ class GameBottomMenu extends StatelessWidget {
                           }
                         },
                         onPressed: () {
-                          // if (game.props.puzzleLength == 0) {
                           if (!game.props.hasPuzzle) {
                             if (game.props.rotationCounter.value > 0) {
                               game.undoLastRotation();
@@ -64,11 +63,8 @@ class GameBottomMenu extends StatelessWidget {
                           } else {
                             if (game.props.puzzleLength == 0) {
                               game.startPuzzle(game.prefs.puzzleSize.value);
-                            } else if (game.rotations.length >
-                                game.props.puzzleLength) {
-                              game.undoLastRotation();
                             } else {
-                              game.resetPuzzle();
+                              game.undoLastRotation();
                             }
                           }
                         },

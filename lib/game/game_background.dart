@@ -34,7 +34,7 @@ class GameBackground extends StatelessWidget {
                   zone.size.y / size.height,
                 ) *
                 tileSize;
-            const centerShade = [0.55, 0.65, 0.55];
+            const centerShade = [0.4, 0.3, 0.55];
             return Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
@@ -44,20 +44,20 @@ class GameBackground extends StatelessWidget {
                     Color.lerp(
                         Color.lerp(
                           skTileColors[(skwer + 0) % 3],
-                          skTileColors[(skwer + (skwer == 0 ? 2 : 1)) % 3],
-                          0.4,
+                          const Color.fromARGB(255, 5, 110, 230),
+                          0.2,
                         )!,
                         skBlack,
                         centerShade[skwer % 3] *
                             (props.hasPuzzle ? 0.8 : 1.4))!,
                     Color.lerp(
                       Color.lerp(
-                        skTileColors[(skwer + 2) % 3],
-                        skTileColors[skwer % 3],
+                        const Color.fromARGB(255, 5, 110, 230),
+                        skRed,
                         0.5,
                       )!,
                       skBlack,
-                      0.87,
+                      0.7,
                     )!,
                     Color.lerp(
                       skTileColors[skwer % 3],

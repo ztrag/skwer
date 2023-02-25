@@ -212,15 +212,16 @@ class Game {
       }
     }
 
-    _skwerAction(
-      tileProps,
-      (target) => _rotateTile(
-        rotation,
-        target,
-        hasFailFix || rotation.delta == 1,
-      ),
-    );
-    _checkEndGame(rotation.index);
+    _rotateTile(rotation, tileProps.index, false);
+    // _skwerAction(
+    //   tileProps,
+    //   (target) => _rotateTile(
+    //     rotation,
+    //     target,
+    //     hasFailFix || rotation.delta == 1,
+    //   ),
+    // );
+    // _checkEndGame(rotation.index);
   }
 
   void _skwerAction(SkwerTileProps trigger, SkwerTileAction action) {

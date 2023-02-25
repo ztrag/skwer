@@ -39,7 +39,11 @@ class MosaicTile {
     _path.lineTo(p.first.x * size.width, p.first.y * size.height);
 
     final color = Color.lerp(skWhite, transition.color, pressAnimation)!;
-    final colorD2 = getAnimatedColorD1 * brightness;
+    final colorD2 = color.computeLuminance() < 0.1
+        ? 0.0
+        : ((color.computeLuminance() > 0.5 ? 1 : 0.75) *
+            getAnimatedColorD1 *
+            brightness);
     _paint.color = colorD2 > 1
         ? Color.lerp(color, skWhite, colorD2 - 1)!
         : Color.lerp(color, skBlack, 1 - colorD2)!;

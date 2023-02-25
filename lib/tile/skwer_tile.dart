@@ -356,13 +356,15 @@ class _SkwerTilePaint extends CustomPainter {
     final numTiles = max(gameProps.numTilesX, gameProps.numTilesY);
     final xNumTiles = tileSizeFromNumTiles(numTiles);
     final xPuzzle = gameProps.hasPuzzle && props.isActive.value ? 0.95 : 0.8;
-    final xDist = 0.3 *
+    final xDist = 0.12 *
         xNumTiles *
         numTiles /
         (props.isActive.value && gameProps.hasPuzzle
             ? 0.1
             : cartesianDistFromCenter);
-    final x = xPuzzle * min(1.0, pow(xDist, 0.7));
+    final x = xPuzzle *
+        min(1.0, pow(xDist, 3)) *
+        (props.skwer.value.skwer % 3 == 0 ? 1.6 : 1);
     return pow(x, 1.1).toDouble();
   }
 
@@ -446,8 +448,9 @@ class _SkwerTilePaint extends CustomPainter {
 
       waves.add(
         ColorWave(
-          color: skTileColors[
-              ((props.skwer.value.skwer == gameProps.skwer.value)
+          color: skwer.skwer % 3 == 1
+              ? skFocusColor
+              : skTileColors[((props.skwer.value.skwer == gameProps.skwer.value)
                       ? props.skwer.value.skwer
                       : skwer.skwer) %
                   3],

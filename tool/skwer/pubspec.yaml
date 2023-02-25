@@ -1,0 +1,15 @@
+name: skwer
+description: A tool for developing skwer.
+version: 1.0.0
+
+environment:
+  sdk: '>=2.16.2 <3.0.0'
+
+dev_dependencies:
+  lints: ^1.0.0
+dependencies:
+  console: ^4.1.0
+  glob: ^2.0.2
+
+executables:
+  skwer:

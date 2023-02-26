@@ -62,9 +62,11 @@ Future<int> _createMacosImages(String path) async {
     return cropped;
   }
 
-  final roundedPath = await _createRoundedCornersImage(croppedPath, tempDir);
-  if (roundedPath == null) {
-    return 1;
+  final roundedPath = '${tempDir.path}/rounded.png';
+  final rounded =
+      await _createRoundedCornersImage(croppedPath, roundedPath, 164, 152, 24);
+  if (rounded != 0) {
+    return rounded;
   }
 
   var paddedPath = '${_kMacosOut}_1024.png';
@@ -94,23 +96,65 @@ Future<int> _createAndroidImages(String path) async {
     return cropped;
   }
 
-  final paddedPath = '${tempDir.path}_1024.png';
-  final padded = await _createPaddedImage(croppedPath, paddedPath);
-  if (padded != 0) {
-    return padded;
+  final resizedPath = '${tempDir.path}/resized.png';
+  final resized = await _createResizedImage(croppedPath, resizedPath, 690);
+  if (resized != 0) {
+    return resized;
   }
 
-  final name = 'ic_launcher_foreground.png';
-  final map = {
+  final roundedCornersPath = '${tempDir.path}/rounded.png';
+  final roundedCorners = await _createRoundedCornersImage(
+      resizedPath, roundedCornersPath, 100, 90, 21);
+  if (roundedCorners != 0) {
+    return roundedCorners;
+  }
+
+  final paddedRoundedCornersPath = '${tempDir.path}_1024.png';
+  final paddedRoundedCorners =
+      await _createPaddedImage(roundedCornersPath, paddedRoundedCornersPath);
+  if (paddedRoundedCorners != 0) {
+    return paddedRoundedCorners;
+  }
+
+  final icLauncherForeground = await _createAndroidImageSet(
+      paddedRoundedCornersPath, 'ic_launcher_foreground.png');
+  if (icLauncherForeground != 0) {
+    return icLauncherForeground;
+  }
+
+  final circledPath = '${tempDir.path}/circled.png';
+  final circled = await _createCircledImage(resizedPath, circledPath, 20);
+  if (circled != 0) {
+    return circled;
+  }
+
+  final paddedCircledPath = '${tempDir.path}_c_1024.png';
+  final paddedCircled =
+      await _createPaddedImage(circledPath, paddedCircledPath);
+  if (paddedCircled != 0) {
+    return paddedCircled;
+  }
+
+  final icLauncherForegroundRound = await _createAndroidImageSet(
+      paddedCircledPath, 'ic_launcher_foreground_round.png');
+  if (icLauncherForegroundRound != 0) {
+    return icLauncherForegroundRound;
+  }
+
+  return 0;
+}
+
+Future<int> _createAndroidImageSet(String path, String name) async {
+  final androidSizeMap = {
     48: 'mdpi',
     72: 'hdpi',
     96: 'xhdpi',
     144: 'xxhdpi',
     192: 'xxxhdpi',
   };
-  for (final entry in map.entries) {
+  for (final entry in androidSizeMap.entries) {
     final result = await _createResizedImage(
-        paddedPath, '$_kAndroidOut${entry.value}/$name', entry.key);
+        path, '$_kAndroidOut${entry.value}/$name', entry.key);
     if (result != 0) {
       return result;
     }
@@ -118,8 +162,9 @@ Future<int> _createAndroidImages(String path) async {
   return 0;
 }
 
-Future<String?> _createRoundedCornersImage(String path, Directory out) async {
-  final size = await _getImageSize(path);
+Future<int> _createCircledImage(String input, String output, int width) async {
+  final size = await _getImageSize(input);
+  final maskPath = '${Directory.systemTemp.path}/mask.png';
   final mask = await runProcess(
     'convert',
     [
@@ -127,23 +172,64 @@ Future<String?> _createRoundedCornersImage(String path, Directory out) async {
       '${size.x}x${size.y}',
       'xc:none',
       '-draw',
-      "roundrectangle 0,0,${size.x},${size.y},164,164",
-      '${out.path}/mask.png',
+      "circle ${size.x ~/ 2},${size.y ~/ 2} 0,${size.x ~/ 2}",
+      maskPath,
     ],
     ProcessStartMode.inheritStdio,
   );
   if (mask != 0) {
-    return null;
+    return mask;
   }
 
-  final width = 24;
-  final roundedOut = '${out.path}/rounded1.png';
-  final round = await runProcess(
+  return runProcess(
     'convert',
     [
-      path,
+      input,
+      '-fill',
+      'transparent',
+      '-stroke',
+      '#64be00',
+      '-strokewidth',
+      '$width',
+      '-draw',
+      "circle ${size.x ~/ 2},${size.y ~/ 2}"
+          " ${width ~/ 2 + 0.5},${size.x ~/ 2}",
       '-matte',
-      '${out.path}/mask.png',
+      maskPath,
+      '-compose',
+      'DstIn',
+      '-composite',
+      output,
+    ],
+  );
+}
+
+Future<int> _createRoundedCornersImage(String input, String output,
+    int borderRadius1, int borderRadius2, int width) async {
+  final size = await _getImageSize(input);
+  final maskPath = '${Directory.systemTemp.path}/mask.png';
+  final mask = await runProcess(
+    'convert',
+    [
+      '-size',
+      '${size.x}x${size.y}',
+      'xc:none',
+      '-draw',
+      "roundrectangle 0,0,${size.x},${size.y},$borderRadius1,$borderRadius1",
+      maskPath,
+    ],
+    ProcessStartMode.inheritStdio,
+  );
+  if (mask != 0) {
+    return mask;
+  }
+
+  return runProcess(
+    'convert',
+    [
+      input,
+      '-matte',
+      maskPath,
       '-compose',
       'DstIn',
       '-composite',
@@ -155,16 +241,11 @@ Future<String?> _createRoundedCornersImage(String path, Directory out) async {
       '$width',
       '-draw',
       "roundrectangle ${width ~/ 2},${width ~/ 2}"
-          " ${820 - width ~/ 2},${820 - width ~/ 2}"
-          " 154,154",
-      roundedOut,
+          " ${size.x - width ~/ 2},${size.x - width ~/ 2}"
+          " $borderRadius2,$borderRadius2",
+      output,
     ],
   );
-  if (round != 0) {
-    return null;
-  }
-
-  return roundedOut;
 }
 
 Future<int> _createPaddedImage(String input, String output) {
@@ -186,7 +267,7 @@ Future<int> _createCroppedImage(String input, String output, int size) {
     '-gravity',
     'center',
     '-crop',
-    '${size}x${size}+0+0',
+    '${size}x$size+0+0',
     '+repage',
     output,
   ]);

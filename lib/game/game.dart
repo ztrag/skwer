@@ -22,6 +22,7 @@ class Game {
   final GameProps props = GameProps();
   final List<GameRotation> rotations = [];
 
+  bool _hasInited = false;
   GamePrefs prefs = GamePrefs();
   GameState state = GameState.inProgress;
   int _resetPuzzleCounter = 0;
@@ -33,8 +34,14 @@ class Game {
     clearFocus(true);
     endPuzzle(false);
     props.numTiles.value = Point(numTilesX, numTilesY);
-    startPuzzle(0);
-    reset(immediate: true);
+    if (!_hasInited) {
+      _hasInited = true;
+      reset(skwer: Random().nextInt(3), immediate: true);
+      Future.microtask(() => startPuzzle(prefs.puzzleSize.value));
+    } else {
+      startPuzzle(0);
+      reset(immediate: true);
+    }
   }
 
   void reset({

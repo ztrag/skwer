@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:skwer/game/game_widget.dart';
+import 'package:skwer/menu/menu_wrapper.dart';
 
 void main() {
   runApp(const MaterialApp(
     home: SafeArea(
         child: DefaultTextStyle(
       style: TextStyle(fontSize: 16, fontFamily: 'CourierPrime'),
-      child: GameWidget(),
+      child: MenuWrapper(),
     )),
     debugShowCheckedModeBanner: false,
   ));

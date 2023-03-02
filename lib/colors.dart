@@ -5,6 +5,6 @@ const Color skGreen = Color.fromARGB(255, 100, 190, 0);
 const Color skBlue = Color.fromARGB(255, 5, 110, 230);
 const List<Color> skTileColors = [skRed, skGreen, skBlue];
 
-const Color skFocusColor = Color.fromARGB(255, 210, 210, 0);
+const Color skYellow = Color.fromARGB(255, 200, 200, 80);
 const Color skWhite = Color(0xFFFFFFFF);
 const Color skBlack = Color(0xFF000000);

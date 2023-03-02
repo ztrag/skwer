@@ -200,10 +200,10 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
 
   void onFocused() {
     if (widget.props.isFocused.value) {
-      focusAnimationController.forward(from: 0);
+      focusAnimationController.forward();
     } else {
       if (!widget.gameProps.hasPuzzle) {
-        rainbowAnimationController.forward(from: 0);
+        rainbowAnimationController.forward();
       }
       focusAnimationController.reverse();
     }

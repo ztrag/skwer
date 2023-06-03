@@ -3,12 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:skwer/menu/menu_wrapper.dart';
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     home: SafeArea(
-        child: DefaultTextStyle(
-      style: TextStyle(fontSize: 16, fontFamily: 'CourierPrime'),
-      child: MenuWrapper(),
-    )),
+      child: Theme(
+        data: ThemeData(
+          fontFamily: 'CourierPrime',
+        ),
+        child: const MenuWrapper(),
+      ),
+    ),
     debugShowCheckedModeBanner: false,
   ));
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

@@ -31,83 +31,81 @@ class _MenuWidgetState extends State<MenuWidget> {
       DeviceOrientation.portraitDown,
     ]);
 
-    final mediaQueryData = MediaQuery.of(context);
-    final mediaSize = mediaQueryData.size;
-    final size = Size(
-      mediaSize.width,
-      mediaSize.height,
-    );
+    return LayoutBuilder(
+      builder: (c, constraints) {
+        final size = constraints.biggest;
 
-    const minNumTiles = Point(13, 13);
-    final tileSize = _getTileSize(size, minNumTiles);
-    final x = (size.width / tileSize).floor();
-    final y = (size.height / tileSize).floor();
-    final numTilesX = x;
-    final numTilesY = y;
+        const minNumTiles = Point(13, 13);
+        final tileSize = _getTileSize(size, minNumTiles);
+        final x = (size.width / tileSize).floor();
+        final y = (size.height / tileSize).floor();
+        final numTilesX = x;
+        final numTilesY = y;
 
-    if (numTilesX != menu.props.numTilesX ||
-        numTilesY != menu.props.numTilesY) {
-      _positions.clear();
-      menu.props.numTiles.value = Point(numTilesX, numTilesY);
-      Future.delayed(const Duration(seconds: 1), () => menu.drawWelcome());
-    }
+        if (numTilesX != menu.props.numTilesX ||
+            numTilesY != menu.props.numTilesY) {
+          _positions.clear();
+          menu.props.numTiles.value = Point(numTilesX, numTilesY);
+          Future.delayed(const Duration(seconds: 1), () => menu.drawWelcome());
+        }
 
-    return FocusScope(
-      autofocus: true,
-      node: focusScopeNode,
-      onKeyEvent: _onTopKeyEvent,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const MenuBackground(),
-                Listener(
-                  onPointerDown: _onPointerDown,
-                  onPointerMove: _onPointerMove,
-                  onPointerUp: _onPointerUp,
-                  child: ValueListenableBuilder(
-                    valueListenable: menu.props.numTiles,
-                    builder: (_, numTiles, __) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          numTiles.y,
-                          (y) => Row(
+        return FocusScope(
+          autofocus: true,
+          node: focusScopeNode,
+          onKeyEvent: _onTopKeyEvent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const MenuBackground(),
+                    Listener(
+                      onPointerDown: _onPointerDown,
+                      onPointerMove: _onPointerMove,
+                      onPointerUp: _onPointerUp,
+                      child: ValueListenableBuilder(
+                        valueListenable: menu.props.numTiles,
+                        builder: (_, numTiles, __) {
+                          return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(
-                              numTiles.x,
-                              (x) => _buildTile(x, y, tileSize),
+                              numTiles.y,
+                              (y) => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  numTiles.x,
+                                  (x) => _buildTile(x, y, tileSize),
+                                ),
+                              ),
                             ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      child: TextButton(
+                        onPressed: () {
+                          widget.menuSelection.value = MenuSelection.skwer;
+                        },
+                        child: const Text(
+                          '[skwer]',
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: skGreen,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    )
+                  ],
                 ),
-                Positioned(
-                  bottom: 0,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: const [
-                      Text(
-                        '[skwer]',
-                        style: TextStyle(
-                          fontSize: 40,
-                          color: skGreen,
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -149,7 +147,8 @@ class _MenuWidgetState extends State<MenuWidget> {
       return KeyEventResult.ignored;
     }
 
-    if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
+    if (event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.space) {
       widget.menuSelection.value = MenuSelection.skwer;
       return KeyEventResult.handled;
     }

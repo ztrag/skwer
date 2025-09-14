@@ -6,8 +6,7 @@ import 'package:skwer/menu/menu_tile_props.dart';
 class MenuProps {
   final ValueNotifier<Point<int>> numTiles =
       ValueNotifier(const Point<int>(0, 0));
-  final Map<Point<int>, MenuTileProps> tiles =
-      <Point<int>, MenuTileProps>{};
+  final Map<Point<int>, MenuTileProps> tiles = <Point<int>, MenuTileProps>{};
 
   MenuProps() {
     numTiles.addListener(() {

@@ -25,8 +25,7 @@ class MenuTile extends StatefulWidget {
   }
 }
 
-class _MenuTileState extends State<MenuTile>
-    with TickerProviderStateMixin {
+class _MenuTileState extends State<MenuTile> with TickerProviderStateMixin {
   late final _MenuTilePainter painter = _MenuTilePainter(this);
   late final AnimationController colorAnimationController;
   late final Animation<double> colorAnimation;

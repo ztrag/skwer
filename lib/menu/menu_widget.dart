@@ -3,14 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
+import 'package:skwer/games.dart';
 import 'package:skwer/menu/menu.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/menu/menu_tile.dart';
 import 'package:skwer/menu/menu_tile_props.dart';
-import 'package:skwer/menu/menu_wrapper.dart';
 
 class MenuWidget extends StatefulWidget {
-  final ValueNotifier<MenuSelection?> menuSelection;
+  final ValueNotifier<Games?> menuSelection;
 
   const MenuWidget({Key? key, required this.menuSelection}) : super(key: key);
 
@@ -23,6 +23,9 @@ class _MenuWidgetState extends State<MenuWidget> {
   final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   final Map<Rect, MenuTileProps> _positions = {};
+
+  late Games currentMenuSelection =
+      widget.menuSelection.value ?? Games.values.first;
 
   @override
   Widget build(BuildContext context) {
@@ -86,19 +89,23 @@ class _MenuWidgetState extends State<MenuWidget> {
                     ),
                     Positioned(
                       bottom: 0,
-                      child: TextButton(
-                        onPressed: () {
-                          widget.menuSelection.value = MenuSelection.skwer;
-                        },
-                        child: const Text(
-                          '[skwer]',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: skGreen,
+                      child: Wrap(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              widget.menuSelection.value = Games.skwer;
+                            },
+                            child: const Text(
+                              '[skwer]',
+                              style: TextStyle(
+                                fontSize: 40,
+                                color: skGreen,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -149,7 +156,7 @@ class _MenuWidgetState extends State<MenuWidget> {
 
     if (event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.space) {
-      widget.menuSelection.value = MenuSelection.skwer;
+      widget.menuSelection.value = Games.skwer;
       return KeyEventResult.handled;
     }
 

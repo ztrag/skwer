@@ -131,11 +131,11 @@ class _GameWidgetState extends State<GameWidget> {
                     child: GestureDetector(
                       onTap: () => setState(() => _isShowingHelp = false),
                       child: Container(
-                        color: skBlack.withOpacity(0.5),
-                        child: Column(
+                        color: skBlack.withAlpha(122),
+                        child: const Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Row(children: const [
+                            Row(children: [
                               Flexible(
                                 child: Help(),
                               ),

@@ -98,7 +98,7 @@ class GameBottomMenu extends StatelessWidget {
                         valueListenable: game.prefs.puzzleSize,
                         builder: (_, __, ___) => Text(
                           '${game.prefs.puzzleSize.value}',
-                          textScaleFactor: 0.9,
+                          textScaler: const TextScaler.linear(0.9),
                         ),
                       ),
                     ],
@@ -106,7 +106,10 @@ class GameBottomMenu extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: onHelp,
-                  child: const Text('?', textScaleFactor: 1.5),
+                  child: const Text(
+                    '?',
+                    textScaler: TextScaler.linear(1.5),
+                  ),
                 ),
               ],
             ),

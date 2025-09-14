@@ -1,11 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:skwer/game/game_widget.dart';
+import 'package:skwer/games.dart';
 import 'package:skwer/menu/menu_widget.dart';
-
-enum MenuSelection {
-  skwer,
-  frogger,
-}
 
 class MenuWrapper extends StatefulWidget {
   const MenuWrapper({Key? key}) : super(key: key);
@@ -15,7 +11,7 @@ class MenuWrapper extends StatefulWidget {
 }
 
 class _MenuWrapperState extends State<MenuWrapper> {
-  final ValueNotifier<MenuSelection?> selection = ValueNotifier(null);
+  final ValueNotifier<Games?> selection = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +21,9 @@ class _MenuWrapperState extends State<MenuWrapper> {
         switch (selection.value) {
           case null:
             return MenuWidget(menuSelection: selection);
-          case MenuSelection.skwer:
+          case Games.skwer:
             return const GameWidget();
-          case MenuSelection.frogger:
+          case Games.tetris:
             throw UnimplementedError();
         }
       },

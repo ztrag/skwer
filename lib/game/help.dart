@@ -9,7 +9,7 @@ class Help extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: skBlack.withOpacity(0.9),
+        color: skBlack.withAlpha(229),
         gradient: SweepGradient(
           colors: [
             skRed,
@@ -25,7 +25,7 @@ class Help extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: skBlack.withOpacity(0.75),
+          color: skBlack.withAlpha(191),
           gradient: RadialGradient(
             colors: [
               Color.lerp(Color.lerp(skRed, skBlue, 0.5)!, skBlack, 0.5)!,

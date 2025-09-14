@@ -1,0 +1,4 @@
+enum Games {
+  skwer,
+  tetris,
+}

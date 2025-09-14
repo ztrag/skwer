@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:skwer/game/game_rotation.dart';
-import 'package:skwer/game/game_zone.dart';
+import 'package:skwer/skwer/game_rotation.dart';
+import 'package:skwer/skwer/game_zone.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 
 class Puzzle {

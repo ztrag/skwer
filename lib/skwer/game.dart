@@ -1,11 +1,11 @@
 import 'dart:math';
 
-import 'package:skwer/game/game_prefs.dart';
-import 'package:skwer/game/game_props.dart';
-import 'package:skwer/game/game_rotation.dart';
-import 'package:skwer/game/game_zone.dart';
-import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/platform.dart';
+import 'package:skwer/skwer/game_prefs.dart';
+import 'package:skwer/skwer/game_props.dart';
+import 'package:skwer/skwer/game_rotation.dart';
+import 'package:skwer/skwer/game_zone.dart';
+import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_skwer.dart';

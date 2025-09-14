@@ -1,4 +1,9 @@
 enum Games {
-  skwer,
-  tetris,
+  skwer('skwer'),
+  tetris('tetris'),
+  frogger('frogger');
+
+  final String name;
+
+  const Games(this.name);
 }

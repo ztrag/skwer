@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:skwer/game/game_props.dart';
-import 'package:skwer/game/game_rotation_counter_painter.dart';
+import 'package:skwer/skwer/game_props.dart';
+import 'package:skwer/skwer/game_rotation_counter_painter.dart';
 
 const kGameBottomCounterHeight = kGameRotationCounterRowTileSize * 1.5;
 

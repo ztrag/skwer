@@ -1,4 +1,4 @@
-import 'package:skwer/game/game_props.dart';
+import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 

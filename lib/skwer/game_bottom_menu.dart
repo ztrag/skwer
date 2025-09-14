@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/game/game.dart';
-import 'package:skwer/game/game_rotation_counter_painter.dart';
+import 'package:skwer/skwer/game.dart';
+import 'package:skwer/skwer/game_rotation_counter_painter.dart';
 
 class GameBottomMenu extends StatelessWidget {
   final Game game;

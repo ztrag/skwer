@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/game/game_props.dart';
+import 'package:skwer/skwer/game_props.dart';
 
 const kGameRotationCounterRowTileSize = 10.0;
 

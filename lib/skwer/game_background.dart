@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/game/game_props.dart';
-import 'package:skwer/game/game_zone.dart';
-import 'package:skwer/game/puzzle.dart';
 import 'package:skwer/platform.dart';
+import 'package:skwer/skwer/game_props.dart';
+import 'package:skwer/skwer/game_zone.dart';
+import 'package:skwer/skwer/puzzle.dart';
 
 class GameBackground extends StatelessWidget {
   final GameProps props;

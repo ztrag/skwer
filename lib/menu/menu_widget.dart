@@ -24,8 +24,22 @@ class _MenuWidgetState extends State<MenuWidget> {
 
   final Map<Rect, MenuTileProps> _positions = {};
 
-  late Games currentMenuSelection =
-      widget.menuSelection.value ?? Games.values.first;
+  late final ValueNotifier<Games> focusedGame =
+      ValueNotifier(widget.menuSelection.value ?? Games.values.first);
+  final Map<Games, ValueNotifier<bool>> isFocusedMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (final game in Games.values) {
+      isFocusedMap[game] = ValueNotifier(game == focusedGame.value);
+    }
+    focusedGame.addListener(() {
+      for (final game in Games.values) {
+        isFocusedMap[game]!.value = game == focusedGame.value;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,20 +104,9 @@ class _MenuWidgetState extends State<MenuWidget> {
                     Positioned(
                       bottom: 0,
                       child: Wrap(
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              widget.menuSelection.value = Games.skwer;
-                            },
-                            child: const Text(
-                              '[skwer]',
-                              style: TextStyle(
-                                fontSize: 40,
-                                color: skGreen,
-                              ),
-                            ),
-                          ),
-                        ],
+                        children: Games.values
+                            .map(_menuOption)
+                            .toList(growable: false),
                       ),
                     ),
                   ],
@@ -114,6 +117,39 @@ class _MenuWidgetState extends State<MenuWidget> {
         );
       },
     );
+  }
+
+  Widget _menuOption(Games game) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isFocusedMap[game]!,
+      builder: (_, __, ___) => TextButton(
+        onPressed: () {
+          widget.menuSelection.value = Games.skwer;
+        },
+        child: Text(
+          _maybeFocusedGameName(game),
+          style: TextStyle(
+            fontSize: 40,
+            color: _maybeFocusedGameColor(game),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _maybeFocusedGameName(Games game) {
+    final name = game.name;
+    if (focusedGame.value == game) {
+      return '[$name]';
+    }
+    return name;
+  }
+
+  Color _maybeFocusedGameColor(Games game) {
+    if (focusedGame.value == game) {
+      return skGreen;
+    }
+    return skWhite;
   }
 
   double _getTileSize(Size size, Point<int> numTiles) {
@@ -150,14 +186,26 @@ class _MenuWidgetState extends State<MenuWidget> {
   }
 
   KeyEventResult _onTopKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
-
     if (event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.space) {
-      widget.menuSelection.value = Games.skwer;
+      if (event is! KeyDownEvent) {
+        return KeyEventResult.ignored;
+      }
+      widget.menuSelection.value = focusedGame.value;
       return KeyEventResult.handled;
+    }
+
+    final isFocusLeft = event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+        event.logicalKey == LogicalKeyboardKey.arrowUp;
+    final isFocusRight = event.logicalKey == LogicalKeyboardKey.arrowRight ||
+        event.logicalKey == LogicalKeyboardKey.arrowDown;
+    if (isFocusLeft || isFocusRight) {
+      if (event is KeyUpEvent) {
+        return KeyEventResult.ignored;
+      }
+      focusedGame.value = Games.values[
+          (Games.values.indexOf(focusedGame.value) + (isFocusLeft ? -1 : 1)) %
+              Games.values.length];
     }
 
     return KeyEventResult.ignored;

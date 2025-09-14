@@ -124,7 +124,7 @@ class _MenuWidgetState extends State<MenuWidget> {
       valueListenable: isFocusedMap[game]!,
       builder: (_, __, ___) => TextButton(
         onPressed: () {
-          widget.menuSelection.value = Games.skwer;
+          widget.menuSelection.value = Games.values.first;
         },
         child: Text(
           _maybeFocusedGameName(game),

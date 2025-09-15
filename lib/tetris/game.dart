@@ -111,8 +111,13 @@ class Game {
     if (current == null) {
       return;
     }
-    // TODO boundary kick
-    props.tetramino.value = ValueChange(current, current.rotate());
+
+    final rotated = _findValidRotation(current);
+    if (rotated == null) {
+      return;
+    }
+
+    props.tetramino.value = ValueChange(current, rotated);
   }
 
   void _translateTetramino(int x, int y) {
@@ -202,6 +207,22 @@ class Game {
       }
     }
     return true;
+  }
+
+  GameTetramino? _findValidRotation(GameTetramino tetramino) {
+    final rotated = tetramino.rotate();
+    if (_isValidPosition(rotated)) {
+      return rotated;
+    }
+
+    for (final wallKickTest
+        in tetramino.tetramino.wallKickTests(tetramino.rotation)) {
+      final translated = rotated.translate(wallKickTest.x, wallKickTest.y);
+      if (_isValidPosition(translated)) {
+        return translated;
+      }
+    }
+    return null;
   }
 
   int _findDropDistance(GameTetramino tetramino) {

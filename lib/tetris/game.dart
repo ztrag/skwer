@@ -151,11 +151,57 @@ class Game {
 
     if (_isTouchingFloor(current)) {
       props.tetramino.value = ValueChange(null, null);
-      // TODO maybe delete row...
+      _checkCompletedRows(current);
+
       return;
     }
 
     props.tetramino.value = ValueChange(current, current.step());
+  }
+
+  void _checkCompletedRows(GameTetramino positioned) {
+    final rowsToCheck = <int>{};
+    for (final tile in positioned.tiles) {
+      rowsToCheck.add(tile.y);
+    }
+
+    final completed = rowsToCheck.where(_isRowComplete);
+    if (completed.isEmpty) {
+      return;
+    }
+
+    final sorted = completed.toList()..sort((a, b) => b - a);
+    var copy = sorted.first - 1;
+    for (var row = sorted.first; row >= 0; row--, copy--) {
+      while (sorted.contains(copy)) {
+        --copy;
+      }
+      if (!_copyRowToRow(copy, row)) {
+        return;
+      }
+    }
+  }
+
+  bool _copyRowToRow(int copy, int paste) {
+    var foundOccupied = false;
+    for (var i = 0; i < props.numTilesX; i++) {
+      final tileToCopy = copy >= 0 ? props.tiles[TileIndex(i, copy)]! : null;
+      final tileToPaste = props.tiles[TileIndex(i, paste)]!;
+      if (!foundOccupied && tileToPaste.isOccupied) {
+        foundOccupied = true;
+      }
+      tileToPaste.color.value = tileToCopy?.color.value;
+    }
+    return foundOccupied;
+  }
+
+  bool _isRowComplete(int row) {
+    for (var i = 0; i < props.numTilesX; i++) {
+      if (!props.tiles[TileIndex(i, row)]!.isOccupied) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _updateTetraminoTiles() {

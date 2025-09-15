@@ -1,18 +1,25 @@
 import 'dart:math';
+import 'dart:ui';
+
+import 'package:skwer/colors.dart';
 
 enum Tetramino {
-  i,
-  o,
-  t,
-  j,
-  l,
-  s,
-  z;
+  i(skYellow),
+  o(skRed),
+  t(skPurple),
+  j(skOrange),
+  l(skCyan),
+  s(skBlue),
+  z(skGreen);
+
+  final Color color;
+
+  const Tetramino(this.color);
 
   List<Point<int>> points(int rotation) {
     switch (this) {
       case Tetramino.i:
-        return _iPoints[rotation];
+        return _iPoints[rotation % 2];
       case Tetramino.o:
         return _oPoints;
       case Tetramino.t:
@@ -27,6 +34,22 @@ enum Tetramino {
         return _zPoints[rotation % 2];
     }
   }
+
+  Point<int> spawnOffset() {
+    switch (this) {
+      case Tetramino.i:
+      case Tetramino.t:
+      case Tetramino.l:
+        return const Point(2, 1);
+      case Tetramino.j:
+        return const Point(1, 1);
+      case Tetramino.o:
+      case Tetramino.s:
+        return const Point(1, 0);
+      case Tetramino.z:
+        return const Point(2, 0);
+    }
+  }
 }
 
 const List<List<Point<int>>> _iPoints = [
@@ -37,18 +60,6 @@ const List<List<Point<int>>> _iPoints = [
     Point(3, 1),
   ],
   [
-    Point(2, 0),
-    Point(2, 1),
-    Point(2, 2),
-    Point(2, 3),
-  ],
-  [
-    Point(0, 2),
-    Point(1, 2),
-    Point(2, 2),
-    Point(3, 2),
-  ],
-  [
     Point(1, 0),
     Point(1, 1),
     Point(1, 2),
@@ -57,18 +68,18 @@ const List<List<Point<int>>> _iPoints = [
 ];
 
 const List<Point<int>> _oPoints = [
+  Point(0, 0),
   Point(1, 0),
-  Point(2, 0),
+  Point(0, 1),
   Point(1, 1),
-  Point(2, 1),
 ];
 
 const List<List<Point<int>>> _tPoints = [
   [
-    Point(1, 0),
     Point(0, 1),
     Point(1, 1),
     Point(2, 1),
+    Point(1, 2),
   ],
   [
     Point(1, 0),
@@ -77,10 +88,10 @@ const List<List<Point<int>>> _tPoints = [
     Point(2, 1),
   ],
   [
+    Point(1, 0),
     Point(0, 1),
     Point(1, 1),
     Point(2, 1),
-    Point(1, 2),
   ],
   [
     Point(0, 1),

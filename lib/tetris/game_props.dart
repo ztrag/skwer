@@ -11,10 +11,10 @@ class GameProps {
 
   final Map<TileIndex, GameTileProps> tiles = <TileIndex, GameTileProps>{};
 
-  ValueListenable<ValueChange<GameTetramino?>> get tetramino => _tetramino;
-
-  final ValueNotifier<ValueChange<GameTetramino?>> _tetramino =
+  final ValueNotifier<ValueChange<GameTetramino?>> tetramino =
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
+
+  final ValueNotifier<bool> isGameOver = ValueNotifier(false);
 
   GameProps() {
     numTiles.addListener(() {
@@ -33,17 +33,4 @@ class GameProps {
   int get numTilesX => numTiles.value.x;
 
   int get numTilesY => numTiles.value.y;
-
-  void spawnTetramino(GameTetramino tetramino) {
-    _tetramino.value = ValueChange(null, tetramino);
-  }
-
-  void rotateTetramino() {
-    final current = tetramino.value.value;
-    if (current == null) {
-      return;
-    }
-
-    _tetramino.value = ValueChange(current, current.rotate());
-  }
 }

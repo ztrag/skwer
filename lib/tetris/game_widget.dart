@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/tetris/game.dart';
 import 'package:skwer/tetris/game_tile.dart';
@@ -13,9 +14,29 @@ class GameWidget extends StatefulWidget {
   State<GameWidget> createState() => _GameWidgetState();
 }
 
-class _GameWidgetState extends State<GameWidget> {
+class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   final Game game = Game();
   final FocusScopeNode focusScopeNode = FocusScopeNode();
+  late Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Ticker(game.update);
+    _ticker.start();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    game.start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +61,7 @@ class _GameWidgetState extends State<GameWidget> {
     return FocusScope(
       autofocus: true,
       node: focusScopeNode,
-      onKeyEvent: _onTopKeyEvent,
+      onKeyEvent: (_, e) => game.onKeyEvent(e),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -65,15 +86,6 @@ class _GameWidgetState extends State<GameWidget> {
         ],
       ),
     );
-  }
-
-  KeyEventResult _onTopKeyEvent(FocusNode node, KeyEvent event) {
-    if (event.logicalKey == LogicalKeyboardKey.arrowUp &&
-        event is! KeyUpEvent) {
-      game.props.rotateTetramino();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
   }
 
   Widget _buildTile(int x, int y, double tileSize) {

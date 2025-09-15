@@ -7,4 +7,6 @@ class GameTileProps {
   final ValueNotifier<Color?> color = ValueNotifier(null);
 
   GameTileProps(this.index);
+
+  bool get isOccupied => color.value != null;
 }

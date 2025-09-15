@@ -4,10 +4,14 @@ import 'package:skwer/mosaic/mosaic.dart';
 import 'package:skwer/mosaic/mosaic_tile.dart';
 
 class GridMosaic extends Mosaic {
-  static const int gridSize = 5;
+  static const int _gridSize = 5;
   static final Random _random = Random();
 
+  final int gridSize;
+
   List<MosaicTile>? _tiles;
+
+  GridMosaic([this.gridSize = _gridSize]);
 
   @override
   List<MosaicTile> get tiles => _tiles ??= _buildTiles();

@@ -6,11 +6,11 @@ import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/skwer/game_rotation.dart';
 import 'package:skwer/skwer/game_zone.dart';
 import 'package:skwer/skwer/puzzle.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_skwer.dart';
+import 'package:skwer/tile/tile_index.dart';
 
-typedef SkwerTileAction = void Function(SkwerTileIndex target);
+typedef SkwerTileAction = void Function(TileIndex target);
 
 enum GameState {
   inProgress,
@@ -55,7 +55,7 @@ class Game {
 
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
-        final index = SkwerTileIndex(x, y);
+        final index = TileIndex(x, y);
         final tileProps = props.skwerTiles[index]!;
 
         tileProps.isActive.value =
@@ -126,7 +126,7 @@ class Game {
     reset(skwer: props.skwer.value);
 
     var hasSkwerCycle = false;
-    final map = <SkwerTileIndex, Map<int, int>>{};
+    final map = <TileIndex, Map<int, int>>{};
     for (final rotation in props.puzzle.value!.rotations) {
       final skwer = props.skwerTiles[rotation.index]!.skwer.value.skwer % 3;
       map[rotation.index] = map[rotation.index] ?? <int, int>{};
@@ -148,11 +148,11 @@ class Game {
     }
   }
 
-  void focus(SkwerTileIndex index, bool hasFocus) {
+  void focus(TileIndex index, bool hasFocus) {
     final tileProps = props.skwerTiles[index]!;
     tileProps.isFocused.value = hasFocus;
 
-    final highlighted = <SkwerTileIndex>{};
+    final highlighted = <TileIndex>{};
     if (hasFocus) {
       _skwerAction(tileProps, (target) {
         highlighted.add(target);
@@ -241,33 +241,33 @@ class Game {
     }
   }
 
-  void _redAction(SkwerTileIndex trigger, SkwerTileAction action) {
+  void _redAction(TileIndex trigger, SkwerTileAction action) {
     for (var x = trigger.x - 1; x <= trigger.x + 1; x++) {
       for (var y = trigger.y - 1; y <= trigger.y + 1; y++) {
         if (x == trigger.x && y == trigger.y) {
           continue;
         }
-        _clampAction(action, SkwerTileIndex(x, y));
+        _clampAction(action, TileIndex(x, y));
       }
     }
   }
 
-  void _greenAction(SkwerTileIndex trigger, SkwerTileAction action) {
+  void _greenAction(TileIndex trigger, SkwerTileAction action) {
     for (var x = 0; x < props.numTilesX; x++) {
       if (x == trigger.x) {
         continue;
       }
-      _clampAction(action, SkwerTileIndex(x, trigger.y));
+      _clampAction(action, TileIndex(x, trigger.y));
     }
     for (var y = 0; y < props.numTilesY; y++) {
       if (y == trigger.y) {
         continue;
       }
-      _clampAction(action, SkwerTileIndex(trigger.x, y));
+      _clampAction(action, TileIndex(trigger.x, y));
     }
   }
 
-  void _blueAction(SkwerTileIndex trigger, SkwerTileAction action) {
+  void _blueAction(TileIndex trigger, SkwerTileAction action) {
     var t = 0;
     while (true) {
       t++;
@@ -281,7 +281,7 @@ class Game {
     }
   }
 
-  int _clampAction(SkwerTileAction action, SkwerTileIndex target) {
+  int _clampAction(SkwerTileAction action, TileIndex target) {
     if (target.x < 0 ||
         target.y < 0 ||
         target.x >= props.numTilesX ||
@@ -294,7 +294,7 @@ class Game {
 
   void _rotateTile(
     GameRotation rotation,
-    SkwerTileIndex target,
+    TileIndex target,
     bool animateWave,
   ) {
     final state = props.skwerTiles[target]!.skwer;
@@ -309,7 +309,7 @@ class Game {
     }
   }
 
-  void _checkEndGame(SkwerTileIndex trigger) {
+  void _checkEndGame(TileIndex trigger) {
     final puzzle = props.puzzle.value;
     if (puzzle == null) {
       return;
@@ -341,7 +341,7 @@ class Game {
     }
   }
 
-  void _showPuzzleWin(SkwerTileIndex trigger) {
+  void _showPuzzleWin(TileIndex trigger) {
     clearFocus();
     props.isSolved.value = true;
   }
@@ -354,7 +354,7 @@ class Game {
     var gameState = GameState.clear;
     for (var x = 0; x < props.numTilesX; x++) {
       for (var y = 0; y < props.numTilesY; y++) {
-        final index = SkwerTileIndex(x, y);
+        final index = TileIndex(x, y);
         final state = props.skwerTiles[index]!.skwer;
         if (state.value.skwer > props.skwer.value) {
           return GameState.failed;

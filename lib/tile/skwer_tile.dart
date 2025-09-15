@@ -10,9 +10,9 @@ import 'package:skwer/mosaic/rosetta_mosaic.dart';
 import 'package:skwer/mosaic/transition_mosaic.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/skwer/game_props.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_skwer.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 final Random _random = Random();
 
@@ -460,7 +460,7 @@ class _SkwerTilePaint extends CustomPainter {
     return waves;
   }
 
-  Point<double>? getWaveDirectionFromTrigger(SkwerTileIndex? trigger) {
+  Point<double>? getWaveDirectionFromTrigger(TileIndex? trigger) {
     if (trigger == null) {
       return null;
     }

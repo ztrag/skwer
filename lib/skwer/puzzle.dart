@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:skwer/skwer/game_rotation.dart';
 import 'package:skwer/skwer/game_zone.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 class Puzzle {
   static final Random _random = Random();
@@ -29,7 +29,7 @@ class Puzzle {
         ),
       );
 
-  static SkwerTileIndex _getRandomIndex(GameZone zone) => SkwerTileIndex(
+  static TileIndex _getRandomIndex(GameZone zone) => TileIndex(
         zone.start.x + _random.nextInt(zone.size.x),
         zone.start.y + _random.nextInt(zone.size.y),
       );

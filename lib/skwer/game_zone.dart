@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:skwer/tile/skwer_tile_index.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 class GameZone {
   final Point<int> start;
@@ -31,7 +31,7 @@ class GameZone {
     return 0;
   }
 
-  bool containsTile(SkwerTileIndex tile) {
+  bool containsTile(TileIndex tile) {
     return tile.x >= start.x &&
         tile.y >= start.y &&
         tile.x - start.x < size.x &&

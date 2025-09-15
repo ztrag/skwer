@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:skwer/skwer/puzzle.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 class GameProps {
   final ValueNotifier<int> skwer = ValueNotifier(0);
@@ -13,8 +13,8 @@ class GameProps {
   final ValueNotifier<bool> isSolved = ValueNotifier(true);
   final ValueNotifier<int> rotationCounter = ValueNotifier(0);
 
-  final Map<SkwerTileIndex, SkwerTileProps> skwerTiles =
-      <SkwerTileIndex, SkwerTileProps>{};
+  final Map<TileIndex, SkwerTileProps> skwerTiles =
+      <TileIndex, SkwerTileProps>{};
 
   GameProps() {
     numTiles.addListener(() {
@@ -23,7 +23,7 @@ class GameProps {
       );
       for (var x = 0; x < numTilesX; x++) {
         for (var y = 0; y < numTilesY; y++) {
-          final tileIndex = SkwerTileIndex(x, y);
+          final tileIndex = TileIndex(x, y);
           skwerTiles[tileIndex] =
               skwerTiles[tileIndex] ?? SkwerTileProps(index: tileIndex);
         }
@@ -31,7 +31,7 @@ class GameProps {
     });
   }
 
-  bool isTileActive(SkwerTileIndex index) {
+  bool isTileActive(TileIndex index) {
     var currentPuzzle = puzzle.value;
     if (currentPuzzle == null) {
       return true;

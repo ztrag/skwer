@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_skwer.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 class SkwerTileProps {
   final GlobalKey key = GlobalKey();
   final FocusNode focusNode = FocusNode();
-  final SkwerTileIndex index;
+  final TileIndex index;
 
   final ValueNotifier<SkwerTileSkwer> skwer = ValueNotifier(SkwerTileSkwer());
   final ValueNotifier<int> pressCounter = ValueNotifier(0);

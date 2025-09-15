@@ -1,10 +1,10 @@
 import 'package:skwer/skwer/game_props.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 class SkwerTileSkwer {
   final int skwer;
-  final SkwerTileIndex? trigger;
+  final TileIndex? trigger;
   final DateTime time;
   final bool animateColor;
   final bool animateWave;
@@ -17,7 +17,7 @@ class SkwerTileSkwer {
   }) : time = DateTime.now();
 
   SkwerTileSkwer rotate(
-    SkwerTileIndex trigger,
+    TileIndex trigger,
     int delta,
     bool animateWave,
   ) {

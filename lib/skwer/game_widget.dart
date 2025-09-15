@@ -12,8 +12,8 @@ import 'package:skwer/skwer/game_rotation.dart';
 import 'package:skwer/skwer/help.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile.dart';
-import 'package:skwer/tile/skwer_tile_index.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
+import 'package:skwer/tile/tile_index.dart';
 
 final _kDigits = [
   LogicalKeyboardKey.digit1,
@@ -40,7 +40,7 @@ class _GameWidgetState extends State<GameWidget> {
 
   final Map<Rect, SkwerTileProps> _positions = {};
   Future? _delayedUnfocus;
-  SkwerTileIndex? _singlePointer;
+  TileIndex? _singlePointer;
   bool _isShowingHelp = false;
 
   @override
@@ -177,7 +177,7 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   Widget _buildTile(int x, int y, double tileSize) {
-    final tileIndex = SkwerTileIndex(x, y);
+    final tileIndex = TileIndex(x, y);
     final tileProps = game.props.skwerTiles[tileIndex]!;
     return SizedBox(
       key: tileProps.key,
@@ -271,7 +271,7 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   KeyEventResult _onTileKeyEvent(
-      KeyEvent event, SkwerTileProps tileProps, SkwerTileIndex tileIndex) {
+      KeyEvent event, SkwerTileProps tileProps, TileIndex tileIndex) {
     if (event is! KeyDownEvent) {
       return KeyEventResult.ignored;
     }

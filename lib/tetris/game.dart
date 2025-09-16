@@ -67,6 +67,13 @@ class Game {
       return KeyEventResult.ignored;
     }
 
+    if (event.logicalKey == LogicalKeyboardKey.keyR) {
+      if (props.isGameOver.value) {
+        start();
+        return KeyEventResult.handled;
+      }
+    }
+
     if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       _rotateTetramino();
       return KeyEventResult.handled;

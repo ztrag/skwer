@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:skwer/colors.dart';
+import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/tetris/game.dart';
 import 'package:skwer/tetris/game_tile.dart';
 import 'package:skwer/tile/tile_index.dart';
@@ -51,12 +53,12 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     final size = Size(mediaSize.width, mediaSize.height);
 
     const tileSize = 40.0;
-    final numTilesX = (size.width / tileSize).floor();
-    final numTilesY = (size.height / tileSize).floor();
+    final numTilesX = min((size.width / tileSize).floor() - 1, 10);
+    final numTilesY = min((size.height / tileSize).floor() - 1, 20);
 
     if (numTilesX != game.props.numTilesX ||
         numTilesY != game.props.numTilesY) {
-      game.resize(min(numTilesX, 10), min(numTilesY, 20));
+      game.resize(numTilesX, numTilesY);
     }
 
     return FastKeyFocusScope(
@@ -66,23 +68,39 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          ValueListenableBuilder(
-            valueListenable: game.props.numTiles,
-            builder: (_, numTiles, __) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  numTiles.y,
-                  (y) => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      numTiles.x,
-                      (x) => _buildTile(x, y, tileSize),
+          const MenuBackground(radius: 1.2),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: game.props.numTiles,
+                builder: (_, numTiles, __) {
+                  return SizedBox(
+                    width: (numTiles.x + 0.5) * tileSize,
+                    height: (numTiles.y + 0.5) * tileSize,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: skBlack,
+                        border: Border.all(color: skRed, width: 2),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          numTiles.y,
+                          (y) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              numTiles.x,
+                              (x) => _buildTile(x, y, tileSize),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

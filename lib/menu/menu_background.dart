@@ -2,14 +2,19 @@ import 'package:flutter/widgets.dart';
 import 'package:skwer/colors.dart';
 
 class MenuBackground extends StatelessWidget {
-  const MenuBackground({Key? key}) : super(key: key);
+  final double radius;
+
+  const MenuBackground({
+    Key? key,
+    this.radius = 0.5,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
-          radius: 0.5,
+          radius: radius,
           stops: const [0.3, 0.6, 1],
           colors: [
             Color.lerp(

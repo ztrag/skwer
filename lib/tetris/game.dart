@@ -4,16 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 import 'package:skwer/util/value_change.dart';
 
 class Game {
   final GameProps props = GameProps();
+  final Random _random = Random();
 
-  Duration _elapsed = const Duration();
-  Duration _lastStep = const Duration();
   final Duration _stepDuration = const Duration(seconds: 1);
   final Duration _spawnDuration = const Duration(milliseconds: 200);
-  final Random _random = Random();
+
+  Duration _elapsed = const Duration();
+  Duration? _waitStepStartTime;
+  Duration? _waitSpawnStartTime;
 
   Game() {
     props.tetramino.addListener(_updateTetraminoTiles);
@@ -25,7 +28,7 @@ class Game {
     }
     props.tetramino.value = ValueChange(null, null);
     props.isGameOver.value = false;
-    _lastStep = _elapsed;
+    _waitSpawnStartTime = _elapsed + const Duration(seconds: 1);
   }
 
   void update(Duration e) {
@@ -34,18 +37,23 @@ class Game {
     }
 
     _elapsed = e;
-    final elapsedSinceStep = _elapsed - _lastStep;
-    if (props.tetramino.value.value == null) {
-      if (elapsedSinceStep >= _spawnDuration) {
-        _lastStep = _elapsed;
+
+    if (_waitSpawnStartTime != null) {
+      // Waiting for spawn...
+      if (_elapsed - _waitSpawnStartTime! >= _spawnDuration) {
+        _waitSpawnStartTime = null;
         _spawnTetramino();
       }
       return;
     }
 
-    if (_elapsed - _lastStep >= _stepDuration) {
-      _lastStep = _elapsed;
-      _stepTetramino();
+    if (_waitStepStartTime != null) {
+      // Waiting for step...
+      if (_elapsed - _waitStepStartTime! >= _stepDuration) {
+        _waitStepStartTime = null;
+        _stepTetramino();
+      }
+      return;
     }
   }
 
@@ -54,8 +62,8 @@ class Game {
     start();
   }
 
-  KeyEventResult onKeyEvent(KeyEvent event) {
-    if (event is KeyUpEvent) {
+  KeyEventResult onKeyEvent(FastKeyEvent event) {
+    if (event.type == FastKeyEventType.up) {
       return KeyEventResult.ignored;
     }
 
@@ -103,6 +111,7 @@ class Game {
       return;
     }
 
+    _waitStepStartTime = _elapsed;
     props.tetramino.value = ValueChange(null, next);
   }
 
@@ -137,25 +146,22 @@ class Game {
     if (current == null) {
       return;
     }
-    _lastStep = _elapsed - _stepDuration;
     final drop = _findDropDistance(current);
+    _waitStepStartTime = _elapsed - _stepDuration;
     props.tetramino.value = ValueChange(current, current.translate(0, drop));
   }
 
   void _stepTetramino() {
-    final current = props.tetramino.value.value;
-    if (current == null) {
-      _spawnTetramino();
-      return;
-    }
+    final current = props.tetramino.value.value!;
 
     if (_isTouchingFloor(current)) {
       props.tetramino.value = ValueChange(null, null);
       _checkCompletedRows(current);
-
+      _waitSpawnStartTime = _elapsed;
       return;
     }
 
+    _waitStepStartTime = _elapsed;
     props.tetramino.value = ValueChange(current, current.step());
   }
 

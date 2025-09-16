@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:skwer/tetris/game.dart';
 import 'package:skwer/tetris/game_tile.dart';
 import 'package:skwer/tile/tile_index.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class GameWidget extends StatefulWidget {
   const GameWidget({Key? key}) : super(key: key);
@@ -58,10 +59,10 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
       game.resize(min(numTilesX, 10), min(numTilesY, 20));
     }
 
-    return FocusScope(
+    return FastKeyFocusScope(
       autofocus: true,
       node: focusScopeNode,
-      onKeyEvent: (_, e) => game.onKeyEvent(e),
+      onKeyEvent: game.onKeyEvent,
       child: Stack(
         alignment: Alignment.center,
         children: [

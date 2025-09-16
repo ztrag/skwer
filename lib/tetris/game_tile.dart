@@ -14,7 +14,7 @@ class GameTile extends StatefulWidget {
 }
 
 class _GameTileState extends State<GameTile> {
-  late final _Paint paint = _Paint(widget.props);
+  late final _Painter paint = _Painter(widget.props);
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +22,14 @@ class _GameTileState extends State<GameTile> {
   }
 }
 
-class _Paint extends CustomPainter {
+class _Painter extends CustomPainter {
   final Mosaic mosaic = GridMosaic(3);
+  final Paint dropHintPaint = Paint();
 
   final GameTileProps props;
 
-  _Paint(this.props) : super(repaint: props.color);
+  _Painter(this.props)
+      : super(repaint: Listenable.merge([props.color, props.dropHintColor]));
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -38,19 +40,26 @@ class _Paint extends CustomPainter {
     );
     size = Size(size.width * x, size.height * x);
 
-    final color = props.color.value;
-    if (color == null) {
-      return;
+    final dropHintColor = props.dropHintColor.value;
+    if (dropHintColor != null) {
+      dropHintPaint.color = dropHintColor;
+      canvas.drawRect(
+          Rect.fromLTRB(
+              0, (size.height * 0.95).floorToDouble(), size.width, size.height),
+          dropHintPaint);
     }
 
-    mosaic.paint(
-      canvas,
-      size,
-      0.8,
-      1,
-      [ColorWave(color: color, animation: 0, rotate: false)],
-      null,
-    );
+    final color = props.color.value;
+    if (color != null) {
+      mosaic.paint(
+        canvas,
+        size,
+        0.8,
+        1,
+        [ColorWave(color: color, animation: 0, rotate: false)],
+        null,
+      );
+    }
   }
 
   @override

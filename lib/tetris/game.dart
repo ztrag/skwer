@@ -17,9 +17,10 @@ class Game {
   Duration _elapsed = const Duration();
   Duration? _waitStepStartTime;
   Duration? _waitSpawnStartTime;
+  Set<TileIndex> _dropHintTiles = <TileIndex>{};
 
   Game() {
-    props.tetramino.addListener(_updateTetraminoTiles);
+    props.tetramino.addListener(_updateTetramino);
   }
 
   void start() {
@@ -218,6 +219,11 @@ class Game {
     return true;
   }
 
+  void _updateTetramino() {
+    _updateTetraminoTiles();
+    _updateTetraminoDropHint();
+  }
+
   void _updateTetraminoTiles() {
     final oldTiles = props.tetramino.value.old?.tiles ?? [];
     final newTiles = props.tetramino.value.value?.tiles ?? [];
@@ -234,6 +240,46 @@ class Game {
       }
       props.tiles[tile]!.color.value =
           props.tetramino.value.value!.tetramino.color;
+    }
+  }
+
+  void _updateTetraminoDropHint() {
+    final tetramino = props.tetramino.value.value;
+    final Map<int, int> newDropHintIndices = <int, int>{};
+
+    if (tetramino != null) {
+      for (final tile in tetramino.tiles) {
+        final floor = _findFloor(tile);
+        if (floor != null) {
+          newDropHintIndices[tile.x] = floor;
+        }
+      }
+    }
+    final Set<TileIndex> newDropHintTiles = newDropHintIndices.entries
+        .map<TileIndex>((e) => TileIndex(e.key, e.value))
+        .toSet();
+
+    for (final tile in _dropHintTiles) {
+      if (!newDropHintTiles.contains(tile)) {
+        props.tiles[tile]!.dropHintColor.value = null;
+      }
+    }
+    _dropHintTiles = newDropHintTiles;
+    for (final tile in _dropHintTiles) {
+      props.tiles[tile]!.dropHintColor.value = tetramino!.tetramino.color;
+    }
+  }
+
+  int? _findFloor(TileIndex tile) {
+    TileIndex? floor;
+    var next = tile;
+    while(true) {
+      next = next.translate(0, 1);
+      final nextTile = props.tiles[next];
+      if (nextTile == null || nextTile.isOccupied) {
+        return floor?.y;
+      }
+      floor = next;
     }
   }
 

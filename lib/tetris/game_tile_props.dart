@@ -5,6 +5,7 @@ class GameTileProps {
   final TileIndex index;
 
   final ValueNotifier<Color?> color = ValueNotifier(null);
+  final ValueNotifier<Color?> dropHintColor = ValueNotifier(null);
 
   GameTileProps(this.index);
 

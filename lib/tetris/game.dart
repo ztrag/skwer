@@ -28,6 +28,7 @@ class Game {
       tile.color.value = null;
     }
     props.tetramino.value = ValueChange(null, null);
+    _dropHintTiles.clear();
     props.isGameOver.value = false;
     _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
   }

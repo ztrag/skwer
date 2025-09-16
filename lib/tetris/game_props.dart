@@ -3,21 +3,22 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
+import 'package:skwer/tetris/level.dart';
 import 'package:skwer/util/value_change.dart';
 
 class GameProps {
   final ValueNotifier<Point<int>> numTiles =
       ValueNotifier(const Point<int>(0, 0));
-
   final Map<TileIndex, GameTileProps> tiles = <TileIndex, GameTileProps>{};
+
+  final ValueNotifier<int> score = ValueNotifier(0);
+  final ValueNotifier<Level> level = ValueNotifier(kLevels.first);
+  final ValueNotifier<bool> isGameOver = ValueNotifier(false);
 
   final ValueNotifier<ValueChange<GameTetramino?>> tetramino =
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
-
   final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(
       Tetramino.values[Random().nextInt(Tetramino.values.length)]);
-
-  final ValueNotifier<bool> isGameOver = ValueNotifier(false);
 
   GameProps() {
     numTiles.addListener(() {

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
+import 'package:skwer/tetris/level.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 import 'package:skwer/util/value_change.dart';
 
@@ -11,7 +12,6 @@ class Game {
   final GameProps props = GameProps();
   final Random _random = Random();
 
-  final Duration _stepDuration = const Duration(seconds: 1);
   final Duration _spawnDuration = const Duration(milliseconds: 30);
 
   Duration _elapsed = const Duration();
@@ -29,6 +29,8 @@ class Game {
     }
     props.tetramino.value = ValueChange(null, null);
     props.isGameOver.value = false;
+    props.score.value = 0;
+    props.level.value = kLevels.first;
     _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
   }
 
@@ -50,7 +52,7 @@ class Game {
 
     if (_waitStepStartTime != null) {
       // Waiting for step...
-      if (_elapsed - _waitStepStartTime! >= _stepDuration) {
+      if (_elapsed - _waitStepStartTime! >= props.level.value.stepDuration) {
         _waitStepStartTime = null;
         _stepTetramino();
       }
@@ -80,7 +82,9 @@ class Game {
       if (event.type == FastKeyEventType.repeat) {
         if (_waitStepStartTime != null) {
           _waitStepStartTime = _waitStepStartTime! -
-              Duration(milliseconds: _stepDuration.inMilliseconds ~/ 2);
+              Duration(
+                  milliseconds:
+                      props.level.value.stepDuration.inMilliseconds ~/ 2);
         }
       }
       return KeyEventResult.handled;
@@ -162,7 +166,7 @@ class Game {
       return;
     }
     final drop = _findDropDistance(current);
-    _waitStepStartTime = _elapsed - _stepDuration;
+    _waitStepStartTime = _elapsed - props.level.value.stepDuration;
     props.tetramino.value = ValueChange(current, current.translate(0, drop));
   }
 
@@ -189,6 +193,12 @@ class Game {
     final completed = rowsToCheck.where(_isRowComplete);
     if (completed.isEmpty) {
       return;
+    }
+    props.score.value += completed.length;
+
+    final nextLevel = props.level.value.next;
+    if (nextLevel != null && nextLevel.score <= props.score.value) {
+      props.level.value = nextLevel;
     }
 
     final sorted = completed.toList()..sort((a, b) => b - a);

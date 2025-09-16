@@ -72,58 +72,61 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
       game.resize(numTilesX, numTilesY);
     }
 
-    return FastKeyFocusScope(
-      autofocus: true,
-      node: focusScopeNode,
-      onKeyEvent: game.onKeyEvent,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const MenuBackground(radius: 1.2),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: panelHeight,
-                    child: GamePanel(gameProps: game.props),
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: game.props.numTiles,
-                    builder: (_, numTiles, __) {
-                      return SizedBox(
-                        width: (numTiles.x + 0.5) * tileSize,
-                        height: (numTiles.y + 0.5) * tileSize,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: skBlack,
-                            border: Border.all(color: skRed, width: 2),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              numTiles.y,
-                              (y) => Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  numTiles.x,
-                                  (x) => _buildTile(x, y, tileSize),
+    return Scaffold(
+        body: FastKeyFocusScope(
+        autofocus: true,
+        node: focusScopeNode,
+        onKeyEvent: game.onKeyEvent,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const MenuBackground(radius: 1.2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: tileSize * numTilesX,
+                      height: panelHeight,
+                      child: GamePanel(gameProps: game.props),
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable: game.props.numTiles,
+                      builder: (_, numTiles, __) {
+                        return SizedBox(
+                          width: (numTiles.x + 0.5) * tileSize,
+                          height: (numTiles.y + 0.5) * tileSize,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: skBlack,
+                              border: Border.all(color: skRed, width: 2),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                numTiles.y,
+                                (y) => Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    numTiles.x,
+                                    (x) => _buildTile(x, y, tileSize),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: bottomSpace),
-                ],
-              ),
-            ],
-          ),
-        ],
+                        );
+                      },
+                    ),
+                    SizedBox(height: bottomSpace),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -77,6 +77,12 @@ class Game {
 
     if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       _rotateTetramino();
+      if (event.type == FastKeyEventType.repeat) {
+        if (_waitStepStartTime != null) {
+          _waitStepStartTime = _waitStepStartTime! -
+              Duration(milliseconds: _stepDuration.inMilliseconds ~/ 2);
+        }
+      }
       return KeyEventResult.handled;
     }
 
@@ -273,7 +279,7 @@ class Game {
   int? _findFloor(TileIndex tile) {
     TileIndex? floor;
     var next = tile;
-    while(true) {
+    while (true) {
       next = next.translate(0, 1);
       final nextTile = props.tiles[next];
       if (nextTile == null || nextTile.isOccupied) {
@@ -302,7 +308,7 @@ class Game {
     final test = tetramino.tiles;
     for (final tile in test) {
       if (tile.y < 0 ||
-          tile.y >= props.numTilesY - 1 ||
+          tile.y >= props.numTilesY ||
           tile.x < 0 ||
           tile.x >= props.numTilesX) {
         return false;

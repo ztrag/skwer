@@ -35,17 +35,19 @@ enum Tetramino {
     }
   }
 
-  Point<int> spawnOffset() {
+  Point<double> spawnOffset() {
     switch (this) {
       case Tetramino.i:
+        return const Point(2.5, 1);
       case Tetramino.t:
       case Tetramino.l:
         return const Point(2, 1);
       case Tetramino.j:
-        return const Point(1, 1);
+        return const Point(1.5, 1);
       case Tetramino.o:
-      case Tetramino.s:
         return const Point(1, 0);
+      case Tetramino.s:
+        return const Point(1.5, 0);
       case Tetramino.z:
         return const Point(2, 0);
     }

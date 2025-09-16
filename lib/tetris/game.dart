@@ -106,8 +106,8 @@ class Game {
     final gameTetramino = GameTetramino(
       tetramino,
       TileIndex(
-        props.numTiles.value.x ~/ 2 - tetramino.spawnOffset().x,
-        -tetramino.spawnOffset().y,
+        (props.numTiles.value.x / 2 - tetramino.spawnOffset().x).ceil(),
+        (-tetramino.spawnOffset().y).round(),
       ),
       0,
     );

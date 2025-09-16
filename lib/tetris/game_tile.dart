@@ -23,7 +23,7 @@ class _GameTileState extends State<GameTile> {
 }
 
 class _Paint extends CustomPainter {
-  final Mosaic mosaic = GridMosaic(4);
+  final Mosaic mosaic = GridMosaic(3);
 
   final GameTileProps props;
 

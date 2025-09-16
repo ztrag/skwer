@@ -12,7 +12,7 @@ class Game {
   final Random _random = Random();
 
   final Duration _stepDuration = const Duration(seconds: 1);
-  final Duration _spawnDuration = const Duration(milliseconds: 200);
+  final Duration _spawnDuration = const Duration(milliseconds: 30);
 
   Duration _elapsed = const Duration();
   Duration? _waitStepStartTime;
@@ -28,7 +28,7 @@ class Game {
     }
     props.tetramino.value = ValueChange(null, null);
     props.isGameOver.value = false;
-    _waitSpawnStartTime = _elapsed + const Duration(seconds: 1);
+    _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
   }
 
   void update(Duration e) {
@@ -95,7 +95,8 @@ class Game {
   }
 
   GameTetramino? _getNextSpawn() {
-    final tetramino =
+    final tetramino = props.nextTetramino.value;
+    props.nextTetramino.value =
         Tetramino.values[_random.nextInt(Tetramino.values.length)];
     final gameTetramino = GameTetramino(
       tetramino,

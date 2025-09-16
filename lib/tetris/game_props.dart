@@ -14,6 +14,9 @@ class GameProps {
   final ValueNotifier<ValueChange<GameTetramino?>> tetramino =
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
 
+  final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(
+      Tetramino.values[Random().nextInt(Tetramino.values.length)]);
+
   final ValueNotifier<bool> isGameOver = ValueNotifier(false);
 
   GameProps() {

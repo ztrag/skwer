@@ -103,8 +103,6 @@ class Game {
 
   GameTetramino? _getNextSpawn() {
     final tetramino = props.nextTetramino.value;
-    props.nextTetramino.value =
-        Tetramino.values[_random.nextInt(Tetramino.values.length)];
     final gameTetramino = GameTetramino(
       tetramino,
       TileIndex(
@@ -116,6 +114,8 @@ class Game {
     if (!_isValidPosition(gameTetramino)) {
       return null;
     }
+    props.nextTetramino.value =
+        Tetramino.values[_random.nextInt(Tetramino.values.length)];
     return gameTetramino;
   }
 

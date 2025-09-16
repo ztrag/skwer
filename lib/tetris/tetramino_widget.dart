@@ -39,8 +39,8 @@ class TetraminoWidget extends StatelessWidget {
         props.color.value = tetramino.color;
         tiles.last.add(
           SizedBox(
-            width: 20,
-            height: 20,
+            width: 25,
+            height: 25,
             child: indices.contains(tileIndex)
                 ? GameTile(props: props)
                 : const SizedBox.shrink(),

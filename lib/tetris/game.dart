@@ -28,7 +28,6 @@ class Game {
       tile.color.value = null;
     }
     props.tetramino.value = ValueChange(null, null);
-    _dropHintTiles.clear();
     props.isGameOver.value = false;
     _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
   }
@@ -268,7 +267,7 @@ class Game {
 
     for (final tile in _dropHintTiles) {
       if (!newDropHintTiles.contains(tile)) {
-        props.tiles[tile]!.dropHintColor.value = null;
+        props.tiles[tile]?.dropHintColor.value = null;
       }
     }
     _dropHintTiles = newDropHintTiles;

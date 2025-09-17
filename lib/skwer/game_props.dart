@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/tile_index.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class GameProps {
   final ValueNotifier<int> skwer = ValueNotifier(0);
@@ -12,11 +13,16 @@ class GameProps {
   final ValueNotifier<Puzzle?> puzzle = ValueNotifier(null);
   final ValueNotifier<bool> isSolved = ValueNotifier(true);
   final ValueNotifier<int> rotationCounter = ValueNotifier(0);
+  final ValueNotifier<bool> isShowingOverlay = ValueNotifier(false);
 
   final Map<TileIndex, SkwerTileProps> skwerTiles =
       <TileIndex, SkwerTileProps>{};
 
-  GameProps() {
+  final VoidCallback onExit;
+
+  FastKeyEventCallback? onOverlayKeyEvent;
+
+  GameProps(this.onExit) {
     numTiles.addListener(() {
       skwerTiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,

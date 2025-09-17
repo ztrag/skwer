@@ -2,18 +2,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:skwer/colors.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/skwer/game.dart';
 import 'package:skwer/skwer/game_background.dart';
 import 'package:skwer/skwer/game_bottom_counter.dart';
 import 'package:skwer/skwer/game_bottom_menu.dart';
+import 'package:skwer/skwer/game_overlay_widget.dart';
+import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/skwer/game_rotation.dart';
-import 'package:skwer/skwer/help.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/tile_index.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 
 final _kDigits = [
   LogicalKeyboardKey.digit1,
@@ -37,13 +38,12 @@ class GameWidget extends StatefulWidget {
 }
 
 class _GameWidgetState extends State<GameWidget> {
-  final Game game = Game();
+  late final Game game = Game(GameProps(widget.onExit));
   final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   final Map<Rect, SkwerTileProps> _positions = {};
   Future? _delayedUnfocus;
   TileIndex? _singlePointer;
-  bool _isShowingHelp = false;
 
   @override
   void initState() {
@@ -78,87 +78,81 @@ class _GameWidgetState extends State<GameWidget> {
       game.resize(numTilesX, numTilesY);
     }
 
-    return FocusScope(
-      autofocus: true,
-      node: focusScopeNode,
-      onKeyEvent: _onTopKeyEvent,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                GameBackground(
-                  props: game.props,
-                  size: size,
-                  tileSize: tileSize,
-                ),
-                Listener(
-                  onPointerDown: _onPointerDown,
-                  onPointerMove: _onPointerMove,
-                  onPointerUp: _onPointerUp,
-                  onPointerCancel: (_) => game.clearFocus(),
-                  child: ValueListenableBuilder(
-                    valueListenable: game.props.numTiles,
-                    builder: (_, numTiles, __) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          numTiles.y,
-                          (y) => Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              numTiles.x,
-                              (x) => _buildTile(x, y, tileSize),
+    return Scaffold(
+      body: FastKeyFocusScope(
+        autofocus: true,
+        node: focusScopeNode,
+        onKeyEvent: _onTopKeyEvent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  GameBackground(
+                    props: game.props,
+                    size: size,
+                    tileSize: tileSize,
+                  ),
+                  Listener(
+                    onPointerDown: _onPointerDown,
+                    onPointerMove: _onPointerMove,
+                    onPointerUp: _onPointerUp,
+                    onPointerCancel: (_) => game.clearFocus(),
+                    child: ValueListenableBuilder(
+                      valueListenable: game.props.numTiles,
+                      builder: (_, numTiles, __) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            numTiles.y,
+                            (y) => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                numTiles.x,
+                                (x) => _buildTile(x, y, tileSize),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                if (!Platform.isMobile)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: GameBottomCounter(props: game.props),
-                  ),
-                AnimatedOpacity(
-                  opacity: _isShowingHelp ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 250),
-                  child: IgnorePointer(
-                    ignoring: !_isShowingHelp,
-                    child: GestureDetector(
-                      onTap: () => setState(() => _isShowingHelp = false),
-                      child: Container(
-                        color: skBlack.withAlpha(122),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Row(children: [
-                              Flexible(
-                                child: Help(),
-                              ),
-                            ]),
-                          ],
-                        ),
+                  if (!Platform.isMobile)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: GameBottomCounter(props: game.props),
+                    ),
+                  ValueListenableBuilder(
+                    valueListenable: game.props.isShowingOverlay,
+                    builder: (_, isShowingOverlay, __) => AnimatedOpacity(
+                      opacity: isShowingOverlay ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 250),
+                      child: IgnorePointer(
+                        ignoring: !isShowingOverlay,
+                        child: GestureDetector(
+                            onTap: () =>
+                                setState(() => isShowingOverlay = false),
+                            child: GameOverlayWidget(gameProps: game.props)),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (Platform.isMobile)
-            GameBottomMenu(
-              game: game,
-              onHelp: () => setState(() {
-                _isShowingHelp = !_isShowingHelp;
-              }),
-            ),
-        ],
+            if (Platform.isMobile)
+              GameBottomMenu(
+                game: game,
+                onHelp: () => setState(() {
+                  game.props.isShowingOverlay.value =
+                      !game.props.isShowingOverlay.value;
+                }),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -227,8 +221,15 @@ class _GameWidgetState extends State<GameWidget> {
     );
   }
 
-  KeyEventResult _onTopKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) {
+  KeyEventResult _onTopKeyEvent(FastKeyEvent event) {
+    if (event.type != FastKeyEventType.down) {
+      return KeyEventResult.ignored;
+    }
+
+    if (game.props.isShowingOverlay.value) {
+      if (game.props.onOverlayKeyEvent != null) {
+        return game.props.onOverlayKeyEvent!(event);
+      }
       return KeyEventResult.ignored;
     }
 
@@ -240,30 +241,24 @@ class _GameWidgetState extends State<GameWidget> {
       }
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.escape) {
-      if (_isShowingHelp) {
-        setState(() {
-          _isShowingHelp = false;
-        });
+      final didClearFocus = game.clearFocus();
+      if (didClearFocus) {
         return KeyEventResult.handled;
       }
 
-      final didClearFocus = game.clearFocus();
-      if (!didClearFocus && game.props.hasPuzzle) {
+      if (game.props.hasPuzzle) {
         game.endPuzzle();
         return KeyEventResult.handled;
       }
-      return didClearFocus ? KeyEventResult.handled : KeyEventResult.ignored;
+
+      game.props.isShowingOverlay.value = true;
+      return KeyEventResult.handled;
     } else if (_kDigits.contains(event.logicalKey)) {
       final digit = _kDigits.indexOf(event.logicalKey) + 1;
       game.startPuzzle(digit);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.tab) {
       game.rotateBase();
-      return KeyEventResult.handled;
-    } else if (event.logicalKey == LogicalKeyboardKey.keyH) {
-      setState(() {
-        _isShowingHelp = !_isShowingHelp;
-      });
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.backspace) {
       game.undoLastRotation();
@@ -275,6 +270,10 @@ class _GameWidgetState extends State<GameWidget> {
   KeyEventResult _onTileKeyEvent(
       KeyEvent event, SkwerTileProps tileProps, TileIndex tileIndex) {
     if (event is! KeyDownEvent) {
+      return KeyEventResult.ignored;
+    }
+
+    if (game.props.isShowingOverlay.value) {
       return KeyEventResult.ignored;
     }
 

@@ -19,13 +19,16 @@ enum GameState {
 }
 
 class Game {
-  final GameProps props = GameProps();
+  final GameProps props;
+
   final List<GameRotation> rotations = [];
 
   bool _hasInited = false;
   GamePrefs prefs = GamePrefs();
   GameState state = GameState.inProgress;
   int _resetPuzzleCounter = 0;
+
+  Game(this.props);
 
   void resize(int numTilesX, int numTilesY) {
     if (numTilesX < 0 || numTilesY < 0) {

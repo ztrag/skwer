@@ -63,7 +63,10 @@ class _MenuWidgetState extends State<MenuWidget> {
             numTilesY != menu.props.numTilesY) {
           _positions.clear();
           menu.props.numTiles.value = Point(numTilesX, numTilesY);
-          Future.delayed(const Duration(seconds: 1), () => menu.drawWelcome());
+          Future.delayed(
+            const Duration(milliseconds: 300),
+            () => menu.drawWelcome(),
+          );
         }
 
         return FocusScope(

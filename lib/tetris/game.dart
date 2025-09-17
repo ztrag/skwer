@@ -77,7 +77,10 @@ class Game {
 
   KeyEventResult onKeyEvent(FastKeyEvent event) {
     if (props.isShowingOverlay) {
-      return props.onOverlayKeyEvent!(event);
+      if (props.onOverlayKeyEvent != null) {
+        return props.onOverlayKeyEvent!(event);
+      }
+      return KeyEventResult.ignored;
     }
 
     if (event.type == FastKeyEventType.up) {

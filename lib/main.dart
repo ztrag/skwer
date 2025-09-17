@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_wrapper.dart';
 
 void main() {
@@ -8,6 +9,9 @@ void main() {
       child: Theme(
         data: ThemeData(
           fontFamily: 'CourierPrime',
+          textTheme: const TextTheme(
+            bodyMedium: TextStyle(color: skWhite),
+          ),
         ),
         child: const MenuWrapper(),
       ),

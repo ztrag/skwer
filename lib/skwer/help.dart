@@ -7,60 +7,48 @@ class Help extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: skBlack.withAlpha(229),
-        gradient: SweepGradient(
-          colors: [
-            skRed,
-            skBlue,
-            Color.lerp(skBlue, skRed, 0.5)!,
-            skRed,
-          ].map((e) => Color.lerp(e, skBlack, 0.5)!).toList(),
-        ),
-        border: Border.all(
-          color: Color.lerp(skRed, skBlue, 0.5)!,
-        ),
-        borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: skBlack.withAlpha(191),
-          gradient: RadialGradient(
-            colors: [
-              Color.lerp(Color.lerp(skRed, skBlue, 0.5)!, skBlack, 0.5)!,
-              Colors.transparent,
-            ],
-          ),
-          border: Border.all(
-            color: Color.lerp(skRed, skBlue, 0.5)!,
-          ),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...const [
-                Text(
-                  'help',
-                  style: TextStyle(fontSize: 40, color: skRed),
-                ),
-                Text(
-                  'return to base state',
-                  style: TextStyle(fontSize: 24),
-                ),
-                Text(''),
-                Text('red -> surrounding'),
-                Text('green -> cross'),
-                Text('blue -> diagonals'),
-              ],
-              ..._keyboardHelp(),
-            ],
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ...[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Return to base state.',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        const Text(''),
+                        const Text('Tile actions:'),
+                        const Text(
+                          '[red] -> surrounding',
+                          style: TextStyle(color: skYellow),
+                        ),
+                        const Text(
+                          '[green] -> cross',
+                          style: TextStyle(color: skYellow),
+                        ),
+                        const Text(
+                          '[blue] -> diagonals',
+                          style: TextStyle(color: skYellow),
+                        ),
+                        ..._keyboardHelp(),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -68,9 +56,10 @@ class Help extends StatelessWidget {
     if (Platform.isMobile) {
       return [];
     }
-    const textStyle = TextStyle(color: Colors.grey);
+    const textStyle = TextStyle(color: skYellow);
     return const [
       Text(''),
+      Text('Keyboard actions:'),
       Text('[arrows] ------> move', style: textStyle),
       Text('[space/enter] -> press', style: textStyle),
       Text('[tab] ---------> toggle', style: textStyle),
@@ -78,7 +67,6 @@ class Help extends StatelessWidget {
       Text('[r]  ----------> reset', style: textStyle),
       Text('[backspace] ---> undo', style: textStyle),
       Text('[escape] ------> cancel', style: textStyle),
-      Text('[h] -----------> help', style: textStyle),
     ];
   }
 }

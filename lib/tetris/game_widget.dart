@@ -72,8 +72,10 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
       game.resize(numTilesX, numTilesY);
     }
 
+    bool isTooSmall = numTilesX < 3 || numTilesY < 5;
+
     return Scaffold(
-        body: FastKeyFocusScope(
+      body: FastKeyFocusScope(
         autofocus: true,
         node: focusScopeNode,
         onKeyEvent: game.onKeyEvent,
@@ -82,50 +84,60 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
           alignment: Alignment.center,
           children: [
             const MenuBackground(radius: 1.2),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: tileSize * numTilesX,
-                      height: panelHeight,
-                      child: GamePanel(gameProps: game.props),
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: game.props.numTiles,
-                      builder: (_, numTiles, __) {
-                        return SizedBox(
-                          width: (numTiles.x + 0.5) * tileSize,
-                          height: (numTiles.y + 0.5) * tileSize,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: skBlack,
-                              border: Border.all(color: skRed, width: 2),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                numTiles.y,
-                                (y) => Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(
-                                    numTiles.x,
-                                    (x) => _buildTile(x, y, tileSize),
+            if (isTooSmall)
+              const Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Text(
+                  'window too small',
+                  style: TextStyle(color: skRed),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            if (!isTooSmall)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: tileSize * numTilesX,
+                        height: panelHeight,
+                        child: GamePanel(gameProps: game.props),
+                      ),
+                      ValueListenableBuilder(
+                        valueListenable: game.props.numTiles,
+                        builder: (_, numTiles, __) {
+                          return SizedBox(
+                            width: (numTiles.x + 0.5) * tileSize,
+                            height: (numTiles.y + 0.5) * tileSize,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: skBlack,
+                                border: Border.all(color: skRed, width: 2),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  numTiles.y,
+                                  (y) => Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      numTiles.x,
+                                      (x) => _buildTile(x, y, tileSize),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: bottomSpace),
-                  ],
-                ),
-              ],
-            ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: bottomSpace),
+                    ],
+                  ),
+                ],
+              ),
           ],
         ),
       ),

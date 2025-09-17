@@ -16,10 +16,7 @@ class GamePanel extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: DefaultTextStyle.merge(
-          style: const TextStyle(
-            fontSize: 32,
-            color: skWhite,
-          ),
+          style: TextStyle(fontSize: _fontSize, color: skWhite),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -41,6 +38,7 @@ class GamePanel extends StatelessWidget {
                     }
                     return TetraminoWidget(
                       key: ValueKey(nextTetramino),
+                      tileSize: _tileSize,
                       tetramino: nextTetramino,
                     );
                   }),
@@ -59,5 +57,19 @@ class GamePanel extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double get _fontSize {
+    if (gameProps.numTilesX <= 8) {
+      return (10 + 10 * gameProps.numTilesX / 4).roundToDouble();
+    }
+    return 32;
+  }
+
+  double get _tileSize {
+    if (gameProps.numTilesX <= 8) {
+      return (10 + 10 * gameProps.numTilesX / 4).roundToDouble();
+    }
+    return 30;
   }
 }

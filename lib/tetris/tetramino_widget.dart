@@ -5,8 +5,13 @@ import 'package:skwer/tetris/game_tile_props.dart';
 
 class TetraminoWidget extends StatelessWidget {
   final Tetramino tetramino;
+  final double tileSize;
 
-  const TetraminoWidget({Key? key, required this.tetramino}) : super(key: key);
+  const TetraminoWidget({
+    Key? key,
+    required this.tetramino,
+    required this.tileSize,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +44,8 @@ class TetraminoWidget extends StatelessWidget {
         props.color.value = tetramino.color;
         tiles.last.add(
           SizedBox(
-            width: 30,
-            height: 30,
+            width: tileSize,
+            height: tileSize,
             child: indices.contains(tileIndex)
                 ? GameTile(props: props)
                 : const SizedBox.shrink(),

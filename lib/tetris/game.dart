@@ -123,8 +123,13 @@ class Game {
     if (!_isValidPosition(gameTetramino)) {
       return null;
     }
-    props.nextTetramino.value =
-        Tetramino.values[_random.nextInt(Tetramino.values.length)];
+    if (props.numTilesX == 3) {
+      props.nextTetramino.value =
+          Tetramino.values[1 + _random.nextInt(Tetramino.values.length - 1)];
+    } else {
+      props.nextTetramino.value =
+          Tetramino.values[_random.nextInt(Tetramino.values.length)];
+    }
     return gameTetramino;
   }
 

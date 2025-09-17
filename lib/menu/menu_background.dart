@@ -3,10 +3,12 @@ import 'package:skwer/colors.dart';
 
 class MenuBackground extends StatelessWidget {
   final double radius;
+  final Color color;
 
   const MenuBackground({
     Key? key,
     this.radius = 0.5,
+    this.color = skRed,
   }) : super(key: key);
 
   @override
@@ -18,16 +20,16 @@ class MenuBackground extends StatelessWidget {
           stops: const [0.3, 0.6, 1],
           colors: [
             Color.lerp(
-              Color.lerp(skRed, skBlue, 0.2)!,
+              Color.lerp(color, skBlue, 0.2)!,
               skBlack,
               0.5,
             )!,
             Color.lerp(
-              Color.lerp(skRed, skBlue, 0.5)!,
+              Color.lerp(color, skBlue, 0.5)!,
               skBlack,
               0.6,
             )!,
-            Color.lerp(skRed, skBlack, 0.85)!,
+            Color.lerp(color, skBlack, 0.85)!,
           ],
         ),
       ),

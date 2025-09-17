@@ -93,7 +93,13 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            const MenuBackground(radius: 1.2),
+            ValueListenableBuilder(
+              valueListenable: gameProps.level,
+              builder: (_, level, __) => MenuBackground(
+                radius: level.value < 9 ? (0.6 + level.value * 0.05) : 0,
+                color: level.color,
+              ),
+            ),
             if (isTooSmall)
               const Padding(
                 padding: EdgeInsets.all(4.0),
@@ -121,10 +127,17 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                           return SizedBox(
                             width: (numTiles.x + 0.5) * tileSize,
                             height: (numTiles.y + 0.5) * tileSize,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: skBlack,
-                                border: Border.all(color: skRed, width: 2),
+                            child: ValueListenableBuilder(
+                              valueListenable: gameProps.level,
+                              builder: (_, level, child) => Container(
+                                decoration: BoxDecoration(
+                                  color: skBlack,
+                                  border: Border.all(
+                                    color: level.color,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: child,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,

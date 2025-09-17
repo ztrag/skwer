@@ -80,6 +80,9 @@ class _FastKeyFocusScopeState extends State<FastKeyFocusScope> {
     await Future.delayed(const Duration(milliseconds: 200));
     while (true) {
       await Future.delayed(const Duration(milliseconds: 50));
+      if (!mounted) {
+        return;
+      }
       if (controller._downKeys[event.logicalKey] != event.timeStamp) {
         return;
       }

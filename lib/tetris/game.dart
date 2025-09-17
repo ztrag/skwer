@@ -14,6 +14,7 @@ class Game {
   static final Random _random = Random();
 
   final GameProps props = GameProps();
+  final VoidCallback onExit;
 
   Duration _elapsed = const Duration();
   Duration? _waitStepStartTime;
@@ -21,7 +22,7 @@ class Game {
   Set<TileIndex> _dropHintTiles = <TileIndex>{};
   int _floorSlideDirection = 0;
 
-  Game() {
+  Game(this.onExit) {
     props.tetramino.addListener(_updateTetramino);
   }
 
@@ -72,10 +73,16 @@ class Game {
       return KeyEventResult.ignored;
     }
 
-    if (event.logicalKey == LogicalKeyboardKey.keyR) {
-      if (props.isGameOver.value) {
+    if (props.isGameOver.value) {
+      if (event.logicalKey == LogicalKeyboardKey.keyR) {
         start();
         return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.keyQ) {
+        if (event.type == FastKeyEventType.down) {
+          onExit();
+          return KeyEventResult.handled;
+        }
       }
     }
 

@@ -11,12 +11,12 @@ enum Games {
 
   const Games(this.name);
 
-  Widget widget() {
+  Widget widget(VoidCallback onExit) {
     switch (this) {
       case Games.skwer:
-        return const s.GameWidget();
+        return s.GameWidget(onExit: onExit);
       case Games.tetris:
-        return const t.GameWidget();
+        return t.GameWidget(onExit: onExit);
       case Games.frogger:
         throw UnimplementedError();
     }

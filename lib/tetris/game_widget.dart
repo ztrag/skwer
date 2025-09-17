@@ -6,20 +6,23 @@ import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/tetris/game.dart';
+import 'package:skwer/tetris/game_over_widget.dart';
 import 'package:skwer/tetris/game_panel.dart';
 import 'package:skwer/tetris/game_tile.dart';
 import 'package:skwer/tile/tile_index.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class GameWidget extends StatefulWidget {
-  const GameWidget({Key? key}) : super(key: key);
+  final VoidCallback onExit;
+
+  const GameWidget({Key? key, required this.onExit}) : super(key: key);
 
   @override
   State<GameWidget> createState() => _GameWidgetState();
 }
 
 class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
-  final Game game = Game();
+  late final Game game = Game(widget.onExit);
   final FocusScopeNode focusScopeNode = FocusScopeNode();
   late Ticker _ticker;
 
@@ -137,6 +140,16 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                     ],
                   ),
                 ],
+              ),
+            if (!isTooSmall)
+              ValueListenableBuilder(
+                valueListenable: game.props.isGameOver,
+                builder: (_, isGameOver, __) {
+                  if (!isGameOver) {
+                    return const SizedBox.shrink();
+                  }
+                  return GameOverWidget(gameProps: game.props);
+                },
               ),
           ],
         ),

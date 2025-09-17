@@ -17,7 +17,8 @@ class _MenuWrapperState extends State<MenuWrapper> {
     return ValueListenableBuilder(
       valueListenable: selection,
       builder: (_, __, ___) =>
-          selection.value?.widget() ?? MenuWidget(menuSelection: selection),
+          selection.value?.widget(() => selection.value = null) ??
+          MenuWidget(menuSelection: selection),
     );
   }
 }

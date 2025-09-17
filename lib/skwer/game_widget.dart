@@ -28,7 +28,9 @@ final _kDigits = [
 ];
 
 class GameWidget extends StatefulWidget {
-  const GameWidget({Key? key}) : super(key: key);
+  final VoidCallback onExit;
+
+  const GameWidget({Key? key, required this.onExit}) : super(key: key);
 
   @override
   State<GameWidget> createState() => _GameWidgetState();

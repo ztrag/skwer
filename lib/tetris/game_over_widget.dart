@@ -56,7 +56,7 @@ class _GameOverWidgetState extends State<GameOverWidget> {
                   children: [
                     const SizedBox(height: 40),
                     Text(
-                      '(${widget.gameProps.numTilesX},${widget.gameProps.numTilesY})',
+                      '-${widget.gameProps.numTilesX}x${widget.gameProps.numTilesY}-',
                       style: TextStyle(
                           fontSize: widget.gameProps.numTilesX > 3 ? 50 : 35,
                           color: skRed),
@@ -65,9 +65,14 @@ class _GameOverWidgetState extends State<GameOverWidget> {
                       '${widget.gameProps.score.value}',
                       style: const TextStyle(fontSize: 60),
                     ),
-                    Text(_isNewHighScore
-                        ? 'New High Score'
-                        : 'High Score $_highScore'),
+                    Text(
+                      'High Score${_isNewHighScore ? '' : ' $_highScore'}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: _isNewHighScore ? 26 : 14,
+                        color: _isNewHighScore ? skGreen : skWhite,
+                      ),
+                    ),
                     const SizedBox(height: 40),
                     const Text('r - Restart', style: TextStyle(fontSize: 18)),
                     const Text('q - Quit', style: TextStyle(fontSize: 18)),

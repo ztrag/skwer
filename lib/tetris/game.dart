@@ -6,18 +6,20 @@ import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/level.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/move_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
 class Game {
-  final GameProps props = GameProps();
-  final Random _random = Random();
+  static const Duration _spawnDuration = Duration(milliseconds: 30);
+  static final Random _random = Random();
 
-  final Duration _spawnDuration = const Duration(milliseconds: 30);
+  final GameProps props = GameProps();
 
   Duration _elapsed = const Duration();
   Duration? _waitStepStartTime;
   Duration? _waitSpawnStartTime;
   Set<TileIndex> _dropHintTiles = <TileIndex>{};
+  int _floorSlideDirection = 0;
 
   Game() {
     props.tetramino.addListener(_updateTetramino);
@@ -90,10 +92,13 @@ class Game {
       return KeyEventResult.handled;
     }
 
-    if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-        event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      _translateTetramino(
-          event.logicalKey == LogicalKeyboardKey.arrowLeft ? -1 : 1, 0);
+    final moveDirection =
+        MoveArrows.getHorizontalDirection(props.keyFocusScopeController);
+    if ((event.logicalKey == LogicalKeyboardKey.arrowLeft &&
+            moveDirection == -1) ||
+        (event.logicalKey == LogicalKeyboardKey.arrowRight &&
+            moveDirection == 1)) {
+      _translateTetramino(moveDirection, 0);
       return KeyEventResult.handled;
     }
 
@@ -130,6 +135,7 @@ class Game {
       return;
     }
 
+    _floorSlideDirection = 0;
     _waitStepStartTime = _elapsed;
     props.tetramino.value = ValueChange(null, next);
   }
@@ -173,15 +179,20 @@ class Game {
   void _stepTetramino() {
     final current = props.tetramino.value.value!;
 
-    if (_isTouchingFloor(current)) {
-      props.tetramino.value = ValueChange(null, null);
-      _checkCompletedRows(current);
-      _waitSpawnStartTime = _elapsed;
+    if (!_isTouchingFloor(current)) {
+      _waitStepStartTime = _elapsed;
+      props.tetramino.value = ValueChange(current, current.step());
       return;
     }
 
-    _waitStepStartTime = _elapsed;
-    props.tetramino.value = ValueChange(current, current.step());
+    if (_maybeFloorSlide()) {
+      _waitStepStartTime = _elapsed - props.level.value.stepDuration;
+      return;
+    }
+
+    _checkCompletedRows(current);
+    _waitSpawnStartTime = _elapsed;
+    props.tetramino.value = ValueChange(null, null);
   }
 
   void _checkCompletedRows(GameTetramino positioned) {
@@ -328,6 +339,28 @@ class Game {
         return false;
       }
     }
+    return true;
+  }
+
+  bool _maybeFloorSlide() {
+    final moveDirection =
+        MoveArrows.getHorizontalDirection(props.keyFocusScopeController);
+    if (moveDirection == 0) {
+      return false;
+    }
+
+    final tetramino = props.tetramino.value.value!;
+    final translated = tetramino.translate(moveDirection, 0);
+    final slideDirection = _isValidPosition(translated) ? moveDirection : 0;
+    if (slideDirection == 0) {
+      return false;
+    }
+
+    if (_floorSlideDirection != 0 && _floorSlideDirection != slideDirection) {
+      return false;
+    }
+
+    _floorSlideDirection = slideDirection;
     return true;
   }
 

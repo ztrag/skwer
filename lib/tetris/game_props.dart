@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
 import 'package:skwer/tetris/level.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 import 'package:skwer/util/value_change.dart';
 
 class GameProps {
@@ -19,6 +20,9 @@ class GameProps {
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
   final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(
       Tetramino.values[Random().nextInt(Tetramino.values.length)]);
+
+  final FastKeyFocusScopeController keyFocusScopeController =
+      FastKeyFocusScopeController();
 
   GameProps() {
     numTiles.addListener(() {

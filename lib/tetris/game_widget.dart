@@ -77,6 +77,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
         autofocus: true,
         node: focusScopeNode,
         onKeyEvent: game.onKeyEvent,
+        controller: game.props.keyFocusScopeController,
         child: Stack(
           alignment: Alignment.center,
           children: [

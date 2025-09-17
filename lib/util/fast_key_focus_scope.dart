@@ -16,7 +16,14 @@ enum FastKeyEventType {
 
 typedef FastKeyEventCallback = KeyEventResult Function(FastKeyEvent event);
 
+class FastKeyFocusScopeController {
+  final Map<LogicalKeyboardKey, Duration> _downKeys = {};
+
+  Duration? getKeyDownTime(LogicalKeyboardKey key) => _downKeys[key];
+}
+
 class FastKeyFocusScope extends StatefulWidget {
+  final FastKeyFocusScopeController? controller;
   final bool autofocus;
   final FocusScopeNode node;
   final FastKeyEventCallback onKeyEvent;
@@ -24,6 +31,7 @@ class FastKeyFocusScope extends StatefulWidget {
 
   const FastKeyFocusScope({
     Key? key,
+    this.controller,
     required this.autofocus,
     required this.node,
     required this.onKeyEvent,
@@ -35,7 +43,8 @@ class FastKeyFocusScope extends StatefulWidget {
 }
 
 class _FastKeyFocusScopeState extends State<FastKeyFocusScope> {
-  final Map<PhysicalKeyboardKey, Duration> _downKeys = {};
+  late final FastKeyFocusScopeController controller =
+      widget.controller ?? FastKeyFocusScopeController();
 
   @override
   Widget build(BuildContext context) {
@@ -49,17 +58,17 @@ class _FastKeyFocusScopeState extends State<FastKeyFocusScope> {
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
+      controller._downKeys[event.logicalKey] = event.timeStamp;
       final result = widget
           .onKeyEvent(FastKeyEvent(FastKeyEventType.down, event.logicalKey));
       if (result == KeyEventResult.handled) {
-        _downKeys[event.physicalKey] = event.timeStamp;
         _startRepeatTicker(event);
       }
       return result;
     } else if (event is KeyUpEvent) {
+      controller._downKeys.remove(event.logicalKey);
       final result = widget
           .onKeyEvent(FastKeyEvent(FastKeyEventType.up, event.logicalKey));
-      _downKeys.remove(event.physicalKey);
       return result;
     } else if (event is KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -71,7 +80,7 @@ class _FastKeyFocusScopeState extends State<FastKeyFocusScope> {
     await Future.delayed(const Duration(milliseconds: 200));
     while (true) {
       await Future.delayed(const Duration(milliseconds: 50));
-      if (_downKeys[event.physicalKey] != event.timeStamp) {
+      if (controller._downKeys[event.logicalKey] != event.timeStamp) {
         return;
       }
       widget

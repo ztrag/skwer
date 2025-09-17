@@ -8,7 +8,8 @@ const kLevels = [
   Level(7, 30, Duration(milliseconds: 316)),
   Level(8, 35, Duration(milliseconds: 244)),
   Level(9, 40, Duration(milliseconds: 172)),
-  Level(10, 50, Duration(milliseconds: 100)),
+  Level(10, 50, Duration(milliseconds: 124)),
+  Level(11, 50, Duration(milliseconds: 75)),
 ];
 
 class Level {

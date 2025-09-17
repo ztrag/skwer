@@ -13,36 +13,43 @@ class Game {
   static const Duration _spawnDuration = Duration(milliseconds: 30);
   static final Random _random = Random();
 
-  final GameProps props = GameProps();
-  final VoidCallback onExit;
+  final GameProps props;
 
   Duration _elapsed = const Duration();
   Duration? _waitStepStartTime;
   Duration? _waitSpawnStartTime;
+  Duration _pausedTime = const Duration();
+  Duration? _onPauseTime;
+
   Set<TileIndex> _dropHintTiles = <TileIndex>{};
   int _floorSlideDirection = 0;
 
-  Game(this.onExit) {
+  Game(this.props) {
     props.tetramino.addListener(_updateTetramino);
+    props.isPaused.addListener(_onPauseToggled);
   }
 
   void start() {
     for (final tile in props.tiles.values) {
       tile.color.value = null;
     }
+    _onPauseTime = null;
+    _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
+    _toggleNextTetramino();
+
     props.tetramino.value = ValueChange(null, null);
     props.isGameOver.value = false;
+    props.isPaused.value = false;
     props.score.value = 0;
     props.level.value = kLevels.first;
-    _waitSpawnStartTime = _elapsed + const Duration(milliseconds: 500);
   }
 
   void update(Duration e) {
-    if (props.isGameOver.value) {
+    _elapsed = e - _pausedTime;
+
+    if (props.isShowingOverlay) {
       return;
     }
-
-    _elapsed = e;
 
     if (_waitSpawnStartTime != null) {
       // Waiting for spawn...
@@ -69,21 +76,18 @@ class Game {
   }
 
   KeyEventResult onKeyEvent(FastKeyEvent event) {
+    if (props.isShowingOverlay) {
+      return KeyEventResult.ignored;
+    }
+
     if (event.type == FastKeyEventType.up) {
       return KeyEventResult.ignored;
     }
 
-    if (props.isGameOver.value) {
-      if (event.logicalKey == LogicalKeyboardKey.keyR) {
-        start();
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.keyQ) {
-        if (event.type == FastKeyEventType.down) {
-          onExit();
-          return KeyEventResult.handled;
-        }
-      }
+    if (event.type == FastKeyEventType.down &&
+        event.logicalKey == LogicalKeyboardKey.escape) {
+      props.isPaused.value = true;
+      return KeyEventResult.handled;
     }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
@@ -117,6 +121,14 @@ class Game {
     return KeyEventResult.ignored;
   }
 
+  void _onPauseToggled() {
+    if (props.isPaused.value) {
+      _onPauseTime = _elapsed;
+    } else if (_onPauseTime != null) {
+      _pausedTime += _elapsed - _onPauseTime!;
+    }
+  }
+
   GameTetramino? _getNextSpawn() {
     final tetramino = props.nextTetramino.value;
     final gameTetramino = GameTetramino(
@@ -130,6 +142,11 @@ class Game {
     if (!_isValidPosition(gameTetramino)) {
       return null;
     }
+    _toggleNextTetramino();
+    return gameTetramino;
+  }
+
+  void _toggleNextTetramino() {
     if (props.numTilesX == 3) {
       props.nextTetramino.value =
           Tetramino.values[1 + _random.nextInt(Tetramino.values.length - 1)];
@@ -137,7 +154,6 @@ class Game {
       props.nextTetramino.value =
           Tetramino.values[_random.nextInt(Tetramino.values.length)];
     }
-    return gameTetramino;
   }
 
   void _spawnTetramino() {

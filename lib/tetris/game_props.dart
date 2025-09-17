@@ -15,16 +15,19 @@ class GameProps {
   final ValueNotifier<int> score = ValueNotifier(0);
   final ValueNotifier<Level> level = ValueNotifier(kLevels.first);
   final ValueNotifier<bool> isGameOver = ValueNotifier(false);
+  final ValueNotifier<bool> isPaused = ValueNotifier(false);
 
   final ValueNotifier<ValueChange<GameTetramino?>> tetramino =
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
-  final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(
-      Tetramino.values[Random().nextInt(Tetramino.values.length)]);
+  final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(Tetramino.t);
 
   final FastKeyFocusScopeController keyFocusScopeController =
       FastKeyFocusScopeController();
 
-  GameProps() {
+  final VoidCallback onExit;
+  final VoidCallback onStart;
+
+  GameProps({required this.onStart, required this.onExit}) {
     numTiles.addListener(() {
       tiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,
@@ -41,4 +44,6 @@ class GameProps {
   int get numTilesX => numTiles.value.x;
 
   int get numTilesY => numTiles.value.y;
+
+  bool get isShowingOverlay => isPaused.value || isGameOver.value;
 }

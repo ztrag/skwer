@@ -6,8 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/tetris/game.dart';
-import 'package:skwer/tetris/game_over_widget.dart';
+import 'package:skwer/tetris/game_overlay_widget.dart';
 import 'package:skwer/tetris/game_panel.dart';
+import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tile.dart';
 import 'package:skwer/tile/tile_index.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
@@ -22,7 +23,12 @@ class GameWidget extends StatefulWidget {
 }
 
 class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
-  late final Game game = Game(widget.onExit);
+  late final GameProps gameProps = GameProps(
+    onStart: () => game.start(),
+    onExit: widget.onExit,
+  );
+  late final Game game = Game(gameProps);
+
   final FocusScopeNode focusScopeNode = FocusScopeNode();
   late Ticker _ticker;
 
@@ -70,8 +76,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
       ),
     );
 
-    if (numTilesX != game.props.numTilesX ||
-        numTilesY != game.props.numTilesY) {
+    if (numTilesX != gameProps.numTilesX || numTilesY != gameProps.numTilesY) {
       game.resize(numTilesX, numTilesY);
     }
 
@@ -82,7 +87,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
         autofocus: true,
         node: focusScopeNode,
         onKeyEvent: game.onKeyEvent,
-        controller: game.props.keyFocusScopeController,
+        controller: gameProps.keyFocusScopeController,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -106,10 +111,10 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                       SizedBox(
                         width: tileSize * numTilesX,
                         height: panelHeight,
-                        child: GamePanel(gameProps: game.props),
+                        child: GamePanel(gameProps: gameProps),
                       ),
                       ValueListenableBuilder(
-                        valueListenable: game.props.numTiles,
+                        valueListenable: gameProps.numTiles,
                         builder: (_, numTiles, __) {
                           return SizedBox(
                             width: (numTiles.x + 0.5) * tileSize,
@@ -142,14 +147,12 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                 ],
               ),
             if (!isTooSmall)
-              ValueListenableBuilder(
-                valueListenable: game.props.isGameOver,
-                builder: (_, isGameOver, __) {
-                  if (!isGameOver) {
-                    return const SizedBox.shrink();
-                  }
-                  return GameOverWidget(gameProps: game.props);
-                },
+              ListenableBuilder(
+                listenable: Listenable.merge(
+                    [gameProps.isGameOver, gameProps.isPaused]),
+                builder: (_, __) => gameProps.isShowingOverlay
+                    ? GameOverlayWidget(gameProps: gameProps)
+                    : const SizedBox.shrink(),
               ),
           ],
         ),
@@ -161,7 +164,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     return SizedBox(
       width: tileSize,
       height: tileSize,
-      child: GameTile(props: game.props.tiles[TileIndex(x, y)]!),
+      child: GameTile(props: gameProps.tiles[TileIndex(x, y)]!),
     );
   }
 }

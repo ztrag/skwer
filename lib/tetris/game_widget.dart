@@ -29,12 +29,13 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   );
   late final Game game = Game(gameProps);
 
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
+  late FocusScopeNode _node;
   late Ticker _ticker;
 
   @override
   void initState() {
     super.initState();
+    _node = FocusScopeNode();
     _ticker = Ticker(game.update);
     _ticker.start();
   }
@@ -48,6 +49,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   @override
   void dispose() {
     _ticker.dispose();
+    _node.dispose();
     super.dispose();
   }
 
@@ -85,7 +87,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     return Scaffold(
       body: FastKeyFocusScope(
         autofocus: true,
-        node: focusScopeNode,
+        node: _node,
         onKeyEvent: game.onKeyEvent,
         controller: gameProps.keyFocusScopeController,
         child: Stack(

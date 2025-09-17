@@ -27,6 +27,8 @@ class GameProps {
   final VoidCallback onExit;
   final VoidCallback onStart;
 
+  FastKeyEventCallback? onOverlayKeyEvent;
+
   GameProps({required this.onStart, required this.onExit}) {
     numTiles.addListener(() {
       tiles.removeWhere(

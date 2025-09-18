@@ -8,8 +8,11 @@ class MenuProps {
       ValueNotifier(const Point<int>(0, 0));
   final Map<Point<int>, MenuTileProps> tiles = <Point<int>, MenuTileProps>{};
 
+  Point<int> bgAnchor = const Point(0, 0);
+
   MenuProps() {
     numTiles.addListener(() {
+      bgAnchor = Point(numTilesX ~/ 2-1, (numTilesY - 2) ~/ 2);
       tiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,
       );

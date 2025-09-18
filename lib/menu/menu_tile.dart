@@ -39,7 +39,7 @@ class _MenuTileState extends State<MenuTile> with TickerProviderStateMixin {
     previousColor = getColorD1(widget.props.color.value);
     currentColor = previousColor;
     colorAnimationController = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 400), vsync: this);
     colorAnimation =
         Tween(begin: 0.0, end: 1.0).animate(colorAnimationController);
     widget.props.color.addListener(_onColorChanged);
@@ -71,16 +71,9 @@ class _MenuTileState extends State<MenuTile> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (hover) =>
-          widget.props.hoverPosition.value = hover.localPosition,
-      onEnter: (enter) =>
-          widget.props.hoverPosition.value = enter.localPosition,
-      onExit: (exit) => widget.props.hoverPosition.value = null,
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: painter,
-        ),
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: painter,
       ),
     );
   }
@@ -91,13 +84,7 @@ class _MenuTilePainter extends CustomPainter {
 
   final _MenuTileState state;
 
-  _MenuTilePainter(this.state)
-      : super(
-          repaint: Listenable.merge([
-            state.colorAnimation,
-            state.widget.props.isFocused,
-          ]),
-        );
+  _MenuTilePainter(this.state) : super(repaint: state.colorAnimation);
 
   @override
   void paint(Canvas canvas, Size size) {

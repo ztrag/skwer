@@ -6,8 +6,8 @@ import 'package:skwer/menu/menu_props.dart';
 class Menu {
   final MenuProps props = MenuProps();
 
-  void drawWelcome([Point<int>? anchor]) {
-    anchor ??= Point(props.numTilesX ~/ 2, (props.numTilesY - 1) ~/ 2);
+  void drawWelcome() {
+    final anchor = props.bgAnchor;
 
     for (var i = 0; i < props.numTilesX; i++) {
       for (var j = 0; j < props.numTilesY; j++) {

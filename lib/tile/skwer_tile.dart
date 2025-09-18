@@ -301,7 +301,7 @@ class _SkwerTilePaint extends CustomPainter {
     currentGroup.paint(
       canvas,
       size,
-      brightness * tileOpacity,
+      brightness * tileOpacity * 0.8,
       state.pressAnimation.value,
       currentWaves,
       props.isFocused.value && props.isActive.value

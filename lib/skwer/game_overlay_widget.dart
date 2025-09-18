@@ -35,7 +35,7 @@ class _GameOverlayWidgetState extends State<GameOverlayWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: skBlack.withAlpha(160),
+      color: skBlack.withAlpha(180),
       child: Row(
         children: [
           Expanded(

@@ -61,7 +61,7 @@ class _GameOverlayWidgetState extends State<GameOverlayWidget> {
     return DefaultTextStyle.merge(
       style: const TextStyle(fontSize: 20, color: skWhite),
       child: Container(
-        color: skBlack.withAlpha(150),
+        color: skBlack.withAlpha(180),
         child: Row(
           children: [
             Expanded(

@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:skwer/colors.dart';
 import 'package:skwer/games.dart';
 import 'package:skwer/menu/menu.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/menu/menu_tile.dart';
 import 'package:skwer/menu/menu_tile_props.dart';
+import 'package:skwer/util/command_line.dart';
+import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class MenuWidget extends StatefulWidget {
   final ValueNotifier<Games?> menuSelection;
@@ -21,25 +22,15 @@ class MenuWidget extends StatefulWidget {
 class _MenuWidgetState extends State<MenuWidget> {
   final Menu menu = Menu();
   final FocusScopeNode focusScopeNode = FocusScopeNode();
+  late final CommandLineController commandLineController =
+      CommandLineController(
+    Games.values
+        .map((game) =>
+            Command(game.name, () => widget.menuSelection.value = game))
+        .toList(),
+  );
 
   final Map<Rect, MenuTileProps> _positions = {};
-
-  late final ValueNotifier<Games> focusedGame =
-      ValueNotifier(widget.menuSelection.value ?? Games.values.first);
-  final Map<Games, ValueNotifier<bool>> isFocusedMap = {};
-
-  @override
-  void initState() {
-    super.initState();
-    for (final game in Games.values) {
-      isFocusedMap[game] = ValueNotifier(game == focusedGame.value);
-    }
-    focusedGame.addListener(() {
-      for (final game in Games.values) {
-        isFocusedMap[game]!.value = game == focusedGame.value;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,111 +39,77 @@ class _MenuWidgetState extends State<MenuWidget> {
       DeviceOrientation.portraitDown,
     ]);
 
-    return LayoutBuilder(
-      builder: (c, constraints) {
-        final size = constraints.biggest;
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (c, constraints) {
+          final size = constraints.biggest;
 
-        const minNumTiles = Point(13, 13);
-        final tileSize = _getTileSize(size, minNumTiles);
-        final x = (size.width / tileSize).floor();
-        final y = (size.height / tileSize).floor();
-        final numTilesX = x;
-        final numTilesY = y;
+          const minNumTiles = Point(13, 13);
+          final tileSize = _getTileSize(size, minNumTiles);
+          final x = (size.width / tileSize).floor();
+          final y = (size.height / tileSize).floor();
+          final numTilesX = x;
+          final numTilesY = y;
 
-        if (numTilesX != menu.props.numTilesX ||
-            numTilesY != menu.props.numTilesY) {
-          _positions.clear();
-          menu.props.numTiles.value = Point(numTilesX, numTilesY);
-          Future.delayed(
-            const Duration(milliseconds: 300),
-            () => menu.drawWelcome(),
-          );
-        }
+          if (numTilesX != menu.props.numTilesX ||
+              numTilesY != menu.props.numTilesY) {
+            _positions.clear();
+            menu.props.numTiles.value = Point(numTilesX, numTilesY);
+            Future.delayed(
+              const Duration(milliseconds: 300),
+              () => menu.drawWelcome(),
+            );
+          }
 
-        return FocusScope(
-          autofocus: true,
-          node: focusScopeNode,
-          onKeyEvent: _onTopKeyEvent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const MenuBackground(),
-                    Listener(
-                      onPointerDown: _onPointerDown,
-                      onPointerMove: _onPointerMove,
-                      onPointerUp: _onPointerUp,
-                      child: ValueListenableBuilder(
-                        valueListenable: menu.props.numTiles,
-                        builder: (_, numTiles, __) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              numTiles.y,
-                              (y) => Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  numTiles.x,
-                                  (x) => _buildTile(x, y, tileSize),
+          return FastKeyFocusScope(
+            autofocus: true,
+            node: focusScopeNode,
+            onKeyEvent: commandLineController.onKeyEvent,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const MenuBackground(),
+                      Listener(
+                        onPointerDown: _onPointerDown,
+                        onPointerMove: _onPointerMove,
+                        onPointerUp: _onPointerUp,
+                        child: ValueListenableBuilder(
+                          valueListenable: menu.props.numTiles,
+                          builder: (_, numTiles, __) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                numTiles.y,
+                                (y) => Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    numTiles.x,
+                                    (x) => _buildTile(x, y, tileSize),
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      child: Wrap(
-                        children: Games.values
-                            .map(_menuOption)
-                            .toList(growable: false),
+                      Positioned(
+                        left: 20,
+                        top: 20,
+                        child: CommandLine(controller: commandLineController),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _menuOption(Games game) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: isFocusedMap[game]!,
-      builder: (_, __, ___) => TextButton(
-        onPressed: () {
-          widget.menuSelection.value = Games.values.first;
+              ],
+            ),
+          );
         },
-        child: Text(
-          _maybeFocusedGameName(game),
-          style: TextStyle(
-            fontSize: 40,
-            color: _maybeFocusedGameColor(game),
-          ),
-        ),
       ),
     );
-  }
-
-  String _maybeFocusedGameName(Games game) {
-    final name = game.name;
-    if (focusedGame.value == game) {
-      return '[$name]';
-    }
-    return name;
-  }
-
-  Color _maybeFocusedGameColor(Games game) {
-    if (focusedGame.value == game) {
-      return skGreen;
-    }
-    return skWhite;
   }
 
   double _getTileSize(Size size, Point<int> numTiles) {
@@ -186,32 +143,6 @@ class _MenuWidgetState extends State<MenuWidget> {
         ),
       ),
     );
-  }
-
-  KeyEventResult _onTopKeyEvent(FocusNode node, KeyEvent event) {
-    if (event.logicalKey == LogicalKeyboardKey.enter ||
-        event.logicalKey == LogicalKeyboardKey.space) {
-      if (event is! KeyDownEvent) {
-        return KeyEventResult.ignored;
-      }
-      widget.menuSelection.value = focusedGame.value;
-      return KeyEventResult.handled;
-    }
-
-    final isFocusLeft = event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-        event.logicalKey == LogicalKeyboardKey.arrowUp;
-    final isFocusRight = event.logicalKey == LogicalKeyboardKey.arrowRight ||
-        event.logicalKey == LogicalKeyboardKey.arrowDown;
-    if (isFocusLeft || isFocusRight) {
-      if (event is KeyUpEvent) {
-        return KeyEventResult.ignored;
-      }
-      focusedGame.value = Games.values[
-          (Games.values.indexOf(focusedGame.value) + (isFocusLeft ? -1 : 1)) %
-              Games.values.length];
-    }
-
-    return KeyEventResult.ignored;
   }
 
   void _onPointerDown(PointerDownEvent event) {

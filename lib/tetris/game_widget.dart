@@ -96,8 +96,8 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
             ValueListenableBuilder(
               valueListenable: gameProps.level,
               builder: (_, level, __) => MenuBackground(
-                radius: level.value < 9 ? (0.6 + level.value * 0.05) : 0,
-                color: level.color,
+                radius: 0.8,
+                color: level.gradientColor,
               ),
             ),
             if (isTooSmall)
@@ -133,7 +133,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                                 decoration: BoxDecoration(
                                   color: skBlack,
                                   border: Border.all(
-                                    color: level.color,
+                                    color: level.borderColor,
                                     width: 2,
                                   ),
                                 ),

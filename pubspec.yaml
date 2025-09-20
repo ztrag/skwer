@@ -20,3 +20,5 @@ flutter:
     - family: CourierPrime
       fonts:
         - asset: fonts/CourierPrime-Regular.ttf
+  shaders:
+    - shaders/test-shader.frag

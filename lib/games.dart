@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:skwer/shader_test/shader_test_widget.dart';
 import 'package:skwer/skwer/game_widget.dart' as s;
 import 'package:skwer/tetris/game_widget.dart' as t;
 
 enum Games {
   skwer('skwer'),
-  tetris('tetris');
+  tetris('tetris'),
+  shader('shader');
 
   final String name;
 
@@ -16,6 +18,8 @@ enum Games {
         return s.GameWidget(onExit: onExit);
       case Games.tetris:
         return t.GameWidget(onExit: onExit);
+      case Games.shader:
+        return const ShaderTestWidget();
     }
   }
 }

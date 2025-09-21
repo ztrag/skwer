@@ -18,6 +18,9 @@ uniform vec4 u_wDT_2;
 uniform vec4 u_wDT_3;
 uniform vec4 u_wDT_4;
 
+vec3 u_wC[MAX_WAVES];
+vec4 u_wDT[MAX_WAVES];
+
 out vec4 fragColor;
 
 float rand (vec2 v) {
@@ -39,7 +42,7 @@ float smoothside(vec2 a, vec2 b, vec2 p, vec2 w) {
     vec2 ap = p - a;
     vec2 bp = p - b;
     //    vec2 wn = w / max(0.0001, (ap.length() * bp.length()));
-    float wn = length(w);
+    float wn = 0.75 * length(w);
     return smoothstep(-wn, wn, ap.x * bp.y - ap.y * bp.x);
 }
 
@@ -57,28 +60,28 @@ float tileWaveTime(vec2 p, vec4 wDT, float x) {
     return clamp(t, 0.0, 1.0);
 }
 
-float tileRotTime(vec2 p, vec4[MAX_WAVES] wDT) {
+float tileRotTime(vec2 p) {
     float t = 0.0;
     for (int i=0; i < MAX_WAVES; i++) {
-        t += tileWaveTime(p, wDT[i], wDT[i].w);
+        t += tileWaveTime(p, u_wDT[i], u_wDT[i].w);
     }
     return fract(t);
 }
 
-vec3 tileColor(vec2 p, vec3[MAX_WAVES] wC, vec4[MAX_WAVES] wDT) {
+vec3 tileColor(vec2 p) {
     vec3 color = vec3(0.0, 0.0, 0.0);
     float drawCount = 0.0;
     for (int i=0; i < MAX_WAVES; i++) {
-        float x = step(0.001, wDT[i].w);
-        float t = ((1-x) * wDT[i].z + x * tileWaveTime(p, wDT[i], wDT[i].z));
+        float x = step(0.001, u_wDT[i].w);
+        float t = ((1-x) * u_wDT[i].z + x * tileWaveTime(p, u_wDT[i], u_wDT[i].z));
         t *= max(0.0, 1.0 - drawCount);
         drawCount += t;
-        color += wC[i] * t;
+        color += u_wC[i] * t;
     }
-    return color + wC[MAX_WAVES - 1] * max(0.0, 1.0 - drawCount);
+    return color + u_wC[MAX_WAVES - 1] * max(0.0, 1.0 - drawCount);
 }
 
-vec4 tiles(vec2 pos, vec2 size, float brightness, float flash, vec3[MAX_WAVES] wC, vec4[MAX_WAVES] wDT) {
+vec4 tiles(vec2 pos, vec2 size, float brightness, float flash) {
     vec2[6*6] v;// Tile vertices
     float vr = 0.1;// Vertex position random factor
     for (int i=0; i < 6; i++) {
@@ -98,7 +101,7 @@ vec4 tiles(vec2 pos, vec2 size, float brightness, float flash, vec3[MAX_WAVES] w
     float qq = 0.0;
     for (int i=0; i < 5; i++) {
         for (int j=0; j < 5; j++) {
-            float t = tileRotTime(vec2(i, j) / 4.0, wDT);
+            float t = tileRotTime(vec2(i, j) / 4.0);
             vec2 i0j0 = v[i*6 + j];
             vec2 i0j1 = v[i*6 + j+1];
             vec2 i1j0 = v[(i+1)*6 + j];
@@ -116,7 +119,7 @@ vec4 tiles(vec2 pos, vec2 size, float brightness, float flash, vec3[MAX_WAVES] w
             smv);
             b += (0.65 + 0.6 * rand(v[i*6 + j])) * q * brightness;
             qq += q;
-            color += vec3(tileColor(vec2(i, j) / 4.0, wC, wDT) * q);
+            color += vec3(tileColor(vec2(i, j) / 4.0) * q);
         }
     }
 
@@ -129,17 +132,16 @@ vec4 tiles(vec2 pos, vec2 size, float brightness, float flash, vec3[MAX_WAVES] w
 
 void main() {
     vec2 p = FlutterFragCoord().xy / u_size;
-    vec3 wC[MAX_WAVES];
-    wC[0] = u_wC_1;
-    wC[1] = u_wC_2;
-    wC[2] = u_wC_3;
-    wC[3] = u_wC_4;
 
-    vec4 wDT[MAX_WAVES];
-    wDT[0] = u_wDT_1;
-    wDT[1] = u_wDT_2;
-    wDT[2] = u_wDT_3;
-    wDT[3] = u_wDT_4;
+    u_wC[0] = u_wC_1;
+    u_wC[1] = u_wC_2;
+    u_wC[2] = u_wC_3;
+    u_wC[3] = u_wC_4;
+
+    u_wDT[0] = u_wDT_1;
+    u_wDT[1] = u_wDT_2;
+    u_wDT[2] = u_wDT_3;
+    u_wDT[3] = u_wDT_4;
 
     p -= 0.5;
 
@@ -158,5 +160,5 @@ void main() {
     // Central diamond highlight
     brightness *= (1-mode) + (mode) * (0.6 + 0.4 * (1.0 - step(0.5, max(abs(p.x), abs(p.y)) * u_modeT) * 1.0));
 
-    fragColor = tiles(fract(p + 0.5), u_size, brightness, u_flash, wC, wDT);
+    fragColor = tiles(fract(p + 0.5), u_size, brightness, u_flash);
 }

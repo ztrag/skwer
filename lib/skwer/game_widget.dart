@@ -11,8 +11,8 @@ import 'package:skwer/skwer/game_overlay_widget.dart';
 import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/skwer/game_rotation.dart';
 import 'package:skwer/skwer/puzzle.dart';
-import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
+import 'package:skwer/tile/skwer_tile_shader.dart';
 import 'package:skwer/tile/tile_index.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 
@@ -213,7 +213,7 @@ class _GameWidgetState extends State<GameWidget> {
               onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
               onKeyEvent: (_, event) =>
                   _onTileKeyEvent(event, tileProps, tileIndex),
-              child: SkwerTile(props: tileProps, gameProps: game.props),
+              child: SkwerTileShader(props: tileProps, gameProps: game.props),
             ),
           ),
         ),

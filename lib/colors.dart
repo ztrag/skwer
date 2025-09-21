@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 const Color skRed = Color.fromARGB(255, 255, 5, 130);
-const Color skGreen = Color.fromARGB(255, 100, 255, 0);
+const Color skGreen = Color.fromARGB(255, 114, 240, 0);
 const Color skBlue = Color.fromARGB(255, 5, 120, 255);
 const List<Color> skTileColors = [skRed, skGreen, skBlue];
 

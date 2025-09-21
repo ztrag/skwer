@@ -7,7 +7,7 @@ class ColorWave {
   final Color color;
   final double animation;
   final bool rotate;
-  final Point<double>? direction;
+  final Point<double>? direction; // TODO make non-nullable
 
   const ColorWave({
     required this.color,

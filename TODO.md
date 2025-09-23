@@ -8,7 +8,6 @@
 
 1. Versus
 2. Sounds
-3. Fullscreen Board Size
 
 ## Tetris
 
@@ -20,9 +19,12 @@
 6. Hint Option (enable-disable)
 7. Ghost Hint Option
 
+## Windows
+
+1. Full Screen
+2. Icon
+
 ## Misc
 
-1. Windows Full Screen
-2. Windows Icon
-3. Optimize mosaic_tile.frag
-4. Fix ShaderCache (shader compilation not cached)
+1. Optimize mosaic_tile.frag
+2. Fix ShaderCache (shader compilation not cached?)

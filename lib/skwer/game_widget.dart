@@ -48,7 +48,7 @@ class _GameWidgetState extends State<GameWidget> {
   @override
   void initState() {
     super.initState();
-    game.prefs.numTiles.addListener(() => setState(() {}));
+    game.props.board.addListener(() => setState(() {}));
   }
 
   @override
@@ -64,19 +64,8 @@ class _GameWidgetState extends State<GameWidget> {
         mediaSize.width,
         mediaSize.height -
             (Platform.isMobile ? 100 : kGameBottomCounterHeight * 3));
-
-    final numTilesFromPrefs = getNumTilesFromPrefs();
-    final tileSize = getTileSize(size, numTilesFromPrefs);
-    final x = (size.width / tileSize).floor();
-    final y = (size.height / tileSize).floor();
-    final numTilesX = numTilesFromPrefs?.x ?? (x > 9 && x % 2 == 0 ? x - 1 : x);
-    final numTilesY = numTilesFromPrefs?.y ?? (y > 9 && y % 2 == 0 ? y - 1 : y);
-
-    if (numTilesX != game.props.numTilesX ||
-        numTilesY != game.props.numTilesY) {
-      _positions.clear();
-      game.resize(numTilesX, numTilesY);
-    }
+    _positions.clear();
+    game.props.size.value = Point(size.width, size.height);
 
     return Scaffold(
       body: FastKeyFocusScope(
@@ -93,7 +82,7 @@ class _GameWidgetState extends State<GameWidget> {
                   GameBackground(
                     props: game.props,
                     size: size,
-                    tileSize: tileSize,
+                    tileSize: game.props.tileSize.value,
                   ),
                   Listener(
                     onPointerDown: _onPointerDown,
@@ -101,17 +90,18 @@ class _GameWidgetState extends State<GameWidget> {
                     onPointerUp: _onPointerUp,
                     onPointerCancel: (_) => game.clearFocus(),
                     child: ValueListenableBuilder(
-                      valueListenable: game.props.numTiles,
-                      builder: (_, numTiles, __) {
+                      valueListenable: game.props.board,
+                      builder: (_, board, __) {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(
-                            numTiles.y,
+                            board.size.y,
                             (y) => Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
-                                numTiles.x,
-                                (x) => _buildTile(x, y, tileSize),
+                                board.size.x,
+                                (x) =>
+                                    _buildTile(x, y, game.props.tileSize.value),
                               ),
                             ),
                           ),
@@ -155,21 +145,6 @@ class _GameWidgetState extends State<GameWidget> {
         ),
       ),
     );
-  }
-
-  Point<int>? getNumTilesFromPrefs() {
-    if (Platform.isMobile) {
-      return game.prefs.numTiles.value;
-    }
-    return null;
-  }
-
-  double getTileSize(Size size, Point<int>? numTilesFromPrefs) {
-    if (numTilesFromPrefs == null) {
-      return 70;
-    }
-    return min(
-        size.width / numTilesFromPrefs.x, size.height / numTilesFromPrefs.y);
   }
 
   Widget _buildTile(int x, int y, double tileSize) {
@@ -259,6 +234,9 @@ class _GameWidgetState extends State<GameWidget> {
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.tab) {
       game.rotateBase();
+      return KeyEventResult.handled;
+    } else if (event.logicalKey == LogicalKeyboardKey.backslash) {
+      game.toggleGameZone();
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.backspace) {
       game.undoLastRotation();

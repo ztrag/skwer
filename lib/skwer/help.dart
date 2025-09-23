@@ -64,6 +64,7 @@ class Help extends StatelessWidget {
       Text('[space/enter] -> press', style: textStyle),
       Text('[tab] ---------> toggle', style: textStyle),
       Text('[1-9] ---------> puzzle', style: textStyle),
+      Text('[\\]------------> size', style: textStyle),
       Text('[r]  ----------> reset', style: textStyle),
       Text('[backspace] ---> undo', style: textStyle),
       Text('[escape] ------> cancel', style: textStyle),

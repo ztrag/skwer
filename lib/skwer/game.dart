@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:skwer/platform.dart';
+import 'package:skwer/skwer/game_board.dart';
 import 'package:skwer/skwer/game_prefs.dart';
 import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/skwer/game_rotation.dart';
-import 'package:skwer/skwer/game_zone.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/skwer_tile_skwer.dart';
@@ -28,15 +28,29 @@ class Game {
   GameState state = GameState.inProgress;
   int _resetPuzzleCounter = 0;
 
-  Game(this.props);
+  Game(this.props) {
+    props.size.addListener(updateBoard);
+    props.board.addListener(onBoardUpdated);
+  }
 
-  void resize(int numTilesX, int numTilesY) {
-    if (numTilesX < 0 || numTilesY < 0) {
-      return;
+  void updateBoard() {
+    if (Platform.isMobile) {
+      final boardPref = prefs.board!;
+      props.tileSize.value = min(
+        props.size.value.x / boardPref.size.x,
+        props.size.value.y / boardPref.size.y,
+      );
+      props.board.value = boardPref;
+    } else {
+      props.tileSize.value = 70;
+      props.board.value = _getBoard();
     }
+  }
+
+  void onBoardUpdated() {
     clearFocus(true);
     endPuzzle(false);
-    props.numTiles.value = Point(numTilesX, numTilesY);
+
     if (!_hasInited) {
       _hasInited = true;
       reset(skwer: Random().nextInt(3), immediate: true);
@@ -88,8 +102,7 @@ class Game {
       if (i > 0) {
         reset(immediate: true);
       }
-      props.puzzle.value =
-          Puzzle(GameZone(props.numTilesX, props.numTilesY), size);
+      props.puzzle.value = Puzzle(props.board.value.zone, size);
       if (resetPuzzle()) {
         continue;
       }
@@ -189,6 +202,25 @@ class Game {
     if (props.hasPuzzle) {
       props.isSolved.value = false;
       resetPuzzle();
+    }
+  }
+
+  void toggleGameZone() {
+    clearFocus();
+    props.isSolved.value = true;
+    reset(immediate: true);
+    final initialPuzzleLength = props.hasPuzzle ? props.puzzleLength : -1;
+    while (true) {
+      prefs.desktopZoneLevel++;
+      final board = _getBoard();
+      if (prefs.desktopZoneLevel == 0 || (props.board.value < board)) {
+        updateBoard();
+        break;
+      }
+    }
+    if (initialPuzzleLength >= 0) {
+      props.isSolved.value = false;
+      startPuzzle(initialPuzzleLength);
     }
   }
 
@@ -367,5 +399,14 @@ class Game {
       }
     }
     return gameState;
+  }
+
+  GameBoard _getBoard() {
+    final tileSize = props.tileSize.value;
+    final zoneSizePref = prefs.zoneSize!;
+    final size = props.size.value;
+    final x = ((size.x - tileSize * 0.2) / tileSize).floor();
+    final y = ((size.y - tileSize * 0.2) / tileSize).floor();
+    return GameBoard.forTargetZone(Point(max(x, 0), max(0, y)), zoneSizePref);
   }
 }

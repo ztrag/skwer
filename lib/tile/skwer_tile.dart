@@ -217,7 +217,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
     return Listenable.merge([
       widget.gameProps.skwer,
       widget.gameProps.puzzle,
-      widget.gameProps.numTiles,
+      widget.gameProps.board,
       widget.props.skwer,
       widget.props.hoverPosition,
       didInit,

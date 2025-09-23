@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:skwer/skwer/game_board.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/tile_index.dart';
@@ -8,8 +9,9 @@ import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class GameProps {
   final ValueNotifier<int> skwer = ValueNotifier(0);
-  final ValueNotifier<Point<int>> numTiles =
-      ValueNotifier(const Point<int>(0, 0));
+  final ValueNotifier<Point<double>> size = ValueNotifier(const Point(0, 0));
+  final ValueNotifier<double> tileSize = ValueNotifier(0);
+  final ValueNotifier<GameBoard> board = ValueNotifier(GameBoard.empty());
   final ValueNotifier<Puzzle?> puzzle = ValueNotifier(null);
   final ValueNotifier<bool> isSolved = ValueNotifier(true);
   final ValueNotifier<int> rotationCounter = ValueNotifier(0);
@@ -23,7 +25,7 @@ class GameProps {
   FastKeyEventCallback? onOverlayKeyEvent;
 
   GameProps(this.onExit) {
-    numTiles.addListener(() {
+    board.addListener(() {
       skwerTiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,
       );
@@ -49,7 +51,7 @@ class GameProps {
 
   int get puzzleLength => puzzle.value?.rotations.length ?? 0;
 
-  int get numTilesX => numTiles.value.x;
+  int get numTilesX => board.value.size.x;
 
-  int get numTilesY => numTiles.value.y;
+  int get numTilesY => board.value.size.y;
 }

@@ -33,7 +33,7 @@ class GameBottomMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () => game.prefs.tileLevel++,
+                  onPressed: () => game.prefs.mobileBoardLevel++,
                   child: const Icon(Icons.zoom_out_map),
                 ),
                 TextButton(
@@ -82,7 +82,7 @@ class GameBottomMenu extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     final puzzleSize = game.prefs.puzzleSize.value % 8 + 1;
-                    game.prefs.puzzleSize.value = puzzleSize;
+                    game.prefs.setPuzzleSize(puzzleSize);
                     if ((game.props.puzzle.value?.rotations.isEmpty ?? true) ||
                         puzzleSize == 1) {
                       game.startPuzzle(puzzleSize);

@@ -1,32 +1,65 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:skwer/platform.dart';
+import 'package:skwer/skwer/game_board.dart';
 
-const kNumTiles = [
-  Point(4, 6),
-  Point(4, 7),
-  Point(5, 7),
-  Point(5, 8),
-  Point(6, 10),
-  Point(6, 9),
+const kMobileBoards = [
+  GameBoard(Point(4, 6), Point(2, 2)),
+  GameBoard(Point(4, 7), Point(2, 3)),
+  GameBoard(Point(5, 7), Point(3, 3)),
+  GameBoard(Point(5, 8), Point(3, 4)),
+  GameBoard(Point(6, 10), Point(4, 4)),
+  GameBoard(Point(6, 9), Point(4, 5)),
+];
+
+const kDesktopZoneSizes = [
+  Point(2, 2),
+  Point(3, 2),
+  Point(3, 3),
+  Point(4, 2),
+  Point(4, 3),
+  Point(4, 4),
+  Point(5, 2),
+  Point(5, 3),
+  Point(5, 4),
+  Point(5, 5),
 ];
 
 class GamePrefs {
-  static const int defaultTileLevel = 3;
   static const int defaultPuzzleSize = 6;
+  static const int defaultMobileBoardLevel = 3;
+  static const int defaultDesktopZoneLevel = 9;
 
-  final ValueNotifier<int> puzzleSize = ValueNotifier(defaultPuzzleSize);
-  final ValueNotifier<Point<int>> _numTiles =
-      ValueNotifier(kNumTiles[defaultTileLevel]);
+  final ValueNotifier<int> _puzzleSize = ValueNotifier(defaultPuzzleSize);
 
-  int _tileLevel = defaultTileLevel;
+  int mobileBoardLevel = defaultMobileBoardLevel;
 
-  ValueListenable<Point<int>> get numTiles => _numTiles;
+  int _desktopZoneLevel = defaultDesktopZoneLevel;
 
-  int get tileLevel => _tileLevel;
+  ValueListenable<int> get puzzleSize => _puzzleSize;
 
-  set tileLevel(int level) {
-    _tileLevel = level % kNumTiles.length;
-    _numTiles.value = kNumTiles[_tileLevel];
+  int get desktopZoneLevel => _desktopZoneLevel;
+
+  set desktopZoneLevel(int level) {
+    _desktopZoneLevel = level % kDesktopZoneSizes.length;
+  }
+
+  void setPuzzleSize(int size) {
+    _puzzleSize.value = size;
+  }
+
+  GameBoard? get board {
+    if (!Platform.isMobile) {
+      return null;
+    }
+    return kMobileBoards[mobileBoardLevel % kMobileBoards.length];
+  }
+
+  Point<int>? get zoneSize {
+    if (Platform.isMobile) {
+      return null;
+    }
+    return kDesktopZoneSizes[_desktopZoneLevel % kDesktopZoneSizes.length];
   }
 }

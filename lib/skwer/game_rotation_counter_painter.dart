@@ -23,7 +23,7 @@ class GameRotationCounterPainter extends CustomPainter {
           repaint: Listenable.merge(
             [
               props.skwer,
-              props.numTiles,
+              props.board,
               props.rotationCounter,
             ],
           ),

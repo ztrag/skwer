@@ -7,12 +7,12 @@ class ColorWave {
   final Color color;
   final double animation;
   final bool rotate;
-  final Point<double>? direction;
+  final Point<double> direction;
 
   const ColorWave({
     required this.color,
     required this.animation,
     required this.rotate,
-    this.direction,
+    required this.direction,
   });
 }

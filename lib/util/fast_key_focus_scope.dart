@@ -32,7 +32,7 @@ class FastKeyFocusScope extends StatefulWidget {
   const FastKeyFocusScope({
     Key? key,
     this.controller,
-    required this.autofocus,
+    this.autofocus = false,
     required this.node,
     required this.onKeyEvent,
     required this.child,

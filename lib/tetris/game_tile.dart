@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:skwer/mosaic/color_wave.dart';
-import 'package:skwer/mosaic/grid_mosaic.dart';
-import 'package:skwer/mosaic/mosaic.dart';
+import 'package:skwer/mosaic/mosaic_tile_painter.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
 
 class GameTile extends StatefulWidget {
@@ -13,26 +15,61 @@ class GameTile extends StatefulWidget {
   State<GameTile> createState() => _GameTileState();
 }
 
-class _GameTileState extends State<GameTile> {
-  late final _Painter paint = _Painter(widget.props);
+class _GameTileState extends State<GameTile>
+    with SingleTickerProviderStateMixin {
+  late Ticker ticker = createTicker(onTick);
+  final ValueNotifier<bool> didInit = ValueNotifier(false);
+
+  late final _Painter paint = _Painter(widget.props, didInit);
+
+  @override
+  void initState() {
+    super.initState();
+    ticker.start();
+  }
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(child: CustomPaint(painter: paint));
   }
+
+  void onTick(Duration elapsed) {
+    if (paint.tilePainter.isLoaded) {
+      ticker.stop();
+      didInit.value = true;
+    }
+  }
 }
 
 class _Painter extends CustomPainter {
-  final Mosaic mosaic = GridMosaic(3);
   final Paint dropHintPaint = Paint();
+  final MosaicTilePainter tilePainter = MosaicTilePainter(3);
 
   final GameTileProps props;
 
-  _Painter(this.props)
-      : super(repaint: Listenable.merge([props.color, props.dropHintColor]));
+  _Painter(this.props, Listenable didInit)
+      : super(
+          repaint: Listenable.merge(
+            [
+              props.color,
+              props.dropHintColor,
+              didInit,
+            ],
+          ),
+        );
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (!tilePainter.isLoaded) {
+      return;
+    }
+
     const x = 0.88;
     canvas.translate(
       size.width * (1 - x) / 2,
@@ -51,13 +88,19 @@ class _Painter extends CustomPainter {
 
     final color = props.color.value;
     if (color != null) {
-      mosaic.paint(
-        canvas,
-        size,
-        0.8,
-        1,
-        [ColorWave(color: color, animation: 0, rotate: false)],
-        null,
+      tilePainter.paint(
+        canvas: canvas,
+        size: size,
+        waves: [
+          ColorWave(
+            color: color,
+            animation: 0.0,
+            rotate: false,
+            direction: const Point(0.0, 0.0),
+          )
+        ],
+        seed: (props.index.hashCode + 1) * 0.001,
+        n: 3,
       );
     }
   }

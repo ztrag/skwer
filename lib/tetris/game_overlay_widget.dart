@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
-import 'package:skwer/tetris/game_preferences.dart';
+import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/util/command_line.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';

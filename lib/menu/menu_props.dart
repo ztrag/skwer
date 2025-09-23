@@ -12,7 +12,7 @@ class MenuProps {
 
   MenuProps() {
     numTiles.addListener(() {
-      bgAnchor = Point(numTilesX ~/ 2-1, (numTilesY - 2) ~/ 2);
+      bgAnchor = Point(numTilesX ~/ 2 - 1, (numTilesY - 2) ~/ 2);
       tiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,
       );

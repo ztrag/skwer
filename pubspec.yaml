@@ -20,3 +20,6 @@ flutter:
     - family: CourierPrime
       fonts:
         - asset: fonts/CourierPrime-Regular.ttf
+  shaders:
+    - shaders/mosaic_tile_3.frag
+    - shaders/mosaic_tile_5.frag

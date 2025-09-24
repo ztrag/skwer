@@ -14,11 +14,18 @@ class _MenuWrapperState extends State<MenuWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: selection,
-      builder: (_, __, ___) =>
-          selection.value?.widget(() => selection.value = null) ??
-          MenuWidget(menuSelection: selection),
+    return PopScope(
+      child: ValueListenableBuilder(
+        valueListenable: selection,
+        builder: (_, __, ___) => PopScope(
+          canPop: selection.value == null,
+          onPopInvokedWithResult: (_, __) {
+            selection.value = null;
+          },
+          child: selection.value?.widget(() => selection.value = null) ??
+              MenuWidget(menuSelection: selection),
+        ),
+      ),
     );
   }
 }

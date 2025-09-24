@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:skwer/skwer/game_props.dart';
-import 'package:skwer/skwer/game_rotation_counter_painter.dart';
+import 'package:skwer/util/game_counter.dart';
 
-const kGameBottomCounterHeight = kGameRotationCounterRowTileSize * 1.5;
+const kGameBottomCounterHeight = kGameCounterRowTileSize * 1.5;
 
 class GameBottomCounter extends StatelessWidget {
-  final GameRotationCounterPainter _painter;
+  final GameCounterPainter _painter;
 
   GameBottomCounter({Key? key, required GameProps props})
-      : _painter = GameRotationCounterPainter(
-          props: props,
-          style: GameRotationCounterPainterStyle.row,
+      : _painter = GameCounterPainter(
+          n: props.rotationCounter,
+          skwer: props.skwer,
+          style: GameCounterPainterStyle.row,
         ),
         super(key: key);
 
@@ -20,9 +21,9 @@ class GameBottomCounter extends StatelessWidget {
     return RepaintBoundary(
       child: Padding(
         padding: const EdgeInsets.all(
-            kGameBottomCounterHeight - kGameRotationCounterRowTileSize),
+            kGameBottomCounterHeight - kGameCounterRowTileSize),
         child: SizedBox(
-          height: kGameRotationCounterRowTileSize,
+          height: kGameCounterRowTileSize,
           child: CustomPaint(painter: _painter),
         ),
       ),

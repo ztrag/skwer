@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/skwer/game.dart';
-import 'package:skwer/skwer/game_rotation_counter_painter.dart';
+import 'package:skwer/util/game_counter.dart';
 
 class GameBottomMenu extends StatelessWidget {
   final Game game;
   final VoidCallback onHelp;
 
-  late final GameRotationCounterPainter _painter =
-      GameRotationCounterPainter(props: game.props);
+  late final GameCounterPainter _painter = GameCounterPainter(
+    n: game.props.rotationCounter,
+    skwer: game.props.skwer,
+  );
 
   GameBottomMenu({
     Key? key,

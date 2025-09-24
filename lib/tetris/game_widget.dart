@@ -5,7 +5,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_background.dart';
+import 'package:skwer/platform.dart';
 import 'package:skwer/tetris/game.dart';
+import 'package:skwer/tetris/game_bottom_menu.dart';
 import 'package:skwer/tetris/game_overlay_widget.dart';
 import 'package:skwer/tetris/game_panel.dart';
 import 'package:skwer/tetris/game_props.dart';
@@ -62,34 +64,34 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     ]);
 
     return Scaffold(
-      body: LayoutBuilder(builder: (context, constraints) {
-        final size = Size(constraints.maxWidth, constraints.maxHeight);
+      body: ValueListenableBuilder(
+        valueListenable: game.props.prefs.tileSize,
+        builder: (_, tileSize, __) =>
+            LayoutBuilder(builder: (context, constraints) {
+          final size = Size(constraints.maxWidth,
+              constraints.maxHeight - 64); // FIXME magic number
 
-        const tileSize = 40.0;
-        const panelHeight = 100.0;
-        final numTilesX = min((size.width / tileSize - 0.75).floor(), 10);
-        final numTilesY =
-            min(((size.height - panelHeight) / tileSize - 0.75).floor(), 20);
+          const panelHeight = 100.0;
+          final numTilesX = min((size.width / tileSize - 0.75).floor(), 10);
+          final numTilesY =
+              min(((size.height - panelHeight) / tileSize - 0.75).floor(), 20);
 
-        final bottomSpace = max(
-          0.0,
-          min(
-            panelHeight,
-            size.height - (numTilesY + 0.5) * tileSize - panelHeight,
-          ),
-        );
+          final bottomSpace = max(
+            0.0,
+            min(
+              panelHeight,
+              size.height - (numTilesY + 0.5) * tileSize - panelHeight,
+            ),
+          );
 
-        if (numTilesX != gameProps.numTilesX ||
-            numTilesY != gameProps.numTilesY) {
-          game.resize(numTilesX, numTilesY);
-        }
+          if (numTilesX != gameProps.numTilesX ||
+              numTilesY != gameProps.numTilesY) {
+            game.resize(numTilesX, numTilesY);
+          }
 
-        bool isTooSmall = numTilesX < 3 || numTilesY < 5;
+          bool isTooSmall = numTilesX < 3 || numTilesY < 5;
 
-        return TouchArrows(
-          controller: gameProps.touchArrowsController,
-          onTouchEvent: game.onTouchArrowEvent,
-          child: FastKeyFocusScope(
+          return FastKeyFocusScope(
             autofocus: true,
             node: _node,
             onKeyEvent: game.onKeyEvent,
@@ -125,43 +127,60 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                             height: panelHeight,
                             child: GamePanel(gameProps: gameProps),
                           ),
-                          ValueListenableBuilder(
-                            valueListenable: gameProps.numTiles,
-                            builder: (_, numTiles, __) {
-                              return SizedBox(
-                                width: (numTiles.x + 0.5) * tileSize,
-                                height: (numTiles.y + 0.5) * tileSize,
-                                child: ValueListenableBuilder(
-                                  valueListenable: gameProps.level,
-                                  builder: (_, level, child) => Container(
-                                    decoration: BoxDecoration(
-                                      color: skBlack,
-                                      border: Border.all(
-                                        color: level.borderColor,
-                                        width: 2,
+                          TouchArrows(
+                            controller: gameProps.touchArrowsController,
+                            size: Size(
+                              tileSize * numTilesX,
+                              tileSize * numTilesY,
+                            ),
+                            onTouchEvent: game.onTouchArrowEvent,
+                            child: ValueListenableBuilder(
+                              valueListenable: gameProps.numTiles,
+                              builder: (_, numTiles, __) {
+                                return SizedBox(
+                                  width: (numTiles.x + 0.5) * tileSize,
+                                  height: (numTiles.y + 0.5) * tileSize,
+                                  child: ValueListenableBuilder(
+                                    valueListenable: gameProps.level,
+                                    builder: (_, level, child) => Container(
+                                      decoration: BoxDecoration(
+                                        color: skBlack,
+                                        border: Border.all(
+                                          color: level.borderColor,
+                                          width: 2,
+                                        ),
                                       ),
+                                      child: child,
                                     ),
-                                    child: child,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: List.generate(
-                                      numTiles.y,
-                                      (y) => Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: List.generate(
-                                          numTiles.x,
-                                          (x) => _buildTile(x, y, tileSize),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: List.generate(
+                                        numTiles.y,
+                                        (y) => Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: List.generate(
+                                            numTiles.x,
+                                            (x) => _buildTile(x, y, tileSize),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                           SizedBox(height: bottomSpace),
+                          if (Platform.isMobile)
+                            GameBottomMenu(
+                              game: game,
+                              onHelp: () => setState(() {
+                                game.props.isPaused.value =
+                                    !game.props.isPaused.value;
+                              }),
+                            ),
                         ],
                       ),
                     ],
@@ -176,9 +195,9 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                   ),
               ],
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 

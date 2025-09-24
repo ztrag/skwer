@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-const double kVLimit1 = 0.75;
-const double kVLimit2 = 0.85;
+const double kVLimit1 = 0.8;
+const double kVLimit2 = 0.9;
 
 enum Direction {
   left,
@@ -34,10 +34,15 @@ typedef OnTouchEvent = void Function(TouchArrowEvent event);
 class TouchArrows extends StatefulWidget {
   final TouchArrowsController? controller;
   final OnTouchEvent? onTouchEvent;
+  final Size size;
   final Widget child;
 
   const TouchArrows(
-      {Key? key, required this.child, this.onTouchEvent, this.controller})
+      {Key? key,
+      required this.child,
+      required this.size,
+      this.onTouchEvent,
+      this.controller})
       : super(key: key);
 
   @override
@@ -50,23 +55,17 @@ class _TouchArrowsState extends State<TouchArrows> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (_, constraints) => Stack(
-        children: [
-          Listener(
-            onPointerDown: (e) => _onPointerDown(e, constraints),
-            onPointerMove: (e) => _onPointerMove(e, constraints),
-            onPointerUp: _onPointerUp,
-            onPointerCancel: _onPointerUp,
-            child: widget.child,
-          ),
-        ],
-      ),
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerUp,
+      child: widget.child,
     );
   }
 
-  void _onPointerDown(PointerDownEvent down, BoxConstraints constraints) {
-    final direction = _directionFromTouch(down, constraints);
+  void _onPointerDown(PointerDownEvent down) {
+    final direction = _directionFromTouch(down);
     final event = direction == null
         ? _DirectionlessEvent()
         : TouchArrowEvent._(
@@ -81,8 +80,8 @@ class _TouchArrowsState extends State<TouchArrows> {
     _startRepeatTicker(down);
   }
 
-  void _onPointerMove(PointerMoveEvent move, BoxConstraints constraints) {
-    final direction = _directionFromTouch(move, constraints);
+  void _onPointerMove(PointerMoveEvent move) {
+    final direction = _directionFromTouch(move);
     final current = controller._touching[move.pointer]!;
     if (current.direction == direction) {
       return;
@@ -127,18 +126,22 @@ class _TouchArrowsState extends State<TouchArrows> {
     }
   }
 
-  Direction? _directionFromTouch(
-      PointerEvent event, BoxConstraints constraints) {
-    final w = constraints.maxWidth;
-    final h = constraints.maxHeight;
+  Direction? _directionFromTouch(PointerEvent event) {
+    final w = widget.size.width;
+    final h = widget.size.height;
 
-    if (event.position.dy < h * kVLimit1) {
+    if (event.localPosition.dy < h * kVLimit1) {
+      if (event.localPosition.dx < w/4) {
+        return Direction.left;
+      } else if (event.localPosition.dx > 3*w/4) {
+        return Direction.right;
+      }
       return Direction.up;
-    } else if (event.position.dy > h * kVLimit2 &&
-        event.position.dx > w / 3 &&
-        event.position.dx < 2 * w / 3) {
+    } else if (event.localPosition.dy > h * kVLimit2 &&
+        event.localPosition.dx > w / 3 &&
+        event.localPosition.dx < 2 * w / 3) {
       return Direction.down;
-    } else if (event.position.dx < w / 2) {
+    } else if (event.localPosition.dx < w / 2) {
       return Direction.left;
     } else {
       return Direction.right;

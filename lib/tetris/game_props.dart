@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
 import 'package:skwer/tetris/level.dart';
@@ -25,6 +26,8 @@ class GameProps {
   final FastKeyFocusScopeController keyFocusScopeController =
       FastKeyFocusScopeController();
   final TouchArrowsController touchArrowsController = TouchArrowsController();
+
+  final GamePrefs prefs = GamePrefs();
 
   final VoidCallback onExit;
   final VoidCallback onStart;

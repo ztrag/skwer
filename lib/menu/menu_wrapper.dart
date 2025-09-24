@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:skwer/games.dart';
 import 'package:skwer/menu/menu_widget.dart';
+import 'package:skwer/util/popup_window.dart';
 
 class MenuWrapper extends StatefulWidget {
   const MenuWrapper({Key? key}) : super(key: key);
@@ -20,7 +21,11 @@ class _MenuWrapperState extends State<MenuWrapper> {
         builder: (_, __, ___) => PopScope(
           canPop: selection.value == null,
           onPopInvokedWithResult: (_, __) {
-            selection.value = null;
+            if (PopupWindowCoordinator.canPop()) {
+              selection.value = null;
+              return;
+            }
+            PopupWindowCoordinator.pop();
           },
           child: selection.value?.widget(() => selection.value = null) ??
               MenuWidget(menuSelection: selection),

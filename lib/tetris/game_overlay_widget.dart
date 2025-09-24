@@ -5,6 +5,7 @@ import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/util/command_line.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/popup_window.dart';
 
 class GameOverlayWidget extends StatefulWidget {
   final GameProps gameProps;
@@ -58,42 +59,50 @@ class _GameOverlayWidgetState extends State<GameOverlayWidget> {
     if (_highScore == null) {
       return const SizedBox.shrink();
     }
-    return DefaultTextStyle.merge(
-      style: const TextStyle(fontSize: 20, color: skWhite),
-      child: Container(
-        color: skBlack.withAlpha(180),
-        child: Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    Text(
-                      '-${widget.gameProps.numTilesX}x${widget.gameProps.numTilesY}-',
-                      style: TextStyle(
-                          fontSize: widget.gameProps.numTilesX > 3 ? 50 : 35,
-                          color: skRed),
-                    ),
-                    if (!_isNewHighScore)
+    return ValueListenableBuilder(
+      valueListenable: widget.gameProps.isGameOver,
+      builder: (_, __, child) => PopupWindow(
+        canPop: widget.gameProps.isGameOver.value,
+        onPop: () => widget.gameProps.isPaused.value = false,
+        child: child!,
+      ),
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(fontSize: 20, color: skWhite),
+        child: Container(
+          color: skBlack.withAlpha(180),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 40),
                       Text(
-                        'High Score $_highScore',
-                        style: const TextStyle(fontSize: 14),
+                        '-${widget.gameProps.numTilesX}x${widget.gameProps.numTilesY}-',
+                        style: TextStyle(
+                            fontSize: widget.gameProps.numTilesX > 3 ? 50 : 35,
+                            color: skRed),
                       ),
-                    const SizedBox(height: 20),
-                    Text(
-                      '${widget.gameProps.score.value}',
-                      style: const TextStyle(fontSize: 60),
-                    ),
-                    const SizedBox(height: 20),
-                    CommandLine(controller: commandLineController),
-                  ],
+                      if (!_isNewHighScore)
+                        Text(
+                          'High Score $_highScore',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      const SizedBox(height: 20),
+                      Text(
+                        '${widget.gameProps.score.value}',
+                        style: const TextStyle(fontSize: 60),
+                      ),
+                      const SizedBox(height: 20),
+                      CommandLine(controller: commandLineController),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

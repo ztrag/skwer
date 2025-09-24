@@ -6,6 +6,7 @@ import 'package:skwer/games.dart';
 import 'package:skwer/menu/menu.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/menu/menu_tile.dart';
+import 'package:skwer/platform.dart';
 import 'package:skwer/util/command_line.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 import 'package:skwer/util/move_arrows.dart';
@@ -96,8 +97,10 @@ class _MenuWidgetState extends State<MenuWidget> {
                         },
                       ),
                       Positioned(
-                        left: 20,
-                        top: 20,
+                        left: Platform.isMobile ? null : 20,
+                        top: Platform.isMobile ? null : 20,
+                        right: Platform.isMobile ? 20 : null,
+                        bottom: Platform.isMobile ? 20 : null,
                         child: CommandLine(controller: commandLineController),
                       ),
                     ],

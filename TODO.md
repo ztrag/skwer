@@ -26,5 +26,5 @@
 
 ## Misc
 
-1. Optimize mosaic_tile.frag
+1. Optimize mosaic_tile.frag -> android jank :(
 2. Fix ShaderCache (shader compilation not cached?)

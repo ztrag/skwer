@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
+import 'package:skwer/platform.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 
 class Command {
@@ -45,6 +46,9 @@ class _CommandLineState extends State<CommandLine> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: _commands.map(
         (e) {
+          if (Platform.isMobile) {
+            return TextButton(onPressed: e.action, child: Text(e.name));
+          }
           final isFocused = _commands[_focusedCommandIndex] == e;
           final name = e.name;
           return Text(

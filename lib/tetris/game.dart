@@ -7,6 +7,7 @@ import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/level.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
 import 'package:skwer/util/move_arrows.dart';
+import 'package:skwer/util/touch_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
 class Game {
@@ -75,6 +76,29 @@ class Game {
     start();
   }
 
+  void onTouchArrowEvent(TouchArrowEvent event) {
+    if (event.type == TouchArrowEventType.up) {
+      return;
+    }
+
+    switch (event.direction) {
+      case Direction.left:
+        _onArrowHorizontal(-1);
+        break;
+      case Direction.right:
+        _onArrowHorizontal(1);
+        break;
+      case Direction.up:
+        _onArrowUp(event.type == TouchArrowEventType.repeat);
+        break;
+      case Direction.down:
+        if (event.type == TouchArrowEventType.down) {
+          _onArrowDown();
+        }
+        break;
+    }
+  }
+
   KeyEventResult onKeyEvent(FastKeyEvent event) {
     if (props.isShowingOverlay) {
       if (props.onOverlayKeyEvent != null) {
@@ -94,34 +118,49 @@ class Game {
     }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _rotateTetramino();
-      if (event.type == FastKeyEventType.repeat) {
-        if (_waitStepStartTime != null) {
-          _waitStepStartTime = _waitStepStartTime! -
-              Duration(
-                  milliseconds:
-                      props.level.value.stepDuration.inMilliseconds ~/ 2);
-        }
-      }
+      _onArrowUp(event.type == FastKeyEventType.repeat);
       return KeyEventResult.handled;
     }
 
-    final moveDirection =
-        MoveArrows.getHorizontalDirection(props.keyFocusScopeController);
-    if ((event.logicalKey == LogicalKeyboardKey.arrowLeft &&
-            moveDirection == -1) ||
-        (event.logicalKey == LogicalKeyboardKey.arrowRight &&
-            moveDirection == 1)) {
-      _translateTetramino(moveDirection, 0);
+    if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+        event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      _onArrowHorizontal(
+          event.logicalKey == LogicalKeyboardKey.arrowLeft ? -1 : 1);
       return KeyEventResult.handled;
     }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      _dropTetramino();
+      _onArrowDown();
       return KeyEventResult.handled;
     }
 
     return KeyEventResult.ignored;
+  }
+
+  void _onArrowHorizontal(int dir) {
+    final moveDirection = MoveArrows.getHorizontalDirection(
+      props.keyFocusScopeController,
+      props.touchArrowsController,
+    );
+    if (dir == moveDirection) {
+      _translateTetramino(moveDirection, 0);
+    }
+  }
+
+  void _onArrowUp(bool isRepeat) {
+    _rotateTetramino();
+    if (isRepeat) {
+      if (_waitStepStartTime != null) {
+        _waitStepStartTime = _waitStepStartTime! -
+            Duration(
+                milliseconds:
+                    props.level.value.stepDuration.inMilliseconds ~/ 2);
+      }
+    }
+  }
+
+  void _onArrowDown() {
+    _dropTetramino();
   }
 
   void _onPauseToggled() {
@@ -374,8 +413,8 @@ class Game {
   }
 
   bool _maybeFloorSlide() {
-    final moveDirection =
-        MoveArrows.getHorizontalDirection(props.keyFocusScopeController);
+    final moveDirection = MoveArrows.getHorizontalDirection(
+        props.keyFocusScopeController, props.touchArrowsController);
     if (moveDirection == 0) {
       return false;
     }

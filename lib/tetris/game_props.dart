@@ -5,6 +5,7 @@ import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
 import 'package:skwer/tetris/level.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/touch_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
 class GameProps {
@@ -23,6 +24,7 @@ class GameProps {
 
   final FastKeyFocusScopeController keyFocusScopeController =
       FastKeyFocusScopeController();
+  final TouchArrowsController touchArrowsController = TouchArrowsController();
 
   final VoidCallback onExit;
   final VoidCallback onStart;

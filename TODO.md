@@ -1,9 +1,5 @@
 # TODO
 
-## Menu
-
-1. Mobile Support
-
 ## Skwer
 
 1. Versus

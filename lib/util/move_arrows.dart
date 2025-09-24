@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/touch_arrows.dart';
 
 class MoveArrows {
   static final Map<LogicalKeyboardKey, Point<int>> _arrowPoints = {
@@ -12,11 +13,16 @@ class MoveArrows {
   };
 
   static int getHorizontalDirection(
-      FastKeyFocusScopeController focusScopeController) {
-    final left =
-        focusScopeController.getKeyDownTime(LogicalKeyboardKey.arrowLeft);
-    final right =
-        focusScopeController.getKeyDownTime(LogicalKeyboardKey.arrowRight);
+      FastKeyFocusScopeController focusScopeController,
+      TouchArrowsController touchArrowsController) {
+    final left = _merge(
+      focusScopeController.getKeyDownTime(LogicalKeyboardKey.arrowLeft),
+      touchArrowsController.getLastDirectionTouchTime(Direction.left),
+    );
+    final right = _merge(
+      focusScopeController.getKeyDownTime(LogicalKeyboardKey.arrowRight),
+      touchArrowsController.getLastDirectionTouchTime(Direction.right),
+    );
 
     if (left != null && (right == null || left > right)) {
       return -1;
@@ -25,6 +31,10 @@ class MoveArrows {
       return 1;
     }
     return 0;
+  }
+
+  static Duration? _merge(Duration? k, Duration? t) {
+    return k != null && t != null ? (k > t ? k : t) : (k ?? t);
   }
 
   static Point<int>? getDir(FastKeyEvent event) {

@@ -100,8 +100,12 @@ vec4 tiles(vec2 pos, vec2 size, float brightness, float flash) {
     vec3 color = vec3(0.0, 0.0, 0.0);
     float b = 0.0;
     float qq = 0.0;
-    for (int i=0; i < N; i++) {
-        for (int j=0; j < N; j++) {
+    int iT = int(pos.x * N - 0.5);
+    int jT = int(pos.y * N - 0.5);
+    for (int ii=0; ii<2; ii++) {
+        for (int jj=0; jj<2; jj++) {
+            int i = (iT + ii) % N;
+            int j = (jT + jj) % N;
             float t = tileRotTime(vec2(i, j) / (N-1));
             vec2 i0j0 = v[i*(N+1) + j];
             vec2 i0j1 = v[i*(N+1) + j+1];

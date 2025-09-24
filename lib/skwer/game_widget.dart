@@ -68,6 +68,7 @@ class _GameWidgetState extends State<GameWidget> {
     game.props.size.value = Point(size.width, size.height);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: FastKeyFocusScope(
         autofocus: true,
         node: focusScopeNode,

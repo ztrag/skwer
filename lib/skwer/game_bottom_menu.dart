@@ -33,7 +33,10 @@ class GameBottomMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () => game.prefs.mobileBoardLevel++,
+                  onPressed: () {
+                    game.prefs.mobileBoardLevel++;
+                    game.updateBoard();
+                  },
                   child: const Icon(Icons.zoom_out_map),
                 ),
                 TextButton(

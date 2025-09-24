@@ -12,6 +12,16 @@ void main() {
           textTheme: const TextTheme(
             bodyMedium: TextStyle(color: skWhite),
           ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              textStyle: const TextStyle(
+                fontFamily: 'CourierPrime',
+                fontSize: 20,
+              ),
+              backgroundColor: Colors.transparent, // Transparent background
+              foregroundColor: skGreen, // Text color
+            ),
+          ),
         ),
         child: const MenuWrapper(),
       ),

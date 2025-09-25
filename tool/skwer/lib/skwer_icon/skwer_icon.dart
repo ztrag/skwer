@@ -110,14 +110,20 @@ Future<int> _createWindowsImages(String path) async {
     return rounded;
   }
 
-  final resizedPath = '${tempDir.path}/resized.png';
-  final resized =
-      await _createResizedImage(roundedPath, resizedPath, 256);
-  if (resized != 0) {
-    return resized;
+  final resizedPaths = <String>[];
+  for (var size = 16; size <= 256; size *= 2) {
+    resizedPaths.add('${tempDir.path}/resized_$size.png');
+    final result = await _createResizedImage(
+      roundedPath,
+      resizedPaths.last,
+      size,
+    );
+    if (result != 0) {
+      return result;
+    }
   }
 
-  final ico = await _createIco(resizedPath, _kWindowsOut);
+  final ico = await _createIco(resizedPaths, _kWindowsOut);
   return ico;
 }
 
@@ -319,8 +325,8 @@ Future<int> _createResizedImage(String input, String output, int size) {
   ]);
 }
 
-Future<int> _createIco(String input, String output) {
-  return runProcess('magick', [input, output]);
+Future<int> _createIco(List<String> input, String output) {
+  return runProcess('magick', [...input, output]);
 }
 
 Future<Point<int>> _getImageSize(String path) async {

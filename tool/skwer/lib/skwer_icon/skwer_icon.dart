@@ -10,7 +10,8 @@ A tool for creating app icons.
 
 1. Provided image is added rounded corners.
 2. All macos images are created in place.
-3. All android images are created in place.
+3. Windows ico is created in place.
+4. All android images are created in place.
 
 Available arguments:
 
@@ -18,10 +19,11 @@ Available arguments:
 
 Usage: 
 
-  skwer icon my_icon.png
+  skwer icon app_icon.png
 ''';
 
 const _kMacosOut = 'macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon';
+const _kWindowsOut = 'windows/runner/resources/app_icon.ico';
 const _kAndroidOut = 'android/app/src/main/res/mipmap-';
 
 Future<void> skwerIcon(List<String> args) async {
@@ -33,6 +35,11 @@ Future<void> skwerIcon(List<String> args) async {
 
   final macosResult = await _createMacosImages(args.first);
   if (macosResult != 0) {
+    return;
+  }
+
+  final windowsResult = await _createWindowsImages(args.first);
+  if (windowsResult != 0) {
     return;
   }
 
@@ -86,6 +93,32 @@ Future<int> _createMacosImages(String path) async {
     }
   }
   return 0;
+}
+
+Future<int> _createWindowsImages(String path) async {
+  final tempDir = Directory.systemTemp;
+  final croppedPath = '${tempDir.path}/cropped.png';
+  final cropped = await _createCroppedImage(path, croppedPath, 820);
+  if (cropped != 0) {
+    return cropped;
+  }
+
+  final roundedPath = '${tempDir.path}/rounded.png';
+  final rounded =
+      await _createRoundedCornersImage(croppedPath, roundedPath, 164, 152, 24);
+  if (rounded != 0) {
+    return rounded;
+  }
+
+  final resizedPath = '${tempDir.path}/resized.png';
+  final resized =
+      await _createResizedImage(roundedPath, resizedPath, 256);
+  if (resized != 0) {
+    return resized;
+  }
+
+  final ico = await _createIco(resizedPath, _kWindowsOut);
+  return ico;
 }
 
 Future<int> _createAndroidImages(String path) async {
@@ -166,7 +199,7 @@ Future<int> _createCircledImage(String input, String output, int width) async {
   final size = await _getImageSize(input);
   final maskPath = '${Directory.systemTemp.path}/mask.png';
   final mask = await runProcess(
-    'convert',
+    'magick',
     [
       '-size',
       '${size.x}x${size.y}',
@@ -182,15 +215,15 @@ Future<int> _createCircledImage(String input, String output, int width) async {
   }
 
   return runProcess(
-    'convert',
+    'magick',
     [
       input,
       '-fill',
       'transparent',
-      // '-stroke',
-      // '#64be00',
-      // '-strokewidth',
-      // '$width',
+      '-stroke',
+      '#64be00',
+      '-strokewidth',
+      '$width',
       '-draw',
       "circle ${size.x ~/ 2},${size.y ~/ 2}"
           " ${width ~/ 2 + 0.5},${size.x ~/ 2}",
@@ -209,7 +242,7 @@ Future<int> _createRoundedCornersImage(String input, String output,
   final size = await _getImageSize(input);
   final maskPath = '${Directory.systemTemp.path}/mask.png';
   final mask = await runProcess(
-    'convert',
+    'magick',
     [
       '-size',
       '${size.x}x${size.y}',
@@ -225,7 +258,7 @@ Future<int> _createRoundedCornersImage(String input, String output,
   }
 
   return runProcess(
-    'convert',
+    'magick',
     [
       input,
       '-matte',
@@ -235,10 +268,10 @@ Future<int> _createRoundedCornersImage(String input, String output,
       '-composite',
       '-fill',
       'transparent',
-      // '-stroke',
-      // '#64be00',
-      // '-strokewidth',
-      // '$width',
+      '-stroke',
+      '#64be00',
+      '-strokewidth',
+      '$width',
       '-draw',
       "roundrectangle ${width ~/ 2},${width ~/ 2}"
           " ${size.x - width ~/ 2},${size.x - width ~/ 2}"
@@ -248,21 +281,25 @@ Future<int> _createRoundedCornersImage(String input, String output,
   );
 }
 
-Future<int> _createPaddedImage(String input, String output) {
-  return runProcess('convert', [
+Future<int> _createPaddedImage(
+  String input,
+  String output, [
+  int outSize = 1024,
+]) {
+  return runProcess('magick', [
     input,
     '-background',
     'none',
     '-gravity',
     'center',
     '-extent',
-    '1024x1024',
+    '${outSize}x$outSize',
     output,
   ]);
 }
 
 Future<int> _createCroppedImage(String input, String output, int size) {
-  return runProcess('convert', [
+  return runProcess('magick', [
     input,
     '-gravity',
     'center',
@@ -274,12 +311,16 @@ Future<int> _createCroppedImage(String input, String output, int size) {
 }
 
 Future<int> _createResizedImage(String input, String output, int size) {
-  return runProcess('convert', [
+  return runProcess('magick', [
     input,
     '-resize',
     '${size}x$size',
     output,
   ]);
+}
+
+Future<int> _createIco(String input, String output) {
+  return runProcess('magick', [input, output]);
 }
 
 Future<Point<int>> _getImageSize(String path) async {

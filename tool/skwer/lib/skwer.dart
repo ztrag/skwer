@@ -29,6 +29,9 @@ void _runSkwerCommand(List<String> args) {
   final commandArgs = args.sublist(1);
 
   switch (command) {
+    case '-h':
+      _skwerHelp();
+      return;
     case 'build-tool':
       skwerBuildTool();
       return;

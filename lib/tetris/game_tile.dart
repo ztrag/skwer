@@ -36,6 +36,8 @@ class _GameTileState extends State<GameTile>
 
   @override
   Widget build(BuildContext context) {
+    final density = MediaQuery.of(context).devicePixelRatio;
+    paint.density = density;
     return RepaintBoundary(child: CustomPaint(painter: paint));
   }
 
@@ -52,6 +54,8 @@ class _Painter extends CustomPainter {
   final MosaicTilePainter tilePainter = MosaicTilePainter(3);
 
   final GameTileProps props;
+
+  double density = 0.0;
 
   _Painter(this.props, Listenable didInit)
       : super(
@@ -91,6 +95,7 @@ class _Painter extends CustomPainter {
       tilePainter.paint(
         canvas: canvas,
         size: size,
+        density: density,
         waves: [
           ColorWave(
             color: color,
@@ -100,7 +105,6 @@ class _Painter extends CustomPainter {
           )
         ],
         seed: (props.index.hashCode + 1) * 0.001,
-        n: 3,
       );
     }
   }

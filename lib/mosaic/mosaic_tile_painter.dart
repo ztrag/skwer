@@ -21,9 +21,9 @@ class MosaicTilePainter {
   void paint({
     required Canvas canvas,
     required Size size,
+    required double density,
     required List<ColorWave> waves,
     required double seed,
-    int n = 5,
     double brightness = 1.0,
     double mode = 0.0,
     double flash = 0.0,
@@ -33,7 +33,7 @@ class MosaicTilePainter {
     shader.setFloat(i++, seed);
     shader.setFloat(i++, size.width);
     shader.setFloat(i++, size.height);
-    shader.setFloat(i++, n * 1.0);
+    shader.setFloat(i++, density);
     shader.setFloat(i++, brightness);
     shader.setFloat(i++, mode);
     shader.setFloat(i++, flash);
@@ -44,7 +44,7 @@ class MosaicTilePainter {
       shader.setFloat(i++, wave.color.b);
     }
     // Fill missing waves. Shader does not handle dynamic array uniforms.
-    for (int j = 0; j < (4 - waves.length); j++) {
+    for (int j = 0; j < (3 - waves.length); j++) {
       shader.setFloat(i++, waves.last.color.r);
       shader.setFloat(i++, waves.last.color.g);
       shader.setFloat(i++, waves.last.color.b);
@@ -56,7 +56,7 @@ class MosaicTilePainter {
       shader.setFloat(i++, wave.rotate ? wave.animation : 0.0);
     }
     // Fill missing waves. Shader does not handle dynamic array uniforms.
-    for (int j = 0; j < (4 - waves.length); j++) {
+    for (int j = 0; j < (3 - waves.length); j++) {
       shader.setFloat(i++, 0.0);
       shader.setFloat(i++, 0.0);
       shader.setFloat(i++, 1.0);

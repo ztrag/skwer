@@ -75,6 +75,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
   ];
   late final _SkwerTilePaint paint;
   final List<SkwerTileSkwer> skwerHistory = [];
+  double density = 0.0;
 
   @override
   void initState() {
@@ -203,6 +204,7 @@ class _SkwerTileState extends State<SkwerTile> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    density = MediaQuery.of(context).devicePixelRatio;
     return MouseRegion(
       onHover: (hover) =>
           widget.props.hoverPosition.value = hover.localPosition,
@@ -267,6 +269,7 @@ class _SkwerTilePaint extends CustomPainter {
     tilePainter.paint(
       canvas: canvas,
       size: size,
+      density: state.density,
       waves: currentWaves,
       seed: (props.index.hashCode + 1) * 0.001,
       brightness: brightness * tileOpacity * 0.9,
@@ -365,7 +368,7 @@ class _SkwerTilePaint extends CustomPainter {
 
     final isFailed = state.skwerHistory.last.isFailed(props, gameProps);
     for (var i = state.skwerHistory.length - 1; i >= 0; i--) {
-      if (state.skwerHistory.length > 4) {
+      if (state.skwerHistory.length > 3) {
         state.skwerHistory.removeAt(0);
         continue;
       }

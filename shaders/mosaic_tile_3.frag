@@ -1,12 +1,12 @@
 #include <flutter/runtime_effect.glsl>
 
 #define PI 3.14159265359
-#define MAX_WAVES 4
+#define MAX_WAVES 3
 #define N 3
 
 uniform float u_seed;
 uniform vec2 u_size;
-uniform float u_n;
+uniform float u_density;
 uniform float u_brightness;
 uniform float u_modeT;
 uniform float u_flash;
@@ -14,11 +14,9 @@ uniform float u_flash;
 uniform vec3 u_wC_1;
 uniform vec3 u_wC_2;
 uniform vec3 u_wC_3;
-uniform vec3 u_wC_4;
 uniform vec4 u_wDT_1;
 uniform vec4 u_wDT_2;
 uniform vec4 u_wDT_3;
-uniform vec4 u_wDT_4;
 
 vec3 u_wC[MAX_WAVES];
 vec4 u_wDT[MAX_WAVES];
@@ -83,42 +81,48 @@ vec3 tileColor(vec2 p) {
 }
 
 vec4 tiles(vec2 pos, vec2 size, float brightness, float flash) {
-    vec2[(N+1) * (N+1)] v;// Tile vertices
+    vec2[3 * 3] v;// Tile vertices
     float vr = 0.1;// Vertex position random factor
-    for (int i=0; i < N + 1; i++) {
-        for (int j=0; j < N + 1; j++) {
-            float rx = vr * rand2(vec2(i, j)) * step(0.5, i) * (1 - step(N - 0.5, i));
-            float ry = vr * rand2(vec2(j, i)) * step(0.5, j) * (1 - step(N - 0.5, j));
-            v[i*(N+1) + j] = vec2(0.01 + (0.98 / N) * i + rx, 0.01 + (0.98 / N) * j + ry);
+    int iT = int(pos.x * (N-1));
+    int jT = int(pos.y * (N-1));
+    for (int ii=0; ii < 3; ii++) {
+        for (int jj=0; jj < 3; jj++) {
+            int i = iT + ii;
+            int j = jT + jj;
+            float rx = vr * rand2(vec2(i+1, j+1)) * step(0.5, i) * (1 - step(N - 0.5, i));
+            float ry = vr * rand2(vec2(j+6, i+1)) * step(0.5, j) * (1 - step(N - 0.5, j));
+            v[ii*3 + jj] = vec2(0.01 + (0.98 / N) * i + rx, 0.01 + (0.98 / N) * j + ry);
         }
     }
 
     float d = 0.005;// Tile distance from vertex
-    float dr = 0.02;// Tile random distance from vertex
-    float sm = 0.75;// Smoothing factor
+    float dr = 0.01;// Tile random distance from vertex
+    float sm = 1.2 / u_density;// Smoothing factor
     float smn = sm / size.x;
     vec3 color = vec3(0.0, 0.0, 0.0);
     float b = 0.0;
     float qq = 0.0;
-    for (int i=0; i < N; i++) {
-        for (int j=0; j < N; j++) {
+    for (int ii=0; ii<2; ii++) {
+        for (int jj=0; jj<2; jj++) {
+            int i = iT + ii;
+            int j = jT + jj;
             float t = tileRotTime(vec2(i, j) / (N-1));
-            vec2 i0j0 = v[i*(N+1) + j];
-            vec2 i0j1 = v[i*(N+1) + j+1];
-            vec2 i1j0 = v[(i+1)*(N+1) + j];
-            vec2 i1j1 = v[(i+1)*(N+1) + j+1];
-            i0j0 += dr * rand2(i0j0);
-            i0j1 += dr * rand2(i0j1);
-            i1j0 += dr * rand2(i1j0);
-            i1j1 += dr * rand2(i1j1);
-            float q = quad(
+            vec2 i0j0 = v[ii*3 + jj];
+            vec2 i0j1 = v[ii*3 + jj+1];
+            vec2 i1j0 = v[(ii+1)*3 + jj];
+            vec2 i1j1 = v[(ii+1)*3 + jj+1];
+            i0j0 += dr * rand2(vec2(i+1, j+1));
+            i0j1 += dr * rand2(vec2(i+1+100, j+2+400));
+            i1j0 += dr * rand2(vec2(i+2+200, j+1+500));
+            i1j1 += dr * rand2(vec2(i+2+300, j+2+600));
+            float q = (1-step(N, i)) * (1-step(N, j)) * quad(
             mix(i0j0 + vec2(d, d), i1j0 + vec2(-d, d), t),
             mix(i1j0 + vec2(-d, d), i1j1 + vec2(-d, -d), t),
             mix(i1j1 + vec2(-d, -d), i0j1 + vec2(d, -d), t),
             mix(i0j1 + vec2(d, -d), i0j0 + vec2(d, d), t),
             pos,
             smn);
-            b += (0.65 + 0.6 * rand(v[i*N + j])) * q * brightness;
+            b += (0.65 + 0.6 * rand(vec2(i+1, j+1))) * q * brightness;
             qq += q;
             color += vec3(tileColor(vec2(i, j) / (N-1)) * q);
         }
@@ -137,17 +141,15 @@ void main() {
     u_wC[0] = u_wC_1;
     u_wC[1] = u_wC_2;
     u_wC[2] = u_wC_3;
-    u_wC[3] = u_wC_4;
 
     u_wDT[0] = u_wDT_1;
     u_wDT[1] = u_wDT_2;
     u_wDT[2] = u_wDT_3;
-    u_wDT[3] = u_wDT_4;
 
     p -= 0.5;
 
     // Rotate with mode
-    p = rotate(u_modeT * PI / 4.0) * p * (1 + 0.4142 * u_modeT);
+    p = p * (1 + 0.3 * u_modeT);
 
     // Warp with mode
     float l = length(p);

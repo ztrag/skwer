@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:skwer/tetris/game_board.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/level.dart';
@@ -179,19 +180,18 @@ class Game {
   }
 
   void _onBoardSizeToggled() {
-    final w = props.size.value.width;
     final initialLevel = props.prefs.boardSizeLevel;
-    final boardSize = props.prefs.boardSize;
-    final initialSize = w * (boardSize.value + 0.75) ~/ 400;
+    final initialGameBoard = GameBoard.fromProps(props);
     props.prefs.boardSizeLevel++;
-    if (w < 400) {
-      while (props.prefs.boardSizeLevel != initialLevel) {
-        final newSize = w * (boardSize.value + 0.75) ~/ 400;
-        if (newSize >= 3 && newSize != initialSize) {
-          return;
-        }
-        props.prefs.boardSizeLevel++;
+    while (props.prefs.boardSizeLevel != initialLevel) {
+      final gameBoard = GameBoard.fromProps(props);
+      if (gameBoard.numTilesX >= 3 &&
+          gameBoard.numTilesY >= 5 &&
+          (gameBoard.numTilesX != initialGameBoard.numTilesX ||
+              gameBoard.numTilesY != initialGameBoard.numTilesY)) {
+        return;
       }
+      props.prefs.boardSizeLevel++;
     }
   }
 

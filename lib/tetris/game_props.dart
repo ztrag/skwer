@@ -10,6 +10,8 @@ import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/touch_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
+const kTopPanelHeight = 100.0;
+
 class GameProps {
   final ValueNotifier<Size> size = ValueNotifier(Size.zero);
   final ValueNotifier<Point<int>> numTiles =

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +5,7 @@ import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/tetris/game.dart';
+import 'package:skwer/tetris/game_board.dart';
 import 'package:skwer/tetris/game_board_size_hint.dart';
 import 'package:skwer/tetris/game_bottom_menu.dart';
 import 'package:skwer/tetris/game_overlay_widget.dart';
@@ -78,33 +77,16 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
         builder: (_, boardSize, __) {
           return LayoutBuilder(builder: (context, constraints) {
             final bottomMenuHeight = Platform.isMobile ? 64.0 : 16.0;
-            const topPanelHeight = 100.0;
             final size = Size(
               constraints.maxWidth - 16,
-              constraints.maxHeight - bottomMenuHeight - topPanelHeight,
+              constraints.maxHeight - bottomMenuHeight - kTopPanelHeight,
             );
             gameProps.size.value = size;
 
-            final numTilesX = Platform.isMobile || size.width > 400
-                ? boardSize
-                : size.width * (boardSize + 0.75) ~/ 400;
-            final int numTilesY;
-            final int tileSize;
-
-            if (Platform.isMobile || size.width < 400) {
-              tileSize = size.width ~/ (numTilesX + 0.75);
-              numTilesY = min(20, (size.height / tileSize - 0.75).floor());
-            } else {
-              final tileSizeMinX = 400 ~/ (numTilesX + 0.75);
-              final expansionSize =
-                  max(0.0, size.height - tileSizeMinX * 20.75);
-              numTilesY = min(20, (size.height / tileSizeMinX - 0.75).floor());
-              tileSize = min(
-                (size.height - min(expansionSize, topPanelHeight)) ~/
-                    (numTilesY + 0.75),
-                size.width ~/ (numTilesX + 0.75),
-              );
-            }
+            final board = GameBoard.fromProps(gameProps);
+            final numTilesX = board.numTilesX;
+            final numTilesY = board.numTilesY;
+            final tileSize = board.tileSize;
 
             if (numTilesX != gameProps.numTilesX ||
                 numTilesY != gameProps.numTilesY) {
@@ -132,7 +114,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                     const Padding(
                       padding: EdgeInsets.all(4.0),
                       child: Text(
-                        'window too small',
+                        'too small',
                         style: TextStyle(color: skRed),
                         textAlign: TextAlign.center,
                       ),
@@ -150,7 +132,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                               children: [
                                 SizedBox(
                                   width: 1.0 * tileSize * numTilesX,
-                                  height: topPanelHeight,
+                                  height: kTopPanelHeight,
                                   child: GamePanel(gameProps: gameProps),
                                 ),
                                 TouchArrows(

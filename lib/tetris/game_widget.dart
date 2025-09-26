@@ -72,159 +72,166 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     ]);
 
     return Scaffold(
-      body: ValueListenableBuilder(
-        valueListenable: game.props.prefs.boardSize,
-        builder: (_, boardSize, __) {
-          return LayoutBuilder(builder: (context, constraints) {
-            final bottomMenuHeight = Platform.isMobile ? 64.0 : 16.0;
-            final size = Size(
-              constraints.maxWidth - 16,
-              constraints.maxHeight - bottomMenuHeight - kTopPanelHeight,
-            );
-            gameProps.size.value = size;
+      body: LayoutBuilder(
+        builder: (_, constraints) {
+          final bottomMenuHeight = Platform.isMobile ? 64.0 : 16.0;
+          final size = Size(
+            constraints.maxWidth - 16,
+            constraints.maxHeight - bottomMenuHeight - kTopPanelHeight,
+          );
+          gameProps.size.value = size;
 
-            final board = GameBoard.fromProps(gameProps);
-            final numTilesX = board.numTilesX;
-            final numTilesY = board.numTilesY;
-            final tileSize = board.tileSize;
+          var board = GameBoard.fromProps(gameProps);
+          if (board.isTooSmall) {
+            game.onBoardSizeToggled();
+          }
 
-            if (numTilesX != gameProps.numTilesX ||
-                numTilesY != gameProps.numTilesY) {
-              game.resize(numTilesX, numTilesY);
-            }
+          return ValueListenableBuilder(
+            valueListenable: game.props.prefs.boardSize,
+            builder: (_, boardSize, __) {
+              final board = GameBoard.fromProps(gameProps);
+              final isTooSmall = board.isTooSmall;
 
-            final isTooSmall = numTilesX < 3 || numTilesY < 5;
+              final numTilesX = board.numTilesX;
+              final numTilesY = board.numTilesY;
+              final tileSize = board.tileSize;
 
-            return FastKeyFocusScope(
-              autofocus: true,
-              node: _node,
-              onKeyEvent: game.onKeyEvent,
-              controller: gameProps.keyFocusScopeController,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: gameProps.level,
-                    builder: (_, level, __) => MenuBackground(
-                      radius: 0.8,
-                      color: level.gradientColor,
-                    ),
-                  ),
-                  if (isTooSmall)
-                    const Padding(
-                      padding: EdgeInsets.all(4.0),
-                      child: Text(
-                        'too small',
-                        style: TextStyle(color: skRed),
-                        textAlign: TextAlign.center,
+              if (numTilesX != gameProps.numTilesX ||
+                  numTilesY != gameProps.numTilesY) {
+                game.resize(numTilesX, numTilesY);
+              }
+
+              return FastKeyFocusScope(
+                autofocus: true,
+                node: _node,
+                onKeyEvent: game.onKeyEvent,
+                controller: gameProps.keyFocusScopeController,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ValueListenableBuilder(
+                      valueListenable: gameProps.level,
+                      builder: (_, level, __) => MenuBackground(
+                        radius: 0.8,
+                        color: level.gradientColor,
                       ),
                     ),
-                  if (!isTooSmall)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Expanded(child: SizedBox.shrink()),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 1.0 * tileSize * numTilesX,
-                                  height: kTopPanelHeight,
-                                  child: GamePanel(gameProps: gameProps),
-                                ),
-                                TouchArrows(
-                                  controller: gameProps.touchArrowsController,
-                                  size: Size(
-                                    1.0 * tileSize * numTilesX,
-                                    1.0 * tileSize * numTilesY,
+                    if (isTooSmall)
+                      const Padding(
+                        padding: EdgeInsets.all(4.0),
+                        child: Text(
+                          'too small',
+                          style: TextStyle(color: skRed),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (!isTooSmall)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(child: SizedBox.shrink()),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 1.0 * tileSize * numTilesX,
+                                    height: kTopPanelHeight,
+                                    child: GamePanel(gameProps: gameProps),
                                   ),
-                                  onTouchEvent: game.onTouchArrowEvent,
-                                  child: ValueListenableBuilder(
-                                    valueListenable: gameProps.numTiles,
-                                    builder: (_, numTiles, __) {
-                                      return SizedBox(
-                                        width: (numTiles.x + 0.5) * tileSize,
-                                        height: (numTiles.y + 0.5) * tileSize,
-                                        child: ValueListenableBuilder(
-                                          valueListenable: gameProps.level,
-                                          builder: (_, level, child) =>
-                                              Container(
-                                            decoration: BoxDecoration(
-                                              color: skBlack,
-                                              border: Border.all(
-                                                color: level.borderColor,
-                                                width: 2,
+                                  TouchArrows(
+                                    controller: gameProps.touchArrowsController,
+                                    size: Size(
+                                      1.0 * tileSize * numTilesX,
+                                      1.0 * tileSize * numTilesY,
+                                    ),
+                                    onTouchEvent: game.onTouchArrowEvent,
+                                    child: ValueListenableBuilder(
+                                      valueListenable: gameProps.numTiles,
+                                      builder: (_, numTiles, __) {
+                                        return SizedBox(
+                                          width: (numTiles.x + 0.5) * tileSize,
+                                          height: (numTiles.y + 0.5) * tileSize,
+                                          child: ValueListenableBuilder(
+                                            valueListenable: gameProps.level,
+                                            builder: (_, level, child) =>
+                                                Container(
+                                              decoration: BoxDecoration(
+                                                color: skBlack,
+                                                border: Border.all(
+                                                  color: level.borderColor,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Stack(
+                                                children: [
+                                                  Positioned(
+                                                    left: 0.25 * tileSize,
+                                                    top: 0.25 * tileSize,
+                                                    right: 0.25 * tileSize,
+                                                    bottom: 0.25 * tileSize,
+                                                    child: GameBoardSizeHint(
+                                                      props: gameProps,
+                                                      animation:
+                                                          _boardSizeHintAnimation,
+                                                    ),
+                                                  ),
+                                                  child!,
+                                                ],
                                               ),
                                             ),
-                                            child: Stack(
-                                              children: [
-                                                Positioned(
-                                                  left: 0.25 * tileSize,
-                                                  top: 0.25 * tileSize,
-                                                  right: 0.25 * tileSize,
-                                                  bottom: 0.25 * tileSize,
-                                                  child: GameBoardSizeHint(
-                                                    props: gameProps,
-                                                    animation:
-                                                        _boardSizeHintAnimation,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: List.generate(
+                                                numTiles.y,
+                                                (y) => Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: List.generate(
+                                                    numTiles.x,
+                                                    (x) => _buildTile(
+                                                        x, y, tileSize),
                                                   ),
                                                 ),
-                                                child!,
-                                              ],
-                                            ),
-                                          ),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: List.generate(
-                                              numTiles.y,
-                                              (y) => Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: List.generate(
-                                                  numTiles.x,
-                                                  (x) => _buildTile(
-                                                      x, y, tileSize),
-                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    },
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
+                                ],
+                              ),
+                              const Expanded(child: SizedBox.shrink()),
+                              if (Platform.isMobile) ...[
+                                GameBottomMenu(
+                                  game: game,
+                                  onHelp: () => setState(() {
+                                    game.props.isPaused.value =
+                                        !game.props.isPaused.value;
+                                  }),
+                                )
                               ],
-                            ),
-                            const Expanded(child: SizedBox.shrink()),
-                            if (Platform.isMobile) ...[
-                              GameBottomMenu(
-                                game: game,
-                                onHelp: () => setState(() {
-                                  game.props.isPaused.value =
-                                      !game.props.isPaused.value;
-                                }),
-                              )
                             ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  if (!isTooSmall)
-                    ListenableBuilder(
-                      listenable: Listenable.merge(
-                          [gameProps.isGameOver, gameProps.isPaused]),
-                      builder: (_, __) => gameProps.isShowingOverlay
-                          ? GameOverlayWidget(gameProps: gameProps)
-                          : const SizedBox.shrink(),
-                    ),
-                ],
-              ),
-            );
-          });
+                          ),
+                        ],
+                      ),
+                    if (!isTooSmall)
+                      ListenableBuilder(
+                        listenable: Listenable.merge(
+                            [gameProps.isGameOver, gameProps.isPaused]),
+                        builder: (_, __) => gameProps.isShowingOverlay
+                            ? GameOverlayWidget(gameProps: gameProps)
+                            : const SizedBox.shrink(),
+                      ),
+                  ],
+                ),
+              );
+            },
+          );
         },
       ),
     );

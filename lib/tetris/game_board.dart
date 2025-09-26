@@ -37,4 +37,6 @@ class GameBoard {
 
     return GameBoard(numTilesX, numTilesY, tileSize);
   }
+
+  bool get isTooSmall => numTilesX < 3 || numTilesY < 5;
 }

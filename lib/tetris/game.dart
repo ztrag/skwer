@@ -78,6 +78,22 @@ class Game {
     start();
   }
 
+  GameBoard onBoardSizeToggled() {
+    final initialLevel = props.prefs.boardSizeLevel;
+    final initialGameBoard = GameBoard.fromProps(props);
+    props.prefs.boardSizeLevel++;
+    while (props.prefs.boardSizeLevel != initialLevel) {
+      final gameBoard = GameBoard.fromProps(props);
+      if (!gameBoard.isTooSmall &&
+          (gameBoard.numTilesX != initialGameBoard.numTilesX ||
+              gameBoard.numTilesY != initialGameBoard.numTilesY)) {
+        return gameBoard;
+      }
+      props.prefs.boardSizeLevel++;
+    }
+    return initialGameBoard;
+  }
+
   void onTouchArrowEvent(TouchArrowEvent event) {
     if (event.type == TouchArrowEventType.up) {
       return;
@@ -138,7 +154,7 @@ class Game {
 
     if (event.logicalKey == LogicalKeyboardKey.backslash &&
         event.type == FastKeyEventType.down) {
-      _onBoardSizeToggled();
+      onBoardSizeToggled();
       return KeyEventResult.handled;
     }
 
@@ -176,22 +192,6 @@ class Game {
       _onPauseTime = _elapsed;
     } else if (_onPauseTime != null) {
       _pausedTime += _elapsed - _onPauseTime!;
-    }
-  }
-
-  void _onBoardSizeToggled() {
-    final initialLevel = props.prefs.boardSizeLevel;
-    final initialGameBoard = GameBoard.fromProps(props);
-    props.prefs.boardSizeLevel++;
-    while (props.prefs.boardSizeLevel != initialLevel) {
-      final gameBoard = GameBoard.fromProps(props);
-      if (gameBoard.numTilesX >= 3 &&
-          gameBoard.numTilesY >= 5 &&
-          (gameBoard.numTilesX != initialGameBoard.numTilesX ||
-              gameBoard.numTilesY != initialGameBoard.numTilesY)) {
-        return;
-      }
-      props.prefs.boardSizeLevel++;
     }
   }
 

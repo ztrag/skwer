@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/services.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/touch_arrows.dart';
 
 class MoveArrows {
@@ -12,8 +12,7 @@ class MoveArrows {
     LogicalKeyboardKey.arrowDown: const Point(0, 1),
   };
 
-  static int getHorizontalDirection(
-      FastKeyFocusScopeController focusScopeController,
+  static int getHorizontalDirection(FastKeyFocusController focusScopeController,
       TouchArrowsController touchArrowsController) {
     final left = _merge(
       focusScopeController.getKeyDownTime(LogicalKeyboardKey.arrowLeft),

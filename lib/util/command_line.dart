@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skwer/colors.dart';
 import 'package:skwer/platform.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 
 class Command {
   final String name;

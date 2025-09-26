@@ -131,9 +131,9 @@ class _TouchArrowsState extends State<TouchArrows> {
     final h = widget.size.height;
 
     if (event.localPosition.dy < h * kVLimit1) {
-      if (event.localPosition.dx < w/4) {
+      if (event.localPosition.dx < w / 4) {
         return Direction.left;
-      } else if (event.localPosition.dx > 3*w/4) {
+      } else if (event.localPosition.dx > 3 * w / 4) {
         return Direction.right;
       }
       return Direction.up;

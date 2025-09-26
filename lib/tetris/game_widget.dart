@@ -13,7 +13,7 @@ import 'package:skwer/tetris/game_panel.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/tetris/game_tile.dart';
 import 'package:skwer/tile/tile_index.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/touch_arrows.dart';
 
 class GameWidget extends StatefulWidget {

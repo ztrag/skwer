@@ -8,7 +8,7 @@ import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/menu/menu_tile.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/util/command_line.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/move_arrows.dart';
 
 class MenuWidget extends StatefulWidget {

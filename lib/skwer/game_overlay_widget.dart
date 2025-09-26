@@ -4,7 +4,7 @@ import 'package:skwer/colors.dart';
 import 'package:skwer/skwer/game_props.dart';
 import 'package:skwer/skwer/help.dart';
 import 'package:skwer/util/command_line.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 
 class GameOverlayWidget extends StatefulWidget {
   final GameProps gameProps;

@@ -5,7 +5,7 @@ import 'package:skwer/skwer/game_board.dart';
 import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/tile_index.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 
 class GameProps {
   final ValueNotifier<int> skwer = ValueNotifier(0);

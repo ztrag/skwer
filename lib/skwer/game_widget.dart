@@ -14,7 +14,7 @@ import 'package:skwer/skwer/puzzle.dart';
 import 'package:skwer/tile/skwer_tile.dart';
 import 'package:skwer/tile/skwer_tile_props.dart';
 import 'package:skwer/tile/tile_index.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 
 final _kDigits = [
   LogicalKeyboardKey.digit1,
@@ -184,10 +184,10 @@ class _GameWidgetState extends State<GameWidget> {
           valueListenable: game.props.puzzle,
           builder: (_, puzzle, ___) => ExcludeFocus(
             excluding: !(puzzle?.zone.containsTile(tileIndex) ?? true),
-            child: Focus(
-              focusNode: tileProps.focusNode,
+            child: FastKeyFocus(
+              node: tileProps.focusNode,
               onFocusChange: (hasFocus) => game.focus(tileIndex, hasFocus),
-              onKeyEvent: (_, event) =>
+              onKeyEvent: (event) =>
                   _onTileKeyEvent(event, tileProps, tileIndex),
               child: SkwerTile(props: tileProps, gameProps: game.props),
             ),
@@ -247,8 +247,8 @@ class _GameWidgetState extends State<GameWidget> {
   }
 
   KeyEventResult _onTileKeyEvent(
-      KeyEvent event, SkwerTileProps tileProps, TileIndex tileIndex) {
-    if (event is! KeyDownEvent) {
+      FastKeyEvent event, SkwerTileProps tileProps, TileIndex tileIndex) {
+    if (event.type != FastKeyEventType.down) {
       return KeyEventResult.ignored;
     }
 

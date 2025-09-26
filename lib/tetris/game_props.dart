@@ -5,7 +5,7 @@ import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
 import 'package:skwer/tetris/game_tile_props.dart';
 import 'package:skwer/tetris/level.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/touch_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
@@ -23,8 +23,8 @@ class GameProps {
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
   final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(Tetramino.t);
 
-  final FastKeyFocusScopeController keyFocusScopeController =
-      FastKeyFocusScopeController();
+  final FastKeyFocusController keyFocusScopeController =
+      FastKeyFocusController();
   final TouchArrowsController touchArrowsController = TouchArrowsController();
 
   final GamePrefs prefs = GamePrefs();

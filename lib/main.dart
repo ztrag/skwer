@@ -18,8 +18,8 @@ void main() {
                 fontFamily: 'CourierPrime',
                 fontSize: 20,
               ),
-              backgroundColor: Colors.transparent, // Transparent background
-              foregroundColor: skGreen, // Text color
+              backgroundColor: Colors.transparent,
+              foregroundColor: skGreen,
             ),
           ),
         ),

@@ -4,7 +4,7 @@ import 'package:skwer/colors.dart';
 import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_props.dart';
 import 'package:skwer/util/command_line.dart';
-import 'package:skwer/util/fast_key_focus_scope.dart';
+import 'package:skwer/util/fast_key_focus.dart';
 import 'package:skwer/util/popup_window.dart';
 
 class GameOverlayWidget extends StatefulWidget {

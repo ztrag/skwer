@@ -32,6 +32,13 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   );
   late final Game game = Game(gameProps);
 
+  late final AnimationController _boardSizeHintController = AnimationController(
+    duration: const Duration(milliseconds: 2000),
+    vsync: this,
+  );
+  late final Animation<double> _boardSizeHintAnimation =
+      CurveTween(curve: Curves.ease).animate(_boardSizeHintController);
+
   late FocusScopeNode _node;
   late Ticker _ticker;
 
@@ -53,6 +60,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   void dispose() {
     _ticker.dispose();
     _node.dispose();
+    _boardSizeHintController.dispose();
     super.dispose();
   }
 
@@ -99,6 +107,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
 
             if (numTilesX != gameProps.numTilesX ||
                 numTilesY != gameProps.numTilesY) {
+              _boardSizeHintController.forward(from: 0.0);
               game.resize(numTilesX, numTilesY);
             }
 
@@ -228,7 +237,10 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     return SizedBox(
       width: 1.0 * tileSize,
       height: 1.0 * tileSize,
-      child: GameTile(props: gameProps.tiles[TileIndex(x, y)]!),
+      child: GameTile(
+        props: gameProps.tiles[TileIndex(x, y)]!,
+        boardSizeAnimation: _boardSizeHintAnimation,
+      ),
     );
   }
 }

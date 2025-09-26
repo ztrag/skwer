@@ -10,9 +10,7 @@
 1. Versus
 2. Floor Flip
 3. Sounds
-4. Fullscreen Board Size
-5. Hint Option (enable-disable)
-6. Ghost Hint Option
+4. Drop Hint Option (enable-disable)
 
 ## Windows
 

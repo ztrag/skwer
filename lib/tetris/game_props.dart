@@ -1,6 +1,6 @@
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:skwer/tetris/game_prefs.dart';
 import 'package:skwer/tetris/game_tetramino.dart';
@@ -25,6 +25,7 @@ class GameProps {
       ValueNotifier(ValueChange<GameTetramino?>(null, null));
   final ValueNotifier<Tetramino> nextTetramino = ValueNotifier(Tetramino.t);
 
+  final AnimationController boardSizeHintController;
   final FastKeyFocusController keyFocusScopeController =
       FastKeyFocusController();
   final TouchArrowsController touchArrowsController = TouchArrowsController();
@@ -36,7 +37,11 @@ class GameProps {
 
   FastKeyEventCallback? onOverlayKeyEvent;
 
-  GameProps({required this.onStart, required this.onExit}) {
+  GameProps({
+    required this.onStart,
+    required this.onExit,
+    required this.boardSizeHintController,
+  }) {
     numTiles.addListener(() {
       tiles.removeWhere(
         (key, _) => key.x >= numTilesX || key.y >= numTilesY,

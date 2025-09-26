@@ -31,6 +31,7 @@ class Game {
   }
 
   void start() {
+    props.boardSizeHintController.forward(from: 0.0);
     for (final tile in props.tiles.values) {
       tile.color.value = null;
     }
@@ -136,7 +137,7 @@ class Game {
 
     if (event.logicalKey == LogicalKeyboardKey.backslash &&
         event.type == FastKeyEventType.down) {
-      _onToggleBoardSize();
+      _onBoardSizeToggled();
       return KeyEventResult.handled;
     }
 
@@ -177,7 +178,7 @@ class Game {
     }
   }
 
-  void _onToggleBoardSize() {
+  void _onBoardSizeToggled() {
     final w = props.size.value.width;
     final initialLevel = props.prefs.boardSizeLevel;
     final boardSize = props.prefs.boardSize;

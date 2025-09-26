@@ -7,6 +7,7 @@ import 'package:skwer/colors.dart';
 import 'package:skwer/menu/menu_background.dart';
 import 'package:skwer/platform.dart';
 import 'package:skwer/tetris/game.dart';
+import 'package:skwer/tetris/game_board_size_hint.dart';
 import 'package:skwer/tetris/game_bottom_menu.dart';
 import 'package:skwer/tetris/game_overlay_widget.dart';
 import 'package:skwer/tetris/game_panel.dart';
@@ -29,15 +30,15 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   late final GameProps gameProps = GameProps(
     onStart: () => game.start(),
     onExit: widget.onExit,
+    boardSizeHintController: AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    ),
   );
   late final Game game = Game(gameProps);
 
-  late final AnimationController _boardSizeHintController = AnimationController(
-    duration: const Duration(milliseconds: 2000),
-    vsync: this,
-  );
   late final Animation<double> _boardSizeHintAnimation =
-      CurveTween(curve: Curves.ease).animate(_boardSizeHintController);
+      CurveTween(curve: Curves.ease).animate(gameProps.boardSizeHintController);
 
   late FocusScopeNode _node;
   late Ticker _ticker;
@@ -60,7 +61,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
   void dispose() {
     _ticker.dispose();
     _node.dispose();
-    _boardSizeHintController.dispose();
+    gameProps.boardSizeHintController.dispose();
     super.dispose();
   }
 
@@ -107,7 +108,6 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
 
             if (numTilesX != gameProps.numTilesX ||
                 numTilesY != gameProps.numTilesY) {
-              _boardSizeHintController.forward(from: 0.0);
               game.resize(numTilesX, numTilesY);
             }
 
@@ -177,7 +177,22 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
                                                 width: 2,
                                               ),
                                             ),
-                                            child: child,
+                                            child: Stack(
+                                              children: [
+                                                Positioned(
+                                                  left: 0.25 * tileSize,
+                                                  top: 0.25 * tileSize,
+                                                  right: 0.25 * tileSize,
+                                                  bottom: 0.25 * tileSize,
+                                                  child: GameBoardSizeHint(
+                                                    props: gameProps,
+                                                    animation:
+                                                        _boardSizeHintAnimation,
+                                                  ),
+                                                ),
+                                                child!,
+                                              ],
+                                            ),
                                           ),
                                           child: Column(
                                             mainAxisAlignment:
@@ -237,10 +252,7 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
     return SizedBox(
       width: 1.0 * tileSize,
       height: 1.0 * tileSize,
-      child: GameTile(
-        props: gameProps.tiles[TileIndex(x, y)]!,
-        boardSizeAnimation: _boardSizeHintAnimation,
-      ),
+      child: GameTile(props: gameProps.tiles[TileIndex(x, y)]!),
     );
   }
 }

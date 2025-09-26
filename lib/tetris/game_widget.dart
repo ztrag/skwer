@@ -65,146 +65,169 @@ class _GameWidgetState extends State<GameWidget> with TickerProviderStateMixin {
 
     return Scaffold(
       body: ValueListenableBuilder(
-        valueListenable: game.props.prefs.tileSize,
-        builder: (_, tileSize, __) =>
-            LayoutBuilder(builder: (context, constraints) {
-          final size = Size(constraints.maxWidth,
-              constraints.maxHeight - 64); // FIXME magic number
+        valueListenable: game.props.prefs.boardSize,
+        builder: (_, boardSize, __) {
+          return LayoutBuilder(builder: (context, constraints) {
+            final bottomMenuHeight = Platform.isMobile ? 64.0 : 16.0;
+            const topPanelHeight = 100.0;
+            final size = Size(
+              constraints.maxWidth - 16,
+              constraints.maxHeight - bottomMenuHeight - topPanelHeight,
+            );
+            gameProps.size.value = size;
 
-          const panelHeight = 100.0;
-          final numTilesX = min((size.width / tileSize - 0.75).floor(), 10);
-          final numTilesY =
-              min(((size.height - panelHeight) / tileSize - 0.75).floor(), 20);
+            final numTilesX = Platform.isMobile || size.width > 400
+                ? boardSize
+                : size.width * (boardSize + 0.75) ~/ 400;
+            final int numTilesY;
+            final int tileSize;
 
-          final bottomSpace = max(
-            0.0,
-            min(
-              panelHeight,
-              size.height - (numTilesY + 0.5) * tileSize - panelHeight,
-            ),
-          );
+            if (Platform.isMobile || size.width < 400) {
+              tileSize = size.width ~/ (numTilesX + 0.75);
+              numTilesY = min(20, (size.height / tileSize - 0.75).floor());
+            } else {
+              final tileSizeMinX = 400 ~/ (numTilesX + 0.75);
+              final expansionSize =
+                  max(0.0, size.height - tileSizeMinX * 20.75);
+              numTilesY = min(20, (size.height / tileSizeMinX - 0.75).floor());
+              tileSize = min(
+                (size.height - min(expansionSize, topPanelHeight)) ~/
+                    (numTilesY + 0.75),
+                size.width ~/ (numTilesX + 0.75),
+              );
+            }
 
-          if (numTilesX != gameProps.numTilesX ||
-              numTilesY != gameProps.numTilesY) {
-            game.resize(numTilesX, numTilesY);
-          }
+            if (numTilesX != gameProps.numTilesX ||
+                numTilesY != gameProps.numTilesY) {
+              game.resize(numTilesX, numTilesY);
+            }
 
-          bool isTooSmall = numTilesX < 3 || numTilesY < 5;
+            final isTooSmall = numTilesX < 3 || numTilesY < 5;
 
-          return FastKeyFocusScope(
-            autofocus: true,
-            node: _node,
-            onKeyEvent: game.onKeyEvent,
-            controller: gameProps.keyFocusScopeController,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                ValueListenableBuilder(
-                  valueListenable: gameProps.level,
-                  builder: (_, level, __) => MenuBackground(
-                    radius: 0.8,
-                    color: level.gradientColor,
-                  ),
-                ),
-                if (isTooSmall)
-                  const Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: Text(
-                      'window too small',
-                      style: TextStyle(color: skRed),
-                      textAlign: TextAlign.center,
+            return FastKeyFocusScope(
+              autofocus: true,
+              node: _node,
+              onKeyEvent: game.onKeyEvent,
+              controller: gameProps.keyFocusScopeController,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: gameProps.level,
+                    builder: (_, level, __) => MenuBackground(
+                      radius: 0.8,
+                      color: level.gradientColor,
                     ),
                   ),
-                if (!isTooSmall)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: tileSize * numTilesX,
-                            height: panelHeight,
-                            child: GamePanel(gameProps: gameProps),
-                          ),
-                          TouchArrows(
-                            controller: gameProps.touchArrowsController,
-                            size: Size(
-                              tileSize * numTilesX,
-                              tileSize * numTilesY,
-                            ),
-                            onTouchEvent: game.onTouchArrowEvent,
-                            child: ValueListenableBuilder(
-                              valueListenable: gameProps.numTiles,
-                              builder: (_, numTiles, __) {
-                                return SizedBox(
-                                  width: (numTiles.x + 0.5) * tileSize,
-                                  height: (numTiles.y + 0.5) * tileSize,
+                  if (isTooSmall)
+                    const Padding(
+                      padding: EdgeInsets.all(4.0),
+                      child: Text(
+                        'window too small',
+                        style: TextStyle(color: skRed),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (!isTooSmall)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Expanded(child: SizedBox.shrink()),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 1.0 * tileSize * numTilesX,
+                                  height: topPanelHeight,
+                                  child: GamePanel(gameProps: gameProps),
+                                ),
+                                TouchArrows(
+                                  controller: gameProps.touchArrowsController,
+                                  size: Size(
+                                    1.0 * tileSize * numTilesX,
+                                    1.0 * tileSize * numTilesY,
+                                  ),
+                                  onTouchEvent: game.onTouchArrowEvent,
                                   child: ValueListenableBuilder(
-                                    valueListenable: gameProps.level,
-                                    builder: (_, level, child) => Container(
-                                      decoration: BoxDecoration(
-                                        color: skBlack,
-                                        border: Border.all(
-                                          color: level.borderColor,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: child,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: List.generate(
-                                        numTiles.y,
-                                        (y) => Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: List.generate(
-                                            numTiles.x,
-                                            (x) => _buildTile(x, y, tileSize),
+                                    valueListenable: gameProps.numTiles,
+                                    builder: (_, numTiles, __) {
+                                      return SizedBox(
+                                        width: (numTiles.x + 0.5) * tileSize,
+                                        height: (numTiles.y + 0.5) * tileSize,
+                                        child: ValueListenableBuilder(
+                                          valueListenable: gameProps.level,
+                                          builder: (_, level, child) =>
+                                              Container(
+                                            decoration: BoxDecoration(
+                                              color: skBlack,
+                                              border: Border.all(
+                                                color: level.borderColor,
+                                                width: 2,
+                                              ),
+                                            ),
+                                            child: child,
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: List.generate(
+                                              numTiles.y,
+                                              (y) => Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: List.generate(
+                                                  numTiles.x,
+                                                  (x) => _buildTile(
+                                                      x, y, tileSize),
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
+                                ),
+                              ],
                             ),
-                          ),
-                          SizedBox(height: bottomSpace),
-                          if (Platform.isMobile)
-                            GameBottomMenu(
-                              game: game,
-                              onHelp: () => setState(() {
-                                game.props.isPaused.value =
-                                    !game.props.isPaused.value;
-                              }),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                if (!isTooSmall)
-                  ListenableBuilder(
-                    listenable: Listenable.merge(
-                        [gameProps.isGameOver, gameProps.isPaused]),
-                    builder: (_, __) => gameProps.isShowingOverlay
-                        ? GameOverlayWidget(gameProps: gameProps)
-                        : const SizedBox.shrink(),
-                  ),
-              ],
-            ),
-          );
-        }),
+                            const Expanded(child: SizedBox.shrink()),
+                            if (Platform.isMobile) ...[
+                              GameBottomMenu(
+                                game: game,
+                                onHelp: () => setState(() {
+                                  game.props.isPaused.value =
+                                      !game.props.isPaused.value;
+                                }),
+                              )
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  if (!isTooSmall)
+                    ListenableBuilder(
+                      listenable: Listenable.merge(
+                          [gameProps.isGameOver, gameProps.isPaused]),
+                      builder: (_, __) => gameProps.isShowingOverlay
+                          ? GameOverlayWidget(gameProps: gameProps)
+                          : const SizedBox.shrink(),
+                    ),
+                ],
+              ),
+            );
+          });
+        },
       ),
     );
   }
 
-  Widget _buildTile(int x, int y, double tileSize) {
+  Widget _buildTile(int x, int y, int tileSize) {
     return SizedBox(
-      width: tileSize,
-      height: tileSize,
+      width: 1.0 * tileSize,
+      height: 1.0 * tileSize,
       child: GameTile(props: gameProps.tiles[TileIndex(x, y)]!),
     );
   }

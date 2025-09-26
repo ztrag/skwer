@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:skwer/tetris/game_prefs.dart';
@@ -10,6 +11,7 @@ import 'package:skwer/util/touch_arrows.dart';
 import 'package:skwer/util/value_change.dart';
 
 class GameProps {
+  final ValueNotifier<Size> size = ValueNotifier(Size.zero);
   final ValueNotifier<Point<int>> numTiles =
       ValueNotifier(const Point<int>(0, 0));
   final Map<TileIndex, GameTileProps> tiles = <TileIndex, GameTileProps>{};

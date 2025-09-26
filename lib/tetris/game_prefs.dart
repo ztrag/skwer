@@ -4,19 +4,18 @@ import 'package:skwer/tetris/game_props.dart';
 
 const String tetris = 't';
 
-const _kTileSizes = [
-  40.0,
-  36.0,
-  32.0,
-  28.0,
-  64.0,
-  48.0,
+const _kBoardSizes = [
+  10,
+  8,
+  6,
+  4,
+  12,
 ];
 
 class GamePrefs {
-  final ValueNotifier<double> _tileSize = ValueNotifier(_kTileSizes[0]);
+  final ValueNotifier<int> _boardSize = ValueNotifier(_kBoardSizes[0]);
 
-  int _tileSizeLevel = 0;
+  int _boardSizeLevel = 0;
 
   Future<int> getHighScore(GameProps props) async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,15 +28,15 @@ class GamePrefs {
     prefs.setInt('$tetris-hs_${props.numTilesX}_${props.numTilesY}', score);
   }
 
-  ValueListenable<double> get tileSize => _tileSize;
+  ValueListenable<int> get boardSize => _boardSize;
 
-  int get tileSizeLevel => _tileSizeLevel;
+  int get boardSizeLevel => _boardSizeLevel;
 
-  set tileSizeLevel(int value) {
-    _tileSizeLevel = value % _kTileSizes.length;
-    _tileSize.value = _kTileSizes[_tileSizeLevel];
+  set boardSizeLevel(int value) {
+    _boardSizeLevel = value % _kBoardSizes.length;
+    _boardSize.value = _kBoardSizes[_boardSizeLevel];
     SharedPreferences.getInstance().then(
-      (prefs) => prefs.setInt('$tetris-ts', value),
+      (prefs) => prefs.setInt('$tetris-bs', value),
     );
   }
 }

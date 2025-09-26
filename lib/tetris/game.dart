@@ -134,6 +134,12 @@ class Game {
       return KeyEventResult.handled;
     }
 
+    if (event.logicalKey == LogicalKeyboardKey.backslash &&
+        event.type == FastKeyEventType.down) {
+      _onToggleBoardSize();
+      return KeyEventResult.handled;
+    }
+
     return KeyEventResult.ignored;
   }
 
@@ -168,6 +174,23 @@ class Game {
       _onPauseTime = _elapsed;
     } else if (_onPauseTime != null) {
       _pausedTime += _elapsed - _onPauseTime!;
+    }
+  }
+
+  void _onToggleBoardSize() {
+    final w = props.size.value.width;
+    final initialLevel = props.prefs.boardSizeLevel;
+    final boardSize = props.prefs.boardSize;
+    final initialSize = w * (boardSize.value + 0.75) ~/ 400;
+    props.prefs.boardSizeLevel++;
+    if (w < 400) {
+      while (props.prefs.boardSizeLevel != initialLevel) {
+        final newSize = w * (boardSize.value + 0.75) ~/ 400;
+        if (newSize >= 3 && newSize != initialSize) {
+          return;
+        }
+        props.prefs.boardSizeLevel++;
+      }
     }
   }
 

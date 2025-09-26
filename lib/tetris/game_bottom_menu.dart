@@ -39,7 +39,7 @@ class GameBottomMenu extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () {
-                game.props.prefs.tileSizeLevel++;
+                game.props.prefs.boardSizeLevel++;
               },
               child: const Icon(Icons.zoom_out_map),
             ),

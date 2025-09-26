@@ -9,18 +9,15 @@
 
 1. Versus
 2. Floor Flip
-3. Mobile Support
-4. Sounds
-5. Fullscreen Board Size
-6. Hint Option (enable-disable)
-7. Ghost Hint Option
+3. Sounds
+4. Fullscreen Board Size
+5. Hint Option (enable-disable)
+6. Ghost Hint Option
 
 ## Windows
 
-1. Full Screen
-2. Icon
+1. Better Icon
 
 ## Misc
 
-1. Optimize mosaic_tile.frag -> android jank :(
-2. Fix ShaderCache (shader compilation not cached?)
+1. Pre-compile shader

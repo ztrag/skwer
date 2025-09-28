@@ -8,9 +8,8 @@
 ## Tetris
 
 1. Versus
-2. Floor Flip
-3. Sounds
-4. Drop Hint Option (enable-disable)
+2. Sounds
+3. Drop Hint Option (enable-disable)
 
 ## Windows
 

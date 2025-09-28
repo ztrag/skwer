@@ -18,13 +18,13 @@ class Game {
   final GameProps props;
 
   Duration _elapsed = const Duration();
-  Duration? _waitStepStartTime;
+  Duration? _nextStepTime;
   Duration? _waitSpawnStartTime;
+  Duration? _lastMovementTime;
   Duration _pausedTime = const Duration();
   Duration? _onPauseTime;
 
   Set<TileIndex> _dropHintTiles = <TileIndex>{};
-  int _floorSlideDirection = 0;
 
   Game(this.props) {
     props.tetramino.addListener(_updateTetramino);
@@ -63,10 +63,10 @@ class Game {
       return;
     }
 
-    if (_waitStepStartTime != null) {
+    if (_nextStepTime != null) {
       // Waiting for step...
-      if (_elapsed - _waitStepStartTime! >= props.level.value.stepDuration) {
-        _waitStepStartTime = null;
+      if (_elapsed > _nextStepTime!) {
+        _nextStepTime = null;
         _stepTetramino();
       }
       return;
@@ -167,15 +167,15 @@ class Game {
       props.touchArrowsController,
     );
     if (dir == moveDirection) {
-      _translateTetramino(moveDirection, 0);
+      _translateTetramino(moveDirection);
     }
   }
 
   void _onArrowUp(bool isRepeat) {
     _rotateTetramino();
     if (isRepeat) {
-      if (_waitStepStartTime != null) {
-        _waitStepStartTime = _waitStepStartTime! -
+      if (_nextStepTime != null) {
+        _nextStepTime = _nextStepTime! -
             Duration(
                 milliseconds:
                     props.level.value.stepDuration.inMilliseconds ~/ 2);
@@ -229,8 +229,7 @@ class Game {
       return;
     }
 
-    _floorSlideDirection = 0;
-    _waitStepStartTime = _elapsed;
+    _nextStepTime = _elapsed + props.level.value.stepDuration;
     props.tetramino.value = ValueChange(null, next);
   }
 
@@ -245,19 +244,22 @@ class Game {
       return;
     }
 
+    _lastMovementTime = _elapsed;
     props.tetramino.value = ValueChange(current, rotated);
   }
 
-  void _translateTetramino(int x, int y) {
+  void _translateTetramino(int x) {
     final current = props.tetramino.value.value;
     if (current == null) {
       return;
     }
-    final translated = current.translate(x, y);
+    final translated = current.translate(x, 0);
     if (!_isValidPosition(translated)) {
       return;
     }
-    props.tetramino.value = ValueChange(current, current.translate(x, y));
+
+    _lastMovementTime = _elapsed;
+    props.tetramino.value = ValueChange(current, current.translate(x, 0));
   }
 
   void _dropTetramino() {
@@ -266,7 +268,8 @@ class Game {
       return;
     }
     final drop = _findDropDistance(current);
-    _waitStepStartTime = _elapsed - props.level.value.stepDuration;
+    _nextStepTime = _elapsed;
+    _lastMovementTime = null;
     props.tetramino.value = ValueChange(current, current.translate(0, drop));
   }
 
@@ -274,13 +277,14 @@ class Game {
     final current = props.tetramino.value.value!;
 
     if (!_isTouchingFloor(current)) {
-      _waitStepStartTime = _elapsed;
+      _nextStepTime = _elapsed + props.level.value.stepDuration;
       props.tetramino.value = ValueChange(current, current.step());
       return;
     }
 
-    if (_maybeFloorSlide()) {
-      _waitStepStartTime = _elapsed - props.level.value.stepDuration;
+    final floorSlideDelay = _getFloorSlideDelay();
+    if (floorSlideDelay != null) {
+      _nextStepTime = _elapsed + floorSlideDelay;
       return;
     }
 
@@ -436,26 +440,13 @@ class Game {
     return true;
   }
 
-  bool _maybeFloorSlide() {
-    final moveDirection = MoveArrows.getHorizontalDirection(
-        props.keyFocusScopeController, props.touchArrowsController);
-    if (moveDirection == 0) {
-      return false;
+  Duration? _getFloorSlideDelay() {
+    if (_lastMovementTime == null) {
+      return null;
     }
-
-    final tetramino = props.tetramino.value.value!;
-    final translated = tetramino.translate(moveDirection, 0);
-    final slideDirection = _isValidPosition(translated) ? moveDirection : 0;
-    if (slideDirection == 0) {
-      return false;
-    }
-
-    if (_floorSlideDirection != 0 && _floorSlideDirection != slideDirection) {
-      return false;
-    }
-
-    _floorSlideDirection = slideDirection;
-    return true;
+    final delta = _elapsed - _lastMovementTime!;
+    const delay = Duration(milliseconds: 200);
+    return delta > delay ? null : delay - delta;
   }
 
   GameTetramino? _findValidRotation(GameTetramino tetramino) {

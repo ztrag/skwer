@@ -4,12 +4,13 @@
 
 1. Versus
 2. Sounds
+3. OnPuzzleSolved Background Shader
 
 ## Tetris
 
 1. Versus
 2. Sounds
-3. Drop Hint Option (enable-disable)
+3. OnLineSolved/OnLevelUp Background Shader
 
 ## Windows
 

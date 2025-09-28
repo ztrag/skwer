@@ -17,6 +17,17 @@ class GamePrefs {
 
   int _boardSizeLevel = 0;
 
+  bool _isDropHintEnabled = true;
+
+  GamePrefs() {
+    _load();
+  }
+
+  void _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isDropHintEnabled = prefs.getBool('$tetris-dh') ?? true;
+  }
+
   Future<int> getHighScore(GameProps props) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('$tetris-hs_${props.numTilesX}_${props.numTilesY}') ??
@@ -37,6 +48,15 @@ class GamePrefs {
     _boardSize.value = _kBoardSizes[_boardSizeLevel];
     SharedPreferences.getInstance().then(
       (prefs) => prefs.setInt('$tetris-bs', value),
+    );
+  }
+
+  bool get isDropHintEnabled => _isDropHintEnabled;
+
+  set isDropHintEnabled(bool enabled) {
+    _isDropHintEnabled = enabled;
+    SharedPreferences.getInstance().then(
+      (prefs) => prefs.setBool('$tetris-dh', enabled),
     );
   }
 }

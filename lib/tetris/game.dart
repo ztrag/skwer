@@ -158,6 +158,13 @@ class Game {
       return KeyEventResult.handled;
     }
 
+    if (event.logicalKey == LogicalKeyboardKey.keyD &&
+        event.type == FastKeyEventType.down) {
+      props.prefs.isDropHintEnabled = !props.prefs.isDropHintEnabled;
+      _updateTetraminoDropHint();
+     return KeyEventResult.handled;
+    }
+
     return KeyEventResult.ignored;
   }
 
@@ -346,7 +353,9 @@ class Game {
 
   void _updateTetramino() {
     _updateTetraminoTiles();
-    _updateTetraminoDropHint();
+    if (props.prefs.isDropHintEnabled) {
+      _updateTetraminoDropHint();
+    }
   }
 
   void _updateTetraminoTiles() {
@@ -372,7 +381,7 @@ class Game {
     final tetramino = props.tetramino.value.value;
     final Map<int, int> newDropHintIndices = <int, int>{};
 
-    if (tetramino != null) {
+    if (tetramino != null && props.prefs.isDropHintEnabled) {
       for (final tile in tetramino.tiles) {
         final floor = _findFloor(tile);
         if (floor != null) {
